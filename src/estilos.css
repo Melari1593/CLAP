@@ -26,3 +26,59 @@ pre { background: #f9fafb; padding: 8px; overflow-x: auto; font-size: 0.8rem; }
 dl { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; font-size: 0.85rem; margin: 0; }
 dt { color: var(--suave); }
 dd { margin: 0; }
+
+/* ---------- Navegación y pantallas ---------- */
+.menu { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.menu button { background: rgba(255, 255, 255, 0.15); color: #fff; border-color: rgba(255, 255, 255, 0.4); }
+button, input, select, textarea { font: inherit; }
+button { padding: 8px 12px; border: 1px solid var(--borde); border-radius: 6px; background: #fff; color: var(--texto); cursor: pointer; min-height: 40px; }
+button:disabled { opacity: 0.5; cursor: default; }
+button.primario { background: var(--marca); border-color: var(--marca); color: #fff; }
+button.activo { background: var(--marca); border-color: var(--marca); color: #fff; }
+button.enlace { border: none; background: none; color: var(--marca); padding: 4px 6px; min-height: 0; text-decoration: underline; }
+input, select, textarea { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; max-width: 100%; box-sizing: border-box; }
+input[aria-invalid='true'] { border-color: #b91c1c; }
+label { display: inline-flex; flex-direction: column; gap: 4px; font-size: 0.9rem; }
+.suave { color: var(--suave); }
+.error, .alerta-texto { color: #b91c1c; }
+.aviso { background: #ecfdf5; border: 1px solid #a7f3d0; padding: 8px 12px; border-radius: 6px; }
+.tarjeta { border: 1px solid var(--borde); border-radius: 8px; padding: 12px; margin: 12px 0; display: flex; flex-direction: column; gap: 8px; }
+.buscador { display: flex; gap: 8px; margin-bottom: 12px; }
+.buscador input { flex: 1; min-width: 0; }
+.resultados, .consultas, .lista { list-style: none; padding: 0; margin: 8px 0; }
+.resultados li, .consultas li { margin: 6px 0; }
+button.resultado { width: 100%; text-align: left; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.lista li { padding: 6px 0; border-bottom: 1px solid var(--borde); }
+.etiqueta-estado { color: var(--pendiente); font-size: 0.85rem; }
+.navegacion { display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; margin: 12px 0; }
+.navegacion.fija { position: sticky; bottom: 0; background: var(--fondo); padding: 8px 0; border-top: 1px solid var(--borde); }
+
+/* ---------- Cálculos ---------- */
+.calculos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.calculos div { display: flex; flex-direction: column; }
+.calculos span { font-size: 0.8rem; color: var(--suave); }
+
+/* ---------- Formulario ---------- */
+.pasos { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
+.pasos button { white-space: nowrap; font-size: 0.85rem; }
+fieldset { border: 1px solid var(--borde); border-radius: 8px; margin: 12px 0; padding: 8px 12px; min-width: 0; }
+legend { font-weight: 600; padding: 0 4px; }
+.fila-campo { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 8px 16px; padding: 10px 0; border-bottom: 1px solid var(--borde); align-items: start; }
+.fila-campo:last-child { border-bottom: none; }
+.fila-campo .etiqueta small { display: block; color: var(--suave); }
+.fila-campo.no_se_hizo .estado-campo, .fila-campo.no_corresponde .estado-campo { color: var(--suave); font-style: italic; }
+.control { display: flex; flex-direction: column; gap: 4px; }
+.acciones-campo { display: flex; gap: 4px; flex-wrap: wrap; font-size: 0.8rem; }
+.botones { display: flex; gap: 6px; flex-wrap: wrap; }
+.numero { display: inline-flex; align-items: center; gap: 6px; }
+.numero input { width: 7em; }
+.unidad { color: var(--suave); font-size: 0.85rem; }
+.compuesto { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.multiple { display: flex; flex-direction: column; gap: 4px; }
+.multiple label { flex-direction: row; align-items: center; gap: 6px; }
+.privado { color: #7c3aed; font-size: 0.8rem; }
+.dialogo { border: 2px solid var(--pendiente); background: var(--pendiente-fondo); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.dialogo h3 { margin-top: 0; }
+@media (max-width: 600px) {
+  .fila-campo { grid-template-columns: 1fr; }
+}

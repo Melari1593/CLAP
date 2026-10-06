@@ -1,7 +1,7 @@
 // Única puerta de escritura y lectura de la historia: revisa permisos (A3),
 // deja cada cambio en la bitácora (A3) y lo pone en la cola de sincronización (A4).
 import type { BaseDatos, NombreTabla, TablasHistoria } from './bd';
-import type { CambioBitacora, Embarazo, Gestante, Meta, Usuario } from './modelo';
+import type { CambioBitacora, Embarazo, Gestante, Indicacion, Meta, Usuario } from './modelo';
 import { puedeVerHistoria } from '../privacidad/permisos';
 import { encolarSincronizacion } from '../sync/cola';
 
@@ -59,6 +59,10 @@ export class Repositorio {
     private readonly sesion: Sesion,
     private readonly ahora: () => Date = () => new Date(),
   ) {}
+
+  get usuarioId(): string {
+    return this.sesion.usuario.id;
+  }
 
   private exigirAcceso(institucionId: string): void {
     if (!puedeVerHistoria(this.sesion.usuario, institucionId)) throw new SinPermisoError();
@@ -128,6 +132,19 @@ export class Repositorio {
       await this.guardar('embarazos', { ...anterior, estado: 'cerrado' });
     }
     return this.guardar('embarazos', { gestanteId, estado: 'activo', inicio });
+  }
+
+  /** Gestantes de la institución del usuario guardadas en este dispositivo. */
+  async gestantes(): Promise<Gestante[]> {
+    const { institucionId } = this.sesion.usuario;
+    this.exigirAcceso(institucionId);
+    return this.bd.gestantes.filter((g) => g.institucionId === institucionId).toArray();
+  }
+
+  async indicacionesDe(embarazoId: string): Promise<Indicacion[]> {
+    const embarazo = await this.leer('embarazos', embarazoId);
+    if (!embarazo) return [];
+    return this.bd.indicaciones.where({ embarazoId }).toArray();
   }
 
   async embarazosDe(gestanteId: string): Promise<Embarazo[]> {

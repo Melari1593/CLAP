@@ -48,6 +48,8 @@ export interface Identificacion {
   /** Altitud de residencia en m s. n. m., registrada por el profesional. */
   altitudM: Campo<number>;
   telefono: Campo<string>;
+  /** Opcional: solo si la gestante lo usa (canal alterno del carné). */
+  correo: Campo<string>;
   etnia: Campo<'blanca' | 'indigena' | 'mestiza' | 'negra' | 'otra'>;
   alfabeta: Campo<SiNo>;
   estudios: Campo<'ninguno' | 'primaria' | 'secundaria' | 'universitaria'>;
@@ -230,6 +232,8 @@ export interface DatosSeguimiento {
   fcfLpm: Campo<number>;
   movimientosFetales: Campo<SiNo>;
   proteinuria: Campo<'negativa' | 'trazas' | '1+' | '2+' | '3+'>;
+  /** Evento que cambia el riesgo trombótico (D5). */
+  diagnosticoPreeclampsia: Campo<SiNo>;
   /** Notas internas del profesional: privado, nunca en el carné. */
   observaciones: Campo<string>;
   iniciales: Campo<string>;
@@ -356,7 +360,7 @@ export interface RegistroDerechos extends Meta {
 // ---------------------------------------------------------------- Carné
 
 /** Canales por los que se entrega el enlace del carné. */
-export type CanalEnvio = 'whatsapp' | 'impreso';
+export type CanalEnvio = 'whatsapp' | 'correo' | 'impreso';
 
 export interface Carne extends Meta {
   embarazoId: string;
