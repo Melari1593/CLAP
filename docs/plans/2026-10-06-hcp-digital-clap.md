@@ -2,7 +2,7 @@
 Fecha: 6 de octubre de 2026
 
 ## 1. Objetivo
-Construir la v1 de la HCP digital para control prenatal. El profesional registra la primera consulta y los controles de seguimiento, sin conexión si hace falta, y la app calcula, alerta y recuerda según el CLAP y las guías incorporadas. Al cerrar cada consulta, la gestante recibe por WhatsApp (o impreso) un carné simple protegido con PIN.
+Construir la v1 de la HCP digital para control prenatal. El profesional registra la primera consulta y los controles de seguimiento, sin conexión si hace falta, y la app calcula, alerta y recuerda según el CLAP y las guías incorporadas. Al cerrar cada consulta, la gestante recibe por WhatsApp (o por correo electrónico, o impreso) un carné simple protegido con PIN.
 
 ## 2. Contexto del problema
 En control prenatal, la HCP se llena en papel. El profesional calcula a mano la edad gestacional y depende de su memoria para saber qué examen toca y cuándo un dato es una alerta. La gestante recibe un carné de papel que se pierde o no entiende, y muchas veces no sabe cuándo vuelve, qué exámenes llevar ni qué señales la deben llevar a urgencias. Varios contextos de uso son rurales, con conexión intermitente y gestantes con baja alfabetización. Además, parte de la información es muy sensible (VIH, violencia, decisión sobre el embarazo) y no puede quedar expuesta en un celular compartido.
@@ -22,7 +22,7 @@ Las tareas están en orden de dependencia. Donde dos tareas no dependen entre s�
 - **Hecho cuando:** cada regla de las tareas C y D lee sus valores del catálogo; cambiar un valor en el catálogo cambia el resultado de la regla sin tocar código; la app muestra un aviso interno si una regla usa un parámetro "pendiente de validar".
 
 **A2. Modelo de datos**
-- **Qué hacer:** definir las entidades: gestante, embarazo (episodio; una gestante puede tener varios), consulta (primera o de seguimiento), resultado de examen (con tipo de muestra venosa/capilar para Hb), indicación (hierro, ácido fólico, calcio, ASA, tromboprofilaxis), alerta y su decisión (con motivo y fecha), factor transitorio (inicio y resolución), registro de derechos sexuales y reproductivos, carné (enlace, PIN, estado activo/pausado) y bitácora de cambios. Incluir todos los campos de la HCP más los nuevos del spec: municipio y altitud, cigarrillos al día, enfermedad autoinmune, FIV, alergia al ASA/AINE, antecedentes trombóticos, factores de sangrado, antecedentes y medicamentos que contraindican o condicionan el calcio, ferritina y saturación de transferrina, deseo de continuar el embarazo. Cada campo admite tres estados además del valor: "no se hizo", "no corresponde" y vacío.
+- **Qué hacer:** definir las entidades: gestante, embarazo (episodio; una gestante puede tener varios), consulta (primera o de seguimiento), resultado de examen (con tipo de muestra venosa/capilar para Hb), indicación (hierro, ácido fólico, calcio, ASA, tromboprofilaxis), alerta y su decisión (con motivo y fecha), factor transitorio (inicio y resolución), registro de derechos sexuales y reproductivos, carné (enlace, PIN, canal de envío —WhatsApp, correo o impreso— con su destino, estado activo/pausado) y bitácora de cambios. Incluir todos los campos de la HCP más los nuevos del spec: municipio y altitud, correo electrónico opcional, cigarrillos al día, enfermedad autoinmune, FIV, alergia al ASA/AINE, antecedentes trombóticos, factores de sangrado, antecedentes y medicamentos que contraindican o condicionan el calcio, ferritina y saturación de transferrina, deseo de continuar el embarazo. Cada campo admite tres estados además del valor: "no se hizo", "no corresponde" y vacío.
 - **Componentes:** capa de datos.
 - **Hecho cuando:** se puede guardar y recuperar una historia completa de prueba con todos los campos de la sección 2 y 3 del spec, incluidos los tres estados; un embarazo nuevo no sobrescribe uno anterior.
 
@@ -32,9 +32,9 @@ Las tareas están en orden de dependencia. Donde dos tareas no dependen entre s�
 - **Hecho cuando:** un usuario sin rol autorizado no puede ver la historia; cada edición queda en la bitácora con usuario y hora; ninguna consulta del carné puede leer un campo "nunca en carné" (verificado con prueba automática).
 
 **A4. Funcionamiento sin conexión y sincronización**
-- **Qué hacer:** que la consulta completa (búsqueda de gestantes ya descargadas, registro, cálculos, alertas, cierre e impresión) funcione sin internet. Las acciones que requieren red (sincronizar, enviar WhatsApp) quedan en cola con estado "pendiente de enviar" y se ejecutan solas al volver la señal. Definir cómo se resuelven conflictos si dos dispositivos editan la misma historia.
+- **Qué hacer:** que la consulta completa (búsqueda de gestantes ya descargadas, registro, cálculos, alertas, cierre e impresión) funcione sin internet. Las acciones que requieren red (sincronizar, enviar WhatsApp o correo) quedan en cola con estado "pendiente de enviar" y se ejecutan solas al volver la señal. Definir cómo se resuelven conflictos si dos dispositivos editan la misma historia.
 - **Componentes:** almacenamiento local en el dispositivo; cola de sincronización.
-- **Hecho cuando:** con el dispositivo en modo avión se puede hacer y cerrar una consulta completa e imprimir el carné; al reconectar, los datos aparecen en el servidor y el WhatsApp se envía, y el profesional ve la confirmación.
+- **Hecho cuando:** con el dispositivo en modo avión se puede hacer y cerrar una consulta completa e imprimir el carné; al reconectar, los datos aparecen en el servidor y el WhatsApp o el correo se envía, y el profesional ve la confirmación.
 
 ### Bloque B — Consultas
 
@@ -138,9 +138,9 @@ Todas dependen de C1 y pueden avanzar en paralelo entre sí, salvo D2, que usa l
 - Depende de C1 y F1.
 
 **F3. Cierre de consulta, PIN y vista previa**
-- **Qué hacer:** botón "Cerrar consulta" que lista los campos vacíos y muestra la vista previa del carné. En la primera consulta, registrar el PIN de 4 dígitos con la gestante y confirmar el WhatsApp. Permitir asignar un PIN nuevo y actualizar el número (lo que invalida el enlace anterior).
+- **Qué hacer:** botón "Cerrar consulta" que lista los campos vacíos y muestra la vista previa del carné. En la primera consulta, registrar el PIN de 4 dígitos con la gestante, preguntar el canal en el orden del spec (WhatsApp si lo tiene; correo si no tiene WhatsApp o lo prefiere y dice que lo revisa; impreso si no tiene ninguno) y confirmar el número o la dirección. Permitir asignar un PIN nuevo y actualizar el número o el correo (lo que invalida el enlace anterior).
 - **Componentes:** flujo de cierre; gestión de PIN y enlace.
-- **Hecho cuando:** la vista previa coincide con lo que verá la gestante; cambiar el número deja inservible el enlace viejo.
+- **Hecho cuando:** la vista previa coincide con lo que verá la gestante; cambiar el número o el correo deja inservible el enlace viejo; una dirección de correo mal escrita pide corrección antes de guardar.
 - Depende de F2.
 
 **F4. Carné web de la gestante**
@@ -149,10 +149,10 @@ Todas dependen de C1 y pueden avanzar en paralelo entre sí, salvo D2, que usa l
 - **Hecho cuando:** el carné de prueba muestra todo lo anterior; un caso con VIH, violencia y solicitud de IVE no deja ver nada de eso; el sexto intento de PIN queda bloqueado; un carné pausado muestra solo el mensaje.
 - Depende de A3 y F3.
 
-**F5. Envío por WhatsApp**
-- **Qué hacer:** enviar un mensaje corto con el nombre y el enlace. Si no hay red, dejarlo en la cola de A4. No enviar nada si el carné está pausado.
-- **Componentes:** integración de mensajería; cola de envío.
-- **Hecho cuando:** el mensaje llega al número de prueba; un envío hecho sin red sale al reconectar; un carné pausado no genera envío.
+**F5. Envío por WhatsApp y por correo**
+- **Qué hacer:** enviar desde el servidor un mensaje corto con el nombre y el enlace por el canal elegido: WhatsApp con la API de WhatsApp Business (plantilla aprobada) o correo con un servicio de envío transaccional. El correo lleva solo el nombre y el enlace, nunca el carné adjunto, con asunto y remitente neutros. Si el correo rebota, registrarlo y avisar al profesional en la siguiente consulta para corregir la dirección, cambiar de canal o imprimir. Si no hay red, dejar el envío en la cola de A4. No enviar nada por ningún canal si el carné está pausado.
+- **Componentes:** integración de mensajería (WhatsApp Business y correo); cola de envío; registro de rebotes.
+- **Hecho cuando:** el mensaje llega al número y al correo de prueba; el correo no trae adjuntos y su asunto no menciona el embarazo; un envío hecho sin red sale al reconectar; un correo rebotado aparece como aviso en la siguiente consulta; un carné pausado no genera envío por ningún canal.
 - Depende de A4 y F4.
 
 **F6. Carné impreso**
@@ -169,7 +169,7 @@ Todas dependen de C1 y pueden avanzar en paralelo entre sí, salvo D2, que usa l
 - **Hecho cuando:** todos los casos pasan y el equipo clínico firmó los resultados esperados.
 
 **G2. Registro para medir el éxito**
-- **Qué hacer:** registrar los eventos necesarios para las métricas del spec: aperturas del carné entre consultas, exámenes traídos a la cita, duración de la consulta, decisiones de ASA desde la semana 12, PTOG entre las semanas 24 y 28, asesoría y remisión en la misma consulta, activación de la ruta, evaluación trombótica en primera consulta y semana 28. Solo el registro, sin tableros (los reportes son V2).
+- **Qué hacer:** registrar los eventos necesarios para las métricas del spec: aperturas del carné entre consultas (separadas por canal de envío, para comparar WhatsApp y correo), exámenes traídos a la cita, duración de la consulta, decisiones de ASA desde la semana 12, PTOG entre las semanas 24 y 28, asesoría y remisión en la misma consulta, activación de la ruta, evaluación trombótica en primera consulta y semana 28. Solo el registro, sin tableros (los reportes son V2).
 - **Componentes:** registro de eventos.
 - **Hecho cuando:** cada métrica del spec puede calcularse con una consulta sobre los eventos registrados.
 
