@@ -30,6 +30,11 @@ npm run build      # build de producción con service worker
 - `src/consultas/` — esquema de los formularios, validaciones de valores imposibles, búsqueda y guardado de consultas (B1, B2, B4).
 - `src/alertas/` — motor de alertas y decisiones (C1), reglas básicas del CLAP (C2), antitetánica (C3) y reglas con lógica propia: anemia, hierro, ASA, calcio, tromboprofilaxis y PTOG (D1–D6).
 - `src/derechos/` — flujo privado "Opciones y derechos": marco según la EG, decisión, remisión, ruta de violencia sexual y pausa del carné (E1).
+- `src/recordatorios/` — pendientes y atrasados por semana (F1).
+- `src/carne/` — PIN (PBKDF2, bloqueo tras 5 intentos), enlace, canal de envío y textos del carné (F3, F4).
 - `src/ui/` — pantallas: búsqueda, ficha de la gestante, primera consulta, control de seguimiento y catálogo.
 
-Mientras no exista el servidor, la app usa un profesional autorizado de demostración en el dispositivo.
+Mientras no exista el servidor:
+- la app usa un profesional autorizado de demostración en el dispositivo;
+- el enlace del carné (`#/carne/<token>`) funciona solo en el mismo dispositivo, leyendo la base local;
+- los envíos por WhatsApp o correo quedan en la cola de pendientes.

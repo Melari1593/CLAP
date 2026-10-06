@@ -433,6 +433,30 @@ const BASE = {
     estado: 'decidido',
   }),
 
+  // ---------- Recordatorios por semana (F1) ----------
+  'recordatorios.ventanas': p<Record<string, { desdeSemana: number; hastaSemana: number | null }>>({
+    nombre: 'Ventanas de los exámenes y acciones por semana',
+    valor: {
+      examenesPrimeraConsulta: { desdeSemana: 0, hastaSemana: 20 },
+      examenesDespuesDe20: { desdeSemana: 20, hastaSemana: 36 },
+      ptog: { desdeSemana: 24, hastaSemana: 28 },
+      reevaluacionTrombotica: { desdeSemana: 28, hastaSemana: 30 },
+      egb: { desdeSemana: 35, hastaSemana: 37 },
+    },
+    unidad: 'semanas (inclusive: hasta la semana N+6)',
+    fuentes: ['Spec HCP Digital v1'],
+    estado: 'pendiente',
+    nota:
+      'El spec fija PTOG 24–28 y EGB 35–37. Los límites para marcar "atrasado" los exámenes de la primera consulta (semana 20), los de después de la 20 (semana 36) y la reevaluación de la semana 28 (semana 30) son provisionales.',
+  }),
+  'recordatorios.examenesPrimeraConsulta': p<string[]>({
+    nombre: 'Exámenes de la primera consulta',
+    valor: ['hb', 'vdrl', 'vih', 'bacteriuria', 'toxoplasmosis', 'chagas', 'malaria'],
+    fuentes: ['Spec HCP Digital v1'],
+    estado: 'pendiente',
+    nota: 'Toxoplasmosis, Chagas y malaria según lo que exija la norma del país y la zona. Revisar contra la Ruta Materno Perinatal.',
+  }),
+
   // ---------- Validaciones de datos imposibles (B2) ----------
   'validacion.rangos': p<Record<string, { min: number; max: number }>>({
     nombre: 'Rangos fuera de los cuales se pide confirmar el dato',

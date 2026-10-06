@@ -149,6 +149,7 @@ export function seguimiento(pesoKg: number): DatosSeguimiento {
     movimientosFetales: valor(true),
     proteinuria: valor('negativa'),
     diagnosticoPreeclampsia: valor(false),
+    tamizajeTrimestral: valor(true),
     observaciones: valor(SECRETO.notaInterna),
     iniciales: valor('PP'),
     cambioResidencia: noCorresponde(),

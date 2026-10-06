@@ -234,6 +234,8 @@ export interface DatosSeguimiento {
   proteinuria: Campo<'negativa' | 'trazas' | '1+' | '2+' | '3+'>;
   /** Evento que cambia el riesgo trombótico (D5). */
   diagnosticoPreeclampsia: Campo<SiNo>;
+  /** Se preguntó en este trimestre por tabaco, alcohol y violencia (recordatorio F1). */
+  tamizajeTrimestral: Campo<SiNo>;
   /** Notas internas del profesional: privado, nunca en el carné. */
   observaciones: Campo<string>;
   iniciales: Campo<string>;

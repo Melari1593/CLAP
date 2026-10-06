@@ -15,6 +15,9 @@ import { Formulario } from './Formulario';
 import { PanelCalculos } from './PanelCalculos';
 import { PanelAlertas } from './PanelAlertas';
 import { SeccionesSeguimiento } from './SeccionesSeguimiento';
+import { CierreCarne } from './CierreCarne';
+import { PanelPendientes } from './PanelPendientes';
+import { valorDe } from '../datos/campo';
 
 type Cita = { fecha: string; lugar: string; queLlevar: string };
 
@@ -105,7 +108,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
     await servicio.cerrarConsulta(consultaId);
     setCerrada(true);
     setVacios(undefined);
-    setMensaje('Consulta cerrada. (La vista previa y el envío del carné llegan con el Bloque F.)');
+    setMensaje('Consulta cerrada.');
   };
 
   return (
@@ -114,6 +117,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       <h2>{tipo === 'primera' ? 'Primera consulta' : 'Control de seguimiento'}</h2>
       {cerrada && <p className="aviso">Esta consulta está cerrada. Los cambios quedan en la bitácora.</p>}
       <PanelAlertas embarazoId={embarazoId} version={guardados} abrirDerechos={() => ir({ tipo: 'derechos', gestanteId, embarazoId })} />
+      <PanelPendientes embarazoId={embarazoId} version={guardados} />
 
       {tipo === 'primera' ? (
         <>
@@ -167,6 +171,14 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       )}
 
       {mensaje && <p className="aviso" role="status">{mensaje}</p>}
+      {cerrada && (
+        <CierreCarne
+          embarazoId={embarazoId}
+          telefono={valorDe((tipo === 'primera' ? primera : primeraDelEmbarazo)?.identificacion.telefono)}
+          correo={valorDe((tipo === 'primera' ? primera : primeraDelEmbarazo)?.identificacion.correo)}
+          onImprimir={() => ir({ tipo: 'impresion', gestanteId, embarazoId })}
+        />
+      )}
       <div className="navegacion fija">
         <button type="button" onClick={() => void guardar()}>Guardar</button>
         {!cerrada && <button type="button" className="primario" onClick={() => void pedirCierre()}>Cerrar consulta</button>}

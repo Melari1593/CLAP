@@ -398,6 +398,12 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
         etiqueta: 'Proteinuria',
         control: { tipo: 'opciones', opciones: ops(['negativa', 'Negativa'], ['trazas', 'Trazas'], ['1+', '1+'], ['2+', '2+'], ['3+', '3+']) },
       },
+      {
+        ruta: 'tamizajeTrimestral',
+        etiqueta: 'Se preguntó en este trimestre por tabaco, alcohol y violencia',
+        ayuda: 'Ofrezca un momento a solas.',
+        control: sino,
+      },
       { ruta: 'diagnosticoPreeclampsia', etiqueta: 'Diagnóstico de preeclampsia en este control', control: sino },
       { ruta: 'observaciones', etiqueta: 'Observaciones (notas internas)', privado: true, control: { tipo: 'texto', largo: true } },
       { ruta: 'iniciales', etiqueta: 'Iniciales del profesional', control: { tipo: 'texto' } },

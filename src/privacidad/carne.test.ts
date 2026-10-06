@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { Catalogo } from '../clinico/catalogo';
 import { MENSAJE_CARNE_PAUSADO, proyectarCarne } from './carne';
 import { DATOS_NUNCA_EN_CARNE, nivelDe } from './niveles';
 import type { Carne } from '../datos/modelo';
@@ -79,7 +80,7 @@ const PALABRAS_PROHIBIDAS = [
 describe('Carné: lectura restringida (A3)', () => {
   it('ningún dato "nunca en carné" llega al carné, ni como clave ni como valor', async () => {
     const { historia, carne } = await historiaSensible(repo(nuevaBD()));
-    const datos = proyectarCarne(historia, carne);
+    const datos = proyectarCarne(historia, carne, '2026-10-06', new Catalogo());
     const texto = JSON.stringify(datos);
 
     for (const secreto of Object.values(SECRETO)) expect(texto).not.toContain(secreto);
@@ -89,7 +90,8 @@ describe('Carné: lectura restringida (A3)', () => {
     expect(datos).toMatchObject({
       estado: 'activo',
       nombre: 'Ana',
-      fum: '2026-06-01',
+      fpp: '2027-03-08',
+      semanas: { semanas: 18, dias: 1 },
       grupo: 'O',
       rh: '+',
       indicaciones: ['hierro'],
@@ -100,7 +102,7 @@ describe('Carné: lectura restringida (A3)', () => {
 
   it('un carné pausado muestra solo el mensaje', async () => {
     const { historia, carne } = await historiaSensible(repo(nuevaBD()));
-    expect(proyectarCarne(historia, { ...carne, estado: 'pausado' } as Carne)).toEqual({
+    expect(proyectarCarne(historia, { ...carne, estado: 'pausado' } as Carne, '2026-10-06', new Catalogo())).toEqual({
       estado: 'pausado',
       mensaje: MENSAJE_CARNE_PAUSADO,
     });

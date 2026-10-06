@@ -111,7 +111,7 @@ describe('Registro de la decisión (E1)', () => {
     expect((await r.leer('carnes', carneId))?.estado).toBe('pausado');
 
     const historia = (await r.historia(embarazoId))!;
-    expect(proyectarCarne(historia, historia.carne!)).toEqual({ estado: 'pausado', mensaje: MENSAJE_CARNE_PAUSADO });
+    expect(proyectarCarne(historia, historia.carne!, "2026-10-06", cat)).toEqual({ estado: 'pausado', mensaje: MENSAJE_CARNE_PAUSADO });
     const alerta = (await motor.sincronizar(embarazoId)).find((a) => a.regla === 'no_planeado')!;
     expect(alerta).toMatchObject({ activa: false, decision: { opcion: 'Asesoría realizada y decisión registrada' } });
   });
@@ -171,7 +171,7 @@ describe('Registro de la decisión (E1)', () => {
     });
     const historia = (await r.historia(embarazoId))!;
     expect(historia.carne?.estado).toBe('activo');
-    const texto = JSON.stringify(proyectarCarne(historia, historia.carne!));
+    const texto = JSON.stringify(proyectarCarne(historia, historia.carne!, "2026-10-06", cat));
     for (const prohibido of ['NOTA-DERECHOS-PRIVADA', 'lo_pensara', 'no_planeado', 'no_ha_decidido', 'IVE', 'derechos']) {
       expect(texto).not.toContain(prohibido);
     }
