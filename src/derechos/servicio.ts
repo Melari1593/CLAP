@@ -13,6 +13,7 @@ import type {
 import type { Historia, Repositorio } from '../datos/repositorio';
 import { construirContexto, type ContextoClinico, type MotorAlertas } from '../alertas/motor';
 import { CAUSALES, cita } from './textos';
+import type { RegistroEventos } from '../eventos/eventos';
 
 export type Marco =
   | { tipo: 'voluntad'; texto: string; norma: string }
@@ -86,6 +87,7 @@ export class ServicioDerechos {
     private readonly catalogo: Catalogo,
     private readonly hoy: () => FechaISO,
     private readonly ahora: () => Date = () => new Date(),
+    private readonly eventos?: RegistroEventos,
   ) {}
 
   contexto(historia: Historia): ContextoClinico {
@@ -137,6 +139,13 @@ export class ServicioDerechos {
 
     await this.actualizarCarne(embarazoId);
     await this.atenderAlertas(embarazoId, registro);
+    await this.eventos?.registrar(embarazoId, {
+      tipo: 'derechos_registrado',
+      decision: registro.decision,
+      desencadenante: registro.desencadenante,
+      remisionMismoDia: Boolean(registro.solicitudIVE?.remisionFechaHora && registro.solicitudIVE.remisionFechaHora.slice(0, 10) === fechaHora.slice(0, 10)),
+    });
+    if (registro.rutaViolencia) await this.eventos?.registrar(embarazoId, { tipo: 'ruta_activada' });
     return registro;
   }
 
@@ -144,7 +153,12 @@ export class ServicioDerechos {
   async registrarRemision(registroId: string, remisionFechaHora: FechaHoraISO): Promise<RegistroDerechos> {
     const r = await this.repo.leer('derechos', registroId);
     if (!r?.solicitudIVE) throw new ErrorDerechos('El registro no tiene una solicitud de IVE.');
-    return this.repo.guardar('derechos', { ...r, solicitudIVE: { ...r.solicitudIVE, remisionFechaHora } });
+    const guardado = await this.repo.guardar('derechos', { ...r, solicitudIVE: { ...r.solicitudIVE, remisionFechaHora } });
+    await this.eventos?.registrar(r.embarazoId, {
+      tipo: 'remision_registrada',
+      mismoDiaQueLaSolicitud: remisionFechaHora.slice(0, 10) === r.solicitudIVE.fechaHora.slice(0, 10),
+    });
+    return guardado;
   }
 
   /** Registra la activación de la ruta de violencia sexual y sus notificaciones. */
@@ -157,6 +171,7 @@ export class ServicioDerechos {
     if (!r) throw new ErrorDerechos('Registro no encontrado.');
     const guardado = await this.repo.guardar('derechos', { ...r, rutaViolencia: { activadaFechaHora, notificaciones } });
     await this.atenderAlertas(r.embarazoId, guardado);
+    if (!r.rutaViolencia) await this.eventos?.registrar(r.embarazoId, { tipo: 'ruta_activada' });
     return guardado;
   }
 

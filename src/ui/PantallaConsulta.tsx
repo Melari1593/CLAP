@@ -1,5 +1,5 @@
 // B2 / B4 — Primera consulta y control de seguimiento.
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Consulta, DatosPrimeraConsulta, DatosSeguimiento, Gestante } from '../datos/modelo';
 import {
   BLOQUES_PRIMERA,
@@ -47,6 +47,8 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
   const [mensaje, setMensaje] = useState<string>();
   /** Sube con cada guardado para que el panel de alertas se actualice. */
   const [guardados, setGuardados] = useState(0);
+  /** Para medir la duración de la consulta (G2). */
+  const inicio = useRef(new Date());
 
   useEffect(() => {
     void (async () => {
@@ -105,7 +107,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
 
   const cerrar = async () => {
     if (!consultaId) return;
-    await servicio.cerrarConsulta(consultaId);
+    await servicio.cerrarConsulta(consultaId, idInicial ? undefined : Math.round((Date.now() - inicio.current.getTime()) / 1000));
     setCerrada(true);
     setVacios(undefined);
     setMensaje('Consulta cerrada.');

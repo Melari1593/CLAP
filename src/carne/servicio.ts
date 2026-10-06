@@ -8,6 +8,7 @@ import { carneDebeEstarPausado } from '../derechos/servicio';
 import { proyectarCarne, type DatosCarne } from '../privacidad/carne';
 import { encolarEnvioCarne } from '../sync/cola';
 import { aleatorio, derivarPin, pinValido } from './pin';
+import type { RegistroEventos } from '../eventos/eventos';
 
 export class ErrorCarne extends Error {}
 
@@ -32,6 +33,7 @@ export class ServicioCarne {
     private readonly catalogo: Catalogo,
     private readonly hoy: () => FechaISO,
     private readonly ahora: () => Date = () => new Date(),
+    private readonly eventos?: RegistroEventos,
   ) {}
 
   async carneDe(embarazoId: string): Promise<Carne | undefined> {
@@ -90,6 +92,12 @@ export class ServicioCarne {
     if (carne.estado === 'pausado') return 'pausado';
     if (carne.canal === 'impreso') return 'impreso';
     await encolarEnvioCarne(this.bd, carne.id, carne.canal, this.ahora().toISOString());
+    await this.eventos?.registrar(embarazoId, { tipo: 'carne_enviado', canal: carne.canal });
     return 'en_cola';
+  }
+
+  /** "La gestante entiende" (pregunta corta después de la consulta). */
+  async registrarComprension(embarazoId: string, sabeProximaCita: boolean, signosAlarma: number) {
+    await this.eventos?.registrar(embarazoId, { tipo: 'comprension', sabeProximaCita, signosAlarma });
   }
 }

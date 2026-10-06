@@ -20,6 +20,10 @@ import type {
 import type { Historia, NuevoRegistro, Repositorio } from '../datos/repositorio';
 import { BLOQUES_PRIMERA, BLOQUES_SEGUIMIENTO, aplicarNoCorresponde, etiquetaDe } from './esquema';
 import { validarPrimeraConsulta, validarSeguimiento, type Advertencia } from './validaciones';
+import type { RegistroEventos } from '../eventos/eventos';
+import { construirContexto } from '../alertas/motor';
+import { evaluarTrombo } from '../alertas/trombo';
+import { recordatorios } from '../recordatorios/recordatorios';
 
 // ------------------------------------------------------------------ Cambios clínicos
 
@@ -57,6 +61,7 @@ export class ServicioConsultas {
     private readonly repo: Repositorio,
     private readonly catalogo: Catalogo = new Catalogo(),
     private readonly hoy: () => FechaISO,
+    private readonly eventos?: RegistroEventos,
   ) {}
 
   alCambiar(oyente: Oyente): () => void {
@@ -192,6 +197,11 @@ export class ServicioConsultas {
   async registrarExamen(datos: NuevoRegistro<'examenes'>): Promise<ResultadoExamen> {
     const examen = await this.repo.guardar('examenes', datos);
     await this.avisar({ tipo: 'examen', embarazoId: examen.embarazoId, examen: examen.tipo });
+    if (this.eventos && examen.resultado.estado === 'valor') {
+      const historia = await this.repo.historia(examen.embarazoId);
+      const eg = historia ? this.egDeHistoria(historia, examen.fecha) : undefined;
+      await this.eventos.registrar(examen.embarazoId, { tipo: 'examen_registrado', examen: examen.tipo, egDias: eg?.estado === 'calculada' ? eg.dias : null });
+    }
     return examen;
   }
 
@@ -233,10 +243,26 @@ export class ServicioConsultas {
   }
 
   /** Cierra la consulta. Devuelve los campos vacíos para mostrarlos antes del carné. */
-  async cerrarConsulta(consultaId: string): Promise<{ consulta: Consulta; vacios: string[] }> {
+  /** `duracionSegundos`: desde que se abrió la consulta hasta el cierre (métrica de G2). */
+  async cerrarConsulta(consultaId: string, duracionSegundos?: number): Promise<{ consulta: Consulta; vacios: string[] }> {
     const consulta = await this.repo.leer('consultas', consultaId);
     if (!consulta) throw new Error('Consulta no encontrada');
     const cerrada = await this.repo.guardar('consultas', { ...consulta, cerrada: true });
+    if (this.eventos && !consulta.cerrada) {
+      const historia = await this.repo.historia(consulta.embarazoId);
+      if (historia) {
+        const ctx = construirContexto(historia, this.hoy(), this.catalogo);
+        await this.eventos.registrar(consulta.embarazoId, {
+          tipo: 'consulta_cerrada',
+          consultaId,
+          consultaTipo: consulta.tipo,
+          egDias: ctx.egEn(consulta.fecha) ?? null,
+          duracionSegundos,
+          examenesPendientes: recordatorios(ctx).flatMap((r) => (r.examen ? [r.examen] : [])),
+          puntajeTrombotico: evaluarTrombo(ctx)?.puntaje,
+        });
+      }
+    }
     return { consulta: cerrada, vacios: this.camposVaciosDe(cerrada) };
   }
 }

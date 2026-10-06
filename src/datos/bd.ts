@@ -13,6 +13,7 @@ import type {
   ResultadoExamen,
 } from './modelo';
 import type { ItemCola } from '../sync/cola';
+import type { Evento } from '../eventos/eventos';
 
 export interface TablasHistoria {
   gestantes: Gestante;
@@ -52,6 +53,7 @@ export class BaseDatos extends Dexie {
   carnes!: EntityTable<Carne, 'id'>;
   bitacora!: EntityTable<EntradaBitacora, 'id'>;
   cola!: EntityTable<ItemCola, 'id'>;
+  eventos!: EntityTable<Evento, 'id'>;
 
   constructor(nombre = 'hcp-digital') {
     super(nombre);
@@ -68,5 +70,6 @@ export class BaseDatos extends Dexie {
       bitacora: 'id, entidadId, fechaHora, usuarioId',
       cola: 'id, estado, creadoEn',
     });
+    this.version(2).stores({ eventos: 'id, embarazoId, tipo, fechaHora, enviado' });
   }
 }

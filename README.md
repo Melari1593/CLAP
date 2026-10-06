@@ -7,6 +7,7 @@ HCP Digital (CLAP) para control prenatal: versión digital de la Historia Clíni
 - [Roadmap](docs/roadmap.md)
 - [Spec v1](docs/specs/2026-10-06-hcp-digital-clap.md)
 - [Plan de implementación v1](docs/plans/2026-10-06-hcp-digital-clap.md)
+- [Validación antes de usar con pacientes](docs/validacion/README.md): batería de casos clínicos, parámetros pendientes, verificación normativa, pruebas con gestantes y tiempo de consulta
 
 ## Tecnología
 
@@ -18,6 +19,7 @@ npm run dev        # desarrollo
 npm test           # pruebas
 npm run typecheck  # tipos
 npm run build      # build de producción con service worker
+npm run casos      # regenera los documentos de casos clínicos y parámetros pendientes
 ```
 
 ## Estructura
@@ -32,6 +34,8 @@ npm run build      # build de producción con service worker
 - `src/derechos/` — flujo privado "Opciones y derechos": marco según la EG, decisión, remisión, ruta de violencia sexual y pausa del carné (E1).
 - `src/recordatorios/` — pendientes y atrasados por semana (F1).
 - `src/carne/` — PIN (PBKDF2, bloqueo tras 5 intentos), enlace, canal de envío y textos del carné (F3, F4).
+- `src/casos/` — batería de casos clínicos (G1).
+- `src/eventos/` — registro de eventos y cálculo de las métricas de éxito (G2).
 - `src/ui/` — pantallas: búsqueda, ficha de la gestante, primera consulta, control de seguimiento y catálogo.
 
 Mientras no exista el servidor:

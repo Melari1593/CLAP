@@ -22,6 +22,9 @@ function servidorFalso() {
       if (!estado.enLinea) throw new Error('Sin red');
       estado.envios.push(carneId);
     },
+    async enviarEventos() {
+      if (!estado.enLinea) throw new Error('Sin red');
+    },
   };
   return { estado, transporte };
 }

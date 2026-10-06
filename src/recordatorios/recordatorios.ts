@@ -12,6 +12,8 @@ export interface Recordatorio {
   texto: string;
   estado: 'pendiente' | 'atrasado';
   tipo: 'examen' | 'accion' | 'pregunta';
+  /** Tipo de examen, si el recordatorio es un examen registrable (para medir si llega a la cita). */
+  examen?: TipoExamen;
   /** Texto sencillo para el carné de la gestante (solo exámenes). Nunca nombra resultados. */
   paraGestante?: string;
 }
@@ -61,7 +63,7 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
   const alertaActiva = (regla: string) => historia.alertas.some((a) => a.regla === regla && a.activa);
 
   const examen = (id: string, tipo: TipoExamen, texto: string, hasta: number | null) =>
-    lista.push({ id, texto, tipo: 'examen', estado: estadoEn(hasta), paraGestante: PARA_GESTANTE[tipo] });
+    lista.push({ id, texto, tipo: 'examen', examen: tipo, estado: estadoEn(hasta), paraGestante: PARA_GESTANTE[tipo] });
 
   // EG no confiable
   if (eg.estado !== 'calculada' || !eg.confiable) {
@@ -93,7 +95,7 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
   // Anemia sin ferritina (D2)
   const hb = ultimaHb(ctx);
   if (hb && hb.grado !== 'sin_anemia' && !ctx.ultimo('ferritina')) {
-    lista.push({ id: 'ferritina', texto: 'Solicitar ferritina sérica (anemia).', tipo: 'examen', estado: 'pendiente', paraGestante: SANGRE });
+    lista.push({ id: 'ferritina', texto: 'Solicitar ferritina sérica (anemia).', tipo: 'examen', examen: 'ferritina', estado: 'pendiente', paraGestante: SANGRE });
   }
 
   // Decisiones de ASA (semana 12) y calcio (semana 14) sin tomar

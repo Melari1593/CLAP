@@ -7,6 +7,7 @@
 // porque la HCP tiene valor legal. (La regla definitiva es una decisión pendiente del plan.)
 import type { BaseDatos, NombreTabla, TablasHistoria } from '../datos/bd';
 import type { CanalEnvio } from '../datos/modelo';
+import type { Evento } from '../eventos/eventos';
 
 export type EstadoItem = 'pendiente' | 'enviado' | 'conflicto' | 'descartado';
 
@@ -31,6 +32,8 @@ export interface Transporte {
   sincronizar(p: { entidad: NombreTabla; registro: TablasHistoria[NombreTabla]; versionBase: number }): Promise<RespuestaSincronizacion>;
   /** El servidor arma el mensaje con el enlace del carné y lo envía por el canal indicado. */
   enviarCarne(p: { carneId: string; canal: CanalEnvio }): Promise<void>;
+  /** Eventos para las métricas, en lotes. */
+  enviarEventos(eventos: Evento[]): Promise<void>;
 }
 
 /** Un registro tiene a lo sumo un ítem de sincronización pendiente: se envía su versión más reciente. */
@@ -123,6 +126,17 @@ async function procesar(bd: BaseDatos, transporte: Transporte): Promise<Resultad
       break;
     }
   }
+  if (!r.sinRed) {
+    const lote = await bd.eventos.where('enviado').equals(0).limit(500).toArray();
+    if (lote.length > 0) {
+      try {
+        await transporte.enviarEventos(lote);
+        await bd.eventos.bulkUpdate(lote.map((e) => ({ key: e.id, changes: { enviado: 1 as const } })));
+      } catch {
+        r.sinRed = true;
+      }
+    }
+  }
   return r;
 }
 
@@ -172,6 +186,9 @@ export function transporteHttp(urlBase: string, token: () => string): Transporte
     },
     async enviarCarne(p) {
       await post('/api/carne/enviar', p);
+    },
+    async enviarEventos(eventos) {
+      await post('/api/eventos', { eventos });
     },
   };
 }

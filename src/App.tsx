@@ -9,6 +9,7 @@ import { PantallaDerechos } from './ui/PantallaDerechos';
 import { ServicioCarne } from './carne/servicio';
 import { PantallaImpresion } from './ui/PantallaImpresion';
 import { CarneWeb } from './ui/CarneWeb';
+import { RegistroEventos } from './eventos/eventos';
 import { BaseDatos } from './datos/bd';
 import type { Usuario } from './datos/modelo';
 import { Repositorio } from './datos/repositorio';
@@ -46,14 +47,15 @@ export function App() {
     const catalogo = new Catalogo();
     const repo = new Repositorio(bd, { usuario: USUARIO_DEMO, dispositivoId: dispositivoId() });
     const hoy = () => hoyISO();
-    const servicio = new ServicioConsultas(repo, catalogo, hoy);
-    const motor = new MotorAlertas(repo, REGLAS, catalogo, hoy);
+    const eventos = new RegistroEventos(bd, USUARIO_DEMO.institucionId);
+    const servicio = new ServicioConsultas(repo, catalogo, hoy, eventos);
+    const motor = new MotorAlertas(repo, REGLAS, catalogo, hoy, undefined, eventos);
     // Cada dato guardado vuelve a evaluar las reglas del embarazo (C1).
     servicio.alCambiar(async (cambio) => {
       await motor.sincronizar(cambio.embarazoId);
     });
-    const derechos = new ServicioDerechos(repo, motor, catalogo, hoy);
-    const carnes = new ServicioCarne(bd, repo, catalogo, hoy);
+    const derechos = new ServicioDerechos(repo, motor, catalogo, hoy, undefined, eventos);
+    const carnes = new ServicioCarne(bd, repo, catalogo, hoy, undefined, eventos);
     return { bd, repo, catalogo, hoy, servicio, motor, derechos, carnes };
   }, []);
   const [pantalla, setPantalla] = useState<Pantalla>({ tipo: 'buscar' });

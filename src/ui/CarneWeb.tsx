@@ -9,6 +9,7 @@ import type { Historia } from '../datos/repositorio';
 import { verificarPin } from '../carne/pin';
 import { proyectarCarne, type DatosCarne } from '../privacidad/carne';
 import { CarneGestante } from './CarneGestante';
+import { RegistroEventos } from '../eventos/eventos';
 
 async function historiaPorToken(bd: BaseDatos, token: string): Promise<Historia | undefined> {
   const carne = await bd.carnes.get({ token });
@@ -48,6 +49,7 @@ export function CarneWeb({ bd, token, catalogo, hoy }: { bd: BaseDatos; token: s
     await bd.carnes.update(carne.id, cambios);
     setPin('');
     if (respuesta.resultado === 'correcto') {
+      await new RegistroEventos(bd, carne.institucionId).registrar(carne.embarazoId, { tipo: 'carne_abierto' });
       const historia = await historiaPorToken(bd, token);
       if (historia) setDatos(proyectarCarne(historia, historia.carne!, hoy(), catalogo));
     } else if (respuesta.resultado === 'bloqueado') {

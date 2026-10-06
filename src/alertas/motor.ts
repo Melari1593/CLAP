@@ -16,6 +16,7 @@ import type {
   TipoExamen,
 } from '../datos/modelo';
 import type { Historia, Repositorio } from '../datos/repositorio';
+import type { RegistroEventos } from '../eventos/eventos';
 
 /** Lo que las reglas necesitan saber del embarazo, calculado una sola vez. */
 export interface ContextoClinico {
@@ -121,6 +122,7 @@ export class MotorAlertas {
     private readonly catalogo: Catalogo,
     private readonly hoy: () => FechaISO,
     private readonly ahora: () => Date = () => new Date(),
+    private readonly eventos?: RegistroEventos,
   ) {}
 
   /** Recalcula todas las reglas del embarazo y actualiza sus alertas. */
@@ -131,7 +133,9 @@ export class MotorAlertas {
   private async sincronizarAhora(embarazoId: string): Promise<Alerta[]> {
     const historia = await this.repo.historia(embarazoId);
     if (!historia) return [];
-    const resultados = evaluar(this.reglas, construirContexto(historia, this.hoy(), this.catalogo));
+    const ctx = construirContexto(historia, this.hoy(), this.catalogo);
+    const egDias = ctx.eg.estado === 'calculada' ? ctx.eg.dias : null;
+    const resultados = evaluar(this.reglas, ctx);
     const existentes = new Map(historia.alertas.map((a) => [a.regla, a]));
 
     for (const regla of this.reglas) {
@@ -154,6 +158,9 @@ export class MotorAlertas {
       const decision = previa?.decision;
       // Reaparece si nunca se atendió, o si la situación empeoró respecto de cuando se atendió.
       const activa = !decision || severidad > decision.severidadAtendida;
+      if (activa && !previa?.activa) {
+        await this.eventos?.registrar(embarazoId, { tipo: 'alerta_activada', regla: regla.id, urgente: r.urgente ?? false, egDias });
+      }
       await this.repo.guardar('alertas', {
         ...(previa ?? {}),
         id: previa?.id ?? `${embarazoId}:${regla.id}`,
@@ -208,6 +215,11 @@ export class MotorAlertas {
         severidadAtendida: alerta.severidad,
       },
     });
+    if (this.eventos) {
+      const historia = await this.repo.historia(alerta.embarazoId);
+      const eg = historia ? construirContexto(historia, this.hoy(), this.catalogo).eg : undefined;
+      await this.eventos.registrar(alerta.embarazoId, { tipo: 'alerta_decidida', regla: alerta.regla, opcion, egDias: eg?.estado === 'calculada' ? eg.dias : null });
+    }
     // La indicación puede cambiar otras reglas (por ejemplo, el calcio ya indicado).
     if (def.registraIndicacion) await this.sincronizarAhora(alerta.embarazoId);
     return (await this.repo.leer('alertas', atendida.id)) ?? atendida;

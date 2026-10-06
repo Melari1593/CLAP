@@ -153,6 +153,7 @@ export function CierreCarne({ embarazoId, telefono, correo, onImprimir }: {
         </>
       )}
       {mensaje && <p className="aviso" role="status">{mensaje}</p>}
+      {carne && <Comprension embarazoId={embarazoId} />}
       {vista && (
         <details open>
           <summary>Vista previa: así verá la gestante su carné</summary>
@@ -184,5 +185,41 @@ function FormPinNuevo({ onGuardar }: { onGuardar: (pin: string) => Promise<void>
       <button type="submit">Guardar PIN</button>
       {error && <span className="error">{error}</span>}
     </form>
+  );
+}
+
+/** "La gestante entiende": dos preguntas cortas al final de la consulta (métrica del spec). */
+function Comprension({ embarazoId }: { embarazoId: string }) {
+  const { carnes } = useApp();
+  const [sabeCita, setSabeCita] = useState<boolean>();
+  const [signos, setSignos] = useState<number>();
+  const [listo, setListo] = useState(false);
+  if (listo) return <p className="suave">Respuesta de comprensión registrada.</p>;
+  return (
+    <details className="tarjeta">
+      <summary>Pregunta corta a la gestante (opcional)</summary>
+      <p>¿Sabe decir cuándo es su próxima cita?</p>
+      <div className="botones">
+        {[true, false].map((b) => (
+          <button key={String(b)} type="button" className={sabeCita === b ? 'activo' : ''} onClick={() => setSabeCita(b)}>{b ? 'Sí' : 'No'}</button>
+        ))}
+      </div>
+      <p>¿Cuántos signos de alarma sabe decir sin ayuda?</p>
+      <div className="botones">
+        {[0, 1, 2].map((n) => (
+          <button key={n} type="button" className={signos === n ? 'activo' : ''} onClick={() => setSignos(n)}>{n === 2 ? '2 o más' : n}</button>
+        ))}
+      </div>
+      <button
+        type="button"
+        disabled={sabeCita === undefined || signos === undefined}
+        onClick={async () => {
+          await carnes.registrarComprension(embarazoId, sabeCita!, signos!);
+          setListo(true);
+        }}
+      >
+        Registrar respuesta
+      </button>
+    </details>
   );
 }
