@@ -211,6 +211,16 @@ const BASE = {
     fuentes: ['GPC Colombia 2013'],
     estado: 'decidido',
   }),
+  'ptog.informacionGestante': p<string[]>({
+    nombre: 'Puntos que la GPC pide explicar antes de solicitar la PTOG',
+    valor: [
+      'En muchas mujeres la diabetes gestacional responde a la dieta y el ejercicio.',
+      'Entre 10 % y 20 % necesitan medicamentos o insulina.',
+      'El diagnóstico implica más controles durante el embarazo y el parto.',
+    ],
+    fuentes: ['GPC Colombia 2013'],
+    estado: 'decidido',
+  }),
   'ptog.ventana': p<{ desdeSemana: number; hastaSemana: number }>({
     nombre: 'Ventana de la PTOG',
     valor: { desdeSemana: 24, hastaSemana: 28 },

@@ -3,7 +3,7 @@
 // profesional registra una decisión; si después la regla da un resultado peor, avisa de nuevo.
 // Nunca impide guardar: se ejecuta después del guardado.
 import type { Catalogo } from '../clinico/catalogo';
-import { edad, edadGestacional, type EdadGestacional } from '../clinico/calculos';
+import { diasEntre, edad, edadGestacional, type EdadGestacional } from '../clinico/calculos';
 import { valorDe } from '../datos/campo';
 import type {
   Alerta,
@@ -27,6 +27,10 @@ export interface ContextoClinico {
   primera?: DatosPrimeraConsulta;
   seguimientos: Consulta[];
   eg: EdadGestacional;
+  /** EG (en días) en una fecha dada, si se puede calcular. */
+  egEn(fecha: FechaISO): number | undefined;
+  /** EG (en días) el día de la primera consulta. */
+  egPrimeraConsulta?: number;
   /** Último resultado con valor de un tipo de examen. */
   ultimo<K extends TipoExamen>(tipo: K): (ResultadoPorTipo[K] & { fecha: FechaISO }) | undefined;
 }
@@ -59,23 +63,28 @@ export function construirContexto(historia: Historia, hoy: FechaISO, catalogo: C
   const fechaNac = valorDe(historia.gestante.fechaNacimiento);
   const ordenados = [...historia.examenes].sort((a, b) => (a.fecha + a.creadoEn).localeCompare(b.fecha + b.creadoEn));
 
+  const eg = edadGestacional(
+    {
+      fum: valorDe(g?.fum),
+      egConfiablePorFum: valorDe(g?.egConfiablePorFum),
+      ecografia: valorDe(g?.ecografia),
+      egConfiablePorEco: valorDe(g?.egConfiablePorEco),
+    },
+    hoy,
+    catalogo,
+  );
+  const egEn = (fecha: FechaISO) => (eg.estado === 'calculada' ? diasEntre(eg.inicio, fecha) : undefined);
+
   return {
     hoy,
     catalogo,
     historia,
+    eg,
+    egEn,
+    egPrimeraConsulta: consultaPrimera ? egEn(consultaPrimera.fecha) : undefined,
     edad: fechaNac ? edad(fechaNac, consultaPrimera?.fecha ?? hoy) : undefined,
     primera,
     seguimientos: historia.consultas.filter((c) => c.tipo === 'seguimiento'),
-    eg: edadGestacional(
-      {
-        fum: valorDe(g?.fum),
-        egConfiablePorFum: valorDe(g?.egConfiablePorFum),
-        ecografia: valorDe(g?.ecografia),
-        egConfiablePorEco: valorDe(g?.egConfiablePorEco),
-      },
-      hoy,
-      catalogo,
-    ),
     ultimo<K extends TipoExamen>(tipo: K) {
       const conValor = ordenados.filter(
         (e): e is Extract<ResultadoExamen, { tipo: K }> => e.tipo === tipo && e.resultado.estado === 'valor',
@@ -176,7 +185,19 @@ export class MotorAlertas {
     const def = alerta.opciones.find((o) => o.etiqueta === opcion);
     if (!def) throw new Error(`Opción no válida: ${opcion}`);
     if (def.requiereMotivo && !motivo?.trim()) throw new Error('Esta decisión requiere un motivo.');
-    return this.repo.guardar('alertas', {
+    if (def.registraIndicacion) {
+      const { tipo, estado } = def.registraIndicacion;
+      const existente = (await this.repo.indicacionesDe(alerta.embarazoId)).find((i) => i.tipo === tipo);
+      await this.repo.guardar('indicaciones', {
+        ...(existente ?? {}),
+        embarazoId: alerta.embarazoId,
+        tipo,
+        estado,
+        motivo: motivo?.trim() || undefined,
+        fechaInicio: existente?.fechaInicio ?? this.hoy(),
+      });
+    }
+    const atendida = await this.repo.guardar('alertas', {
       ...alerta,
       activa: false,
       decision: {
@@ -187,6 +208,9 @@ export class MotorAlertas {
         severidadAtendida: alerta.severidad,
       },
     });
+    // La indicación puede cambiar otras reglas (por ejemplo, el calcio ya indicado).
+    if (def.registraIndicacion) await this.sincronizarAhora(alerta.embarazoId);
+    return (await this.repo.leer('alertas', atendida.id)) ?? atendida;
   }
 }
 

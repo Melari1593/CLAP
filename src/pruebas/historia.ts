@@ -1,7 +1,17 @@
 // Historia en memoria para probar reglas sin base de datos.
 import type { Historia } from '../datos/repositorio';
-import type { Consulta, DatosPrimeraConsulta, Meta, ResultadoExamen, ResultadoPorTipo, TipoExamen } from '../datos/modelo';
-import { primeraConsultaCompleta } from './fixtures';
+import type {
+  Consulta,
+  DatosPrimeraConsulta,
+  DatosSeguimiento,
+  FactorTransitorio,
+  Indicacion,
+  Meta,
+  ResultadoExamen,
+  ResultadoPorTipo,
+  TipoExamen,
+} from '../datos/modelo';
+import { primeraConsultaCompleta, seguimiento } from './fixtures';
 
 const meta = (id: string): Meta => ({
   id,
@@ -19,6 +29,11 @@ export function historiaDePrueba(
     fechaNacimiento?: string;
     primera?: (d: DatosPrimeraConsulta) => void;
     examenes?: { tipo: TipoExamen; valor: ResultadoPorTipo[TipoExamen]; fecha?: string }[];
+    /** Fecha de la primera consulta (por defecto 2026-07-20). */
+    fechaPrimera?: string;
+    seguimientos?: { fecha: string; cambios?: (d: DatosSeguimiento) => void }[];
+    factores?: Pick<FactorTransitorio, 'tipo' | 'inicio' | 'resolucion' | 'conHospitalizacion'>[];
+    indicaciones?: Pick<Indicacion, 'tipo' | 'estado'>[];
   } = {},
 ): Historia {
   const primera = primeraConsultaCompleta();
@@ -27,7 +42,7 @@ export function historiaDePrueba(
     ...meta('c1'),
     embarazoId: 'e1',
     tipo: 'primera',
-    fecha: '2026-07-20',
+    fecha: opciones.fechaPrimera ?? '2026-07-20',
     profesionalId: 'prof-1',
     proximaCita: { estado: 'vacio' },
     cerrada: true,
@@ -44,7 +59,14 @@ export function historiaDePrueba(
       fechaNacimiento: { estado: 'valor', valor: opciones.fechaNacimiento ?? '1998-04-12' },
     },
     embarazo: { ...meta('e1'), gestanteId: 'g1', estado: 'activo', inicio: '2026-06-01' },
-    consultas: [consulta],
+    consultas: [
+      consulta,
+      ...(opciones.seguimientos ?? []).map((s, i): Consulta => {
+        const datos = seguimiento(62);
+        s.cambios?.(datos);
+        return { ...consulta, ...meta(`s${i}`), tipo: 'seguimiento', fecha: s.fecha, primera: undefined, seguimiento: datos };
+      }),
+    ],
     examenes: (opciones.examenes ?? []).map(
       (e, i) =>
         ({
@@ -56,9 +78,9 @@ export function historiaDePrueba(
           resultado: { estado: 'valor', valor: e.valor },
         }) as ResultadoExamen,
     ),
-    indicaciones: [],
+    indicaciones: (opciones.indicaciones ?? []).map((x, i) => ({ ...meta(`i${i}`), embarazoId: 'e1', ...x })),
     alertas: [],
-    factores: [],
+    factores: (opciones.factores ?? []).map((x, i) => ({ ...meta(`f${i}`), embarazoId: 'e1', ...x })),
     derechos: [],
     carne: undefined,
   };

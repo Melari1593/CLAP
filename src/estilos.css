@@ -92,3 +92,5 @@ legend { font-weight: 600; padding: 0 4px; }
 .alerta.nueva { box-shadow: 0 0 0 3px #fcd34d; }
 .alerta h4 { margin: 0 0 4px; }
 .alerta ul { margin: 4px 0 8px; padding-left: 20px; }
+.notas { background: #f8fafc; border: 1px solid var(--borde); border-radius: 6px; padding: 8px 12px 8px 28px; margin: 8px 0; font-size: 0.9rem; }
+small.bloque { display: block; color: var(--suave); }

@@ -1,12 +1,14 @@
 // C1 — Alertas activas (urgentes primero), con el porqué y la decisión del profesional.
 import { useEffect, useRef, useState } from 'react';
 import type { Alerta } from '../datos/modelo';
-import { ordenarAlertas } from '../alertas/motor';
+import { construirContexto, ordenarAlertas } from '../alertas/motor';
+import { notasResumen } from '../alertas/resumen';
 import { useApp } from './contexto';
 
 export function PanelAlertas({ embarazoId, version = 0 }: { embarazoId: string; version?: number }) {
-  const { motor } = useApp();
+  const { motor, repo, catalogo, hoy } = useApp();
   const [alertas, setAlertas] = useState<Alerta[]>([]);
+  const [notas, setNotas] = useState<string[]>([]);
   const [nuevas, setNuevas] = useState<Set<string>>(new Set());
   const vistas = useRef<Set<string> | null>(null);
 
@@ -17,6 +19,8 @@ export function PanelAlertas({ embarazoId, version = 0 }: { embarazoId: string; 
     setNuevas(vistas.current ? new Set(activas.filter((id) => !vistas.current!.has(id))) : new Set());
     vistas.current = new Set(activas);
     setAlertas(todas);
+    const historia = await repo.historia(embarazoId);
+    setNotas(historia ? notasResumen(construirContexto(historia, hoy(), catalogo)) : []);
   };
 
   useEffect(() => {
@@ -59,6 +63,11 @@ export function PanelAlertas({ embarazoId, version = 0 }: { embarazoId: string; 
           </div>
         </article>
       ))}
+      {notas.length > 0 && (
+        <ul className="notas" aria-label="Notas del resumen">
+          {notas.map((n) => <li key={n}>{n}</li>)}
+        </ul>
+      )}
       {atendidas.length > 0 && (
         <details>
           <summary>Atendidas ({atendidas.length})</summary>

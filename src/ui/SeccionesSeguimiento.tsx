@@ -11,6 +11,9 @@ import type {
   TipoIndicacion,
 } from '../datos/modelo';
 import { validarHb } from '../consultas/validaciones';
+import { construirContexto } from '../alertas/motor';
+import { clasificarHb, explicarHb } from '../alertas/anemia';
+import type { Historia } from '../datos/repositorio';
 import { useApp } from './contexto';
 
 const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }[] = [
@@ -154,8 +157,9 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
   );
 }
 
-export function SeccionesSeguimiento({ embarazoId, consultaId }: { embarazoId: string; consultaId: string }) {
-  const { repo, servicio, hoy } = useApp();
+export function SeccionesSeguimiento({ embarazoId, consultaId, alCambiar }: { embarazoId: string; consultaId: string; alCambiar?: () => void }) {
+  const { repo, servicio, hoy, catalogo } = useApp();
+  const [historia, setHistoria] = useState<Historia>();
   const [examenes, setExamenes] = useState<ResultadoExamen[]>([]);
   const [indicaciones, setIndicaciones] = useState<Indicacion[]>([]);
   const [factores, setFactores] = useState<FactorTransitorio[]>([]);
@@ -163,6 +167,7 @@ export function SeccionesSeguimiento({ embarazoId, consultaId }: { embarazoId: s
 
   const cargar = async () => {
     const h = await repo.historia(embarazoId);
+    setHistoria(h);
     setExamenes(h?.examenes ?? []);
     setIndicaciones(h?.indicaciones ?? []);
     setFactores(h?.factores ?? []);
@@ -183,6 +188,9 @@ export function SeccionesSeguimiento({ embarazoId, consultaId }: { embarazoId: s
             <li key={e.id}>
               <strong>{etiquetaExamen(e.tipo)}</strong> · {e.fecha} · {resumen(e)}
               {e.tipo === 'vih' && <span className="privado"> 🔒</span>}
+              {e.tipo === 'hb' && e.resultado.estado === 'valor' && historia && (
+                <small className="bloque">{explicarHb(clasificarHb(construirContexto(historia, hoy(), catalogo), { ...e.resultado.valor, fecha: e.fecha }))}</small>
+              )}
             </li>
           ))}
         </ul>
@@ -190,6 +198,7 @@ export function SeccionesSeguimiento({ embarazoId, consultaId }: { embarazoId: s
           onRegistrar={async (tipo, valor, fecha) => {
             await servicio.registrarExamen({ embarazoId, consultaId, fecha, tipo, resultado: { estado: 'valor', valor } } as Parameters<typeof servicio.registrarExamen>[0]);
             await cargar();
+            alCambiar?.();
           }}
         />
       </fieldset>
@@ -210,6 +219,7 @@ export function SeccionesSeguimiento({ embarazoId, consultaId }: { embarazoId: s
                     if (estado === 'no_indicado' && !motivo) return;
                     await servicio.marcarIndicacion(embarazoId, tipo, { estado, motivo });
                     await cargar();
+                    alCambiar?.();
                   }}
                 >
                   {estado === 'indicado' ? 'Indicado' : estado === 'no_indicado' ? 'No indicado' : 'Ya lo toma'}
@@ -237,6 +247,8 @@ export function SeccionesSeguimiento({ embarazoId, consultaId }: { embarazoId: s
                   onClick={async () => {
                     await servicio.resolverFactorTransitorio(f.id, hoy());
                     await cargar();
+                    alCambiar?.();
+                    alCambiar?.();
                   }}
                 >
                   Marcar resuelto hoy
@@ -256,6 +268,7 @@ export function SeccionesSeguimiento({ embarazoId, consultaId }: { embarazoId: s
             onClick={async () => {
               await servicio.registrarFactorTransitorio(embarazoId, nuevoFactor.tipo, nuevoFactor.inicio, nuevoFactor.hosp);
               await cargar();
+              alCambiar?.();
             }}
           >
             Registrar evento

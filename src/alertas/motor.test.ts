@@ -5,7 +5,7 @@ import { ServicioConsultas } from '../consultas/servicio';
 import { primeraConsultaCompleta } from '../pruebas/fixtures';
 import { nuevaBD, repo } from '../pruebas/util';
 import { MotorAlertas, ordenarAlertas } from './motor';
-import { REGLAS_CLAP } from './reglasClap';
+import { REGLAS } from './reglas';
 
 const cat = new Catalogo();
 const HOY = '2026-10-06';
@@ -13,7 +13,7 @@ const HOY = '2026-10-06';
 async function preparar() {
   const r = repo(nuevaBD());
   const servicio = new ServicioConsultas(r, cat, () => HOY);
-  const motor = new MotorAlertas(r, REGLAS_CLAP, cat, () => HOY);
+  const motor = new MotorAlertas(r, REGLAS, cat, () => HOY);
   servicio.alCambiar(async (c) => {
     await motor.sincronizar(c.embarazoId);
   });
@@ -35,7 +35,7 @@ describe('Motor de alertas (C1)', () => {
     const { servicio, motor, embarazoId } = await preparar();
     await servicio.guardarPrimeraConsulta(embarazoId, primeraConsultaCompleta());
     const alertas = await motor.sincronizar(embarazoId);
-    expect(alertas.filter((a) => a.activa).map((a) => a.regla).sort()).toEqual(['habitos', 'no_planeado', 'violencia']);
+    expect(alertas.filter((a) => a.activa).map((a) => a.regla).sort()).toEqual(['asa', 'calcio', 'habitos', 'no_planeado', 'violencia']);
     for (const a of alertas) expect(a.porque.length).toBeGreaterThan(0);
   });
 
@@ -100,5 +100,20 @@ describe('Motor de alertas (C1)', () => {
     await servicio.guardarPrimeraConsulta(embarazoId, primeraConsultaCompleta());
     const orden = ordenarAlertas((await motor.sincronizar(embarazoId)).filter((a) => a.activa)).map((a) => a.regla);
     expect(orden[0]).toBe('no_planeado');
+  });
+
+  it('decidir "Indicado" registra la indicación; una contraindicación nueva vuelve a avisar', async () => {
+    const { servicio, motor, embarazoId, r } = await preparar();
+    const d = primeraConsultaCompleta();
+    const g = await servicio.guardarPrimeraConsulta(embarazoId, d);
+    const consultaId = g.estado === 'guardado' ? g.registro.id : '';
+    await motor.atender(`${embarazoId}:calcio`, 'Indicado');
+    expect((await r.indicacionesDe(embarazoId)).map((i) => [i.tipo, i.estado])).toEqual([['calcio', 'indicado']]);
+    expect(await activas(motor, embarazoId)).not.toContain('calcio');
+
+    d.antecedentesCalcio.hipercalcemia = valor(true);
+    await servicio.guardarPrimeraConsulta(embarazoId, d, { consultaId });
+    const calcio = (await motor.sincronizar(embarazoId)).find((a) => a.regla === 'calcio')!;
+    expect(calcio).toMatchObject({ activa: true, titulo: 'Calcio indicado, pero con contraindicación registrada: valorar' });
   });
 });

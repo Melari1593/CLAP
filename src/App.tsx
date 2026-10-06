@@ -3,7 +3,7 @@ import { Catalogo } from './clinico/catalogo';
 import { hoyISO } from './clinico/calculos';
 import { ServicioConsultas } from './consultas/servicio';
 import { MotorAlertas } from './alertas/motor';
-import { REGLAS_CLAP } from './alertas/reglasClap';
+import { REGLAS } from './alertas/reglas';
 import { BaseDatos } from './datos/bd';
 import type { Usuario } from './datos/modelo';
 import { Repositorio } from './datos/repositorio';
@@ -42,7 +42,7 @@ export function App() {
     const repo = new Repositorio(bd, { usuario: USUARIO_DEMO, dispositivoId: dispositivoId() });
     const hoy = () => hoyISO();
     const servicio = new ServicioConsultas(repo, catalogo, hoy);
-    const motor = new MotorAlertas(repo, REGLAS_CLAP, catalogo, hoy);
+    const motor = new MotorAlertas(repo, REGLAS, catalogo, hoy);
     // Cada dato guardado vuelve a evaluar las reglas del embarazo (C1).
     servicio.alCambiar(async (cambio) => {
       await motor.sincronizar(cambio.embarazoId);

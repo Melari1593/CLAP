@@ -319,6 +319,8 @@ export interface DecisionAlerta {
 export interface OpcionDecision {
   etiqueta: string;
   requiereMotivo?: boolean;
+  /** Al elegirla se registra también la indicación (por ejemplo, "ASA indicado"). */
+  registraIndicacion?: { tipo: TipoIndicacion; estado: Indicacion['estado'] };
 }
 
 /**

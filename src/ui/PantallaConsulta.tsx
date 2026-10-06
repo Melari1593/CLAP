@@ -130,7 +130,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
 
       {tipo === 'seguimiento' &&
         (consultaId ? (
-          <SeccionesSeguimiento embarazoId={embarazoId} consultaId={consultaId} />
+          <SeccionesSeguimiento embarazoId={embarazoId} consultaId={consultaId} alCambiar={() => setGuardados((n) => n + 1)} />
         ) : (
           <p className="suave">Guarde el control para registrar exámenes, indicaciones y factores transitorios.</p>
         ))}
