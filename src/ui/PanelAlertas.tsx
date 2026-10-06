@@ -5,7 +5,7 @@ import { construirContexto, ordenarAlertas } from '../alertas/motor';
 import { notasResumen } from '../alertas/resumen';
 import { useApp } from './contexto';
 
-export function PanelAlertas({ embarazoId, version = 0 }: { embarazoId: string; version?: number }) {
+export function PanelAlertas({ embarazoId, version = 0, abrirDerechos }: { embarazoId: string; version?: number; abrirDerechos?: () => void }) {
   const { motor, repo, catalogo, hoy } = useApp();
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [notas, setNotas] = useState<string[]>([]);
@@ -57,8 +57,8 @@ export function PanelAlertas({ embarazoId, version = 0 }: { embarazoId: string; 
                 {o.etiqueta}{o.requiereMotivo ? ' — motivo' : ''}
               </button>
             ))}
-            {a.enlace === 'derechos' && (
-              <button type="button" disabled title="Llega con el Bloque E">Opciones y derechos (próximamente)</button>
+            {a.enlace === 'derechos' && abrirDerechos && (
+              <button type="button" className="primario" onClick={abrirDerechos}>🔒 Opciones y derechos</button>
             )}
           </div>
         </article>

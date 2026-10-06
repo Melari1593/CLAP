@@ -4,6 +4,8 @@ import { hoyISO } from './clinico/calculos';
 import { ServicioConsultas } from './consultas/servicio';
 import { MotorAlertas } from './alertas/motor';
 import { REGLAS } from './alertas/reglas';
+import { ServicioDerechos } from './derechos/servicio';
+import { PantallaDerechos } from './ui/PantallaDerechos';
 import { BaseDatos } from './datos/bd';
 import type { Usuario } from './datos/modelo';
 import { Repositorio } from './datos/repositorio';
@@ -47,7 +49,8 @@ export function App() {
     servicio.alCambiar(async (cambio) => {
       await motor.sincronizar(cambio.embarazoId);
     });
-    return { bd, repo, catalogo, hoy, servicio, motor };
+    const derechos = new ServicioDerechos(repo, motor, catalogo, hoy);
+    return { bd, repo, catalogo, hoy, servicio, motor, derechos };
   }, []);
   const [pantalla, setPantalla] = useState<Pantalla>({ tipo: 'buscar' });
   const [aviso, setAviso] = useState<string>();
@@ -81,6 +84,7 @@ export function App() {
         {(pantalla.tipo === 'primera' || pantalla.tipo === 'seguimiento') && (
           <PantallaConsulta key={`${pantalla.tipo}-${pantalla.consultaId ?? 'nueva'}`} {...pantalla} ir={ir} />
         )}
+        {pantalla.tipo === 'derechos' && <PantallaDerechos gestanteId={pantalla.gestanteId} embarazoId={pantalla.embarazoId} ir={ir} />}
         {pantalla.tipo === 'catalogo' && <PantallaCatalogo catalogo={contexto.catalogo} />}
       </main>
     </ContextoApp.Provider>

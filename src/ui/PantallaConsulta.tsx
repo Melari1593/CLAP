@@ -113,7 +113,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       <button type="button" className="enlace" onClick={() => ir({ tipo: 'ficha', gestanteId })}>← {gestante.nombres} {gestante.apellidos}</button>
       <h2>{tipo === 'primera' ? 'Primera consulta' : 'Control de seguimiento'}</h2>
       {cerrada && <p className="aviso">Esta consulta está cerrada. Los cambios quedan en la bitácora.</p>}
-      <PanelAlertas embarazoId={embarazoId} version={guardados} />
+      <PanelAlertas embarazoId={embarazoId} version={guardados} abrirDerechos={() => ir({ tipo: 'derechos', gestanteId, embarazoId })} />
 
       {tipo === 'primera' ? (
         <>

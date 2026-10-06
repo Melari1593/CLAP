@@ -37,6 +37,8 @@ async function historiaSensible(r: Repositorio) {
     embarazoId: embarazo.id,
     fechaHora: '2026-07-20T10:00:00.000Z',
     desencadenante: 'no_planeado',
+    egDias: 50,
+    momentoASolas: true,
     decision: 'solicita_ive',
     solicitudIVE: { fechaHora: '2026-07-20T10:05:00.000Z', prestador: 'Prestador X', manual: true },
     notas: SECRETO.notaDerechos,

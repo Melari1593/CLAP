@@ -457,6 +457,15 @@ const BASE = {
     fuentes: ['Sentencia C-055 de 2022'],
     estado: 'decidido',
   }),
+  'ive.limite': p<{ hastaDiasInclusive: number; margenEGDudosaSemanas: number }>({
+    nombre: 'Límite de la IVE por la sola voluntad y margen de EG dudosa',
+    valor: { hastaDiasInclusive: 24 * 7, margenEGDudosaSemanas: 2 },
+    unidad: 'días de EG / semanas',
+    fuentes: ['Sentencia C-055 de 2022', 'Equipo clínico'],
+    estado: 'pendiente',
+    nota:
+      'Se toma "hasta la semana 24" como EG de hasta 24+0. Con EG no confiable entre las semanas 22 y 26 la app pide confirmar la EG sin dilatar la atención. Validar la interpretación con asesoría jurídica.',
+  }),
   'ive.plazoExcepcionalDias': p<number>({
     nombre: 'Plazo máximo excepcional y justificado de la atención de IVE',
     valor: 5,

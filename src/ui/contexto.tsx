@@ -5,12 +5,14 @@ import type { FechaISO } from '../datos/modelo';
 import type { Repositorio } from '../datos/repositorio';
 import type { ServicioConsultas } from '../consultas/servicio';
 import type { MotorAlertas } from '../alertas/motor';
+import type { ServicioDerechos } from '../derechos/servicio';
 
 export interface Contexto {
   bd: BaseDatos;
   repo: Repositorio;
   servicio: ServicioConsultas;
   motor: MotorAlertas;
+  derechos: ServicioDerechos;
   catalogo: Catalogo;
   hoy: () => FechaISO;
 }
@@ -28,4 +30,5 @@ export type Pantalla =
   | { tipo: 'ficha'; gestanteId: string }
   | { tipo: 'primera'; gestanteId: string; embarazoId: string; consultaId?: string }
   | { tipo: 'seguimiento'; gestanteId: string; embarazoId: string; consultaId?: string }
+  | { tipo: 'derechos'; gestanteId: string; embarazoId: string }
   | { tipo: 'catalogo' };

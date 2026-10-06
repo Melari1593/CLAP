@@ -29,6 +29,7 @@ npm run build      # build de producción con service worker
 - `src/clinico/calculos.ts` — edad, FPP, edad gestacional, IMC e intervalo intergenésico (B3).
 - `src/consultas/` — esquema de los formularios, validaciones de valores imposibles, búsqueda y guardado de consultas (B1, B2, B4).
 - `src/alertas/` — motor de alertas y decisiones (C1), reglas básicas del CLAP (C2), antitetánica (C3) y reglas con lógica propia: anemia, hierro, ASA, calcio, tromboprofilaxis y PTOG (D1–D6).
+- `src/derechos/` — flujo privado "Opciones y derechos": marco según la EG, decisión, remisión, ruta de violencia sexual y pausa del carné (E1).
 - `src/ui/` — pantallas: búsqueda, ficha de la gestante, primera consulta, control de seguimiento y catálogo.
 
 Mientras no exista el servidor, la app usa un profesional autorizado de demostración en el dispositivo.

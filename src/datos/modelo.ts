@@ -363,14 +363,30 @@ export interface FactorTransitorio extends Meta {
 
 // ---------------------------------------------------------------- Derechos (sección 7): todo privado
 
+export type DesencadenanteDerechos = 'no_planeado' | 'violencia_sexual' | 'menor_14' | 'causal_clinica' | 'pregunta_gestante';
+export type DecisionDerechos = 'continua' | 'solicita_ive' | 'lo_pensara' | 'no_desea_hablar';
+export type Causal = 'salud' | 'malformacion' | 'violencia_sexual';
+
 export interface RegistroDerechos extends Meta {
   embarazoId: string;
   fechaHora: FechaHoraISO;
-  desencadenante: 'no_planeado' | 'violencia_sexual' | 'menor_14' | 'causal_clinica' | 'pregunta_gestante';
-  decision: 'continua' | 'solicita_ive' | 'lo_pensara' | 'no_desea_hablar';
+  desencadenante: DesencadenanteDerechos;
+  /** EG del día del registro (en días), o null si no era confiable. */
+  egDias: number | null;
+  /** Se ofreció un momento a solas antes de preguntar. */
+  momentoASolas: SiNo;
+  decision: DecisionDerechos;
+  /** "Lo pensará": nueva cita cercana, sin dilatar. */
   citaCercana?: FechaISO;
-  causal?: 'salud' | 'malformacion' | 'violencia_sexual';
-  solicitudIVE?: { fechaHora: FechaHoraISO; prestador: string; remisionFechaHora?: FechaHoraISO; manual: SiNo };
+  /** Causal identificada (obligatoria después de la semana 24). */
+  causal?: Causal;
+  solicitudIVE?: {
+    fechaHora: FechaHoraISO;
+    prestador: string;
+    /** El prestador se escribió a mano porque la institución no tiene uno configurado. */
+    manual: SiNo;
+    remisionFechaHora?: FechaHoraISO;
+  };
   rutaViolencia?: { activadaFechaHora: FechaHoraISO; notificaciones: { a: string; fechaHora: FechaHoraISO }[] };
   notas?: string;
 }

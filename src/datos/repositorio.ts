@@ -165,8 +165,8 @@ export class Repositorio {
       this.bd.examenes.where(porEmbarazo).sortBy('fecha'),
       this.bd.indicaciones.where(porEmbarazo).toArray(),
       this.bd.alertas.where(porEmbarazo).toArray(),
-      this.bd.factores.where(porEmbarazo).toArray(),
-      this.bd.derechos.where(porEmbarazo).toArray(),
+      this.bd.factores.where(porEmbarazo).sortBy('inicio'),
+      this.bd.derechos.where(porEmbarazo).sortBy('fechaHora'),
       this.bd.carnes.where(porEmbarazo).toArray(),
     ]);
     if (!gestante) return undefined;
