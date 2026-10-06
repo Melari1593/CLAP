@@ -2,7 +2,7 @@
 Fecha: 6 de octubre de 2026
 
 ## Overview
-Versión digital de la Historia Clínica Perinatal del CLAP para usar en el control prenatal. El profesional registra cada consulta. La app hace los cálculos, avisa lo que requiere atención (los campos amarillos del CLAP) y recuerda los exámenes según la semana de gestación. Al terminar, la gestante recibe por WhatsApp su carné digital, protegido con un PIN. El carné le explica en lenguaje simple en qué semana va, cuándo vuelve, qué debe hacerse y por qué. Si ella no tiene WhatsApp, se imprime. Todo funciona aunque no haya internet en la consulta.
+Versión digital de la Historia Clínica Perinatal del CLAP para usar en el control prenatal. El profesional registra cada consulta. La app hace los cálculos, avisa lo que requiere atención (los campos amarillos del CLAP) y recuerda los exámenes según la semana de gestación. Al terminar, la gestante recibe por WhatsApp (o por correo electrónico, si lo prefiere) su carné digital, protegido con un PIN. El carné le explica en lenguaje simple en qué semana va, cuándo vuelve, qué debe hacerse y por qué. Si no tiene ninguno de los dos, se imprime. Todo funciona aunque no haya internet en la consulta.
 
 ## Usuarios objetivo
 
@@ -15,7 +15,7 @@ Versión digital de la Historia Clínica Perinatal del CLAP para usar en el cont
 ### La v1 SÍ hace
 1. **Primera consulta completa**: identificación, antecedentes familiares, personales y obstétricos, y gestación actual según la HCP, con cálculos automáticos.
 2. **Consultas de seguimiento con alertas y recordatorios**: registro de cada control, alertas automáticas y exámenes pendientes según la semana.
-3. **Carné digital de la gestante**: enviado por WhatsApp, protegido con PIN, en lenguaje simple. Se puede imprimir si ella no tiene WhatsApp.
+3. **Carné digital de la gestante**: enviado por WhatsApp o, como opción, por correo electrónico; protegido con PIN y en lenguaje simple. Se puede imprimir siempre.
 4. **Funciona sin internet** durante la consulta y envía lo pendiente cuando vuelve la señal.
 
 ### La v1 NO hace
@@ -44,7 +44,7 @@ Versión digital de la Historia Clínica Perinatal del CLAP para usar en el cont
 ### 2. Primera consulta
 El profesional llena los datos en el mismo orden de la HCP, en bloques cortos:
 
-- **Identificación:** nombre, documento, fecha de nacimiento, domicilio, municipio de residencia y la **altitud de su lugar de residencia en metros sobre el nivel del mar**, que registra el profesional (vereda o barrio incluidos), teléfono, etnia (autoidentificación), alfabeta, estudios y años en el mayor nivel, estado civil, si vive sola.
+- **Identificación:** nombre, documento, fecha de nacimiento, domicilio, municipio de residencia y la **altitud de su lugar de residencia en metros sobre el nivel del mar**, que registra el profesional (vereda o barrio incluidos), teléfono, correo electrónico (opcional, solo si la gestante lo usa), etnia (autoidentificación), alfabeta, estudios y años en el mayor nivel, estado civil, si vive sola.
 - **Antecedentes familiares y personales:** listas SÍ/NO de la HCP.
 - **Antecedentes obstétricos:** gestas, partos (vaginales y cesáreas), abortos, nacidos vivos y muertos, viven, muertos en la 1.ª semana y después, peso del último RN, gemelares, fecha de fin del embarazo anterior.
 - **Embarazo planeado** y **fracaso de método anticonceptivo** (con las 6 opciones de la HCP). Si el embarazo es no planeado, la app pide registrar además si la gestante **desea continuar el embarazo** (sí / no / no ha decidido) y abre el flujo de la sección 7.
@@ -341,9 +341,18 @@ Un examen pendiente que ya pasó su ventana aparece como "atrasado".
 
 ### 6. Cierre de consulta y carné de la gestante
 1. Al terminar, el profesional pulsa **"Cerrar consulta"**. La app le muestra cómo verá la gestante su carné.
-2. **En la primera consulta**, la gestante elige un PIN de 4 dígitos y el profesional lo ingresa con ella. La app confirma el número de WhatsApp.
-3. El profesional pulsa **"Enviar por WhatsApp"**. La gestante recibe un mensaje corto con su nombre y el enlace al carné.
-4. Si la gestante **no tiene WhatsApp**, el profesional pulsa **"Imprimir carné"** y le entrega una hoja con el mismo contenido.
+2. **En la primera consulta**, la gestante elige un PIN de 4 dígitos y el profesional lo ingresa con ella. El profesional le pregunta por qué medio prefiere recibir el carné, en este orden:
+   - **WhatsApp**, si lo tiene. Es el canal principal. La app confirma el número.
+   - **Correo electrónico**, si no tiene WhatsApp o prefiere el correo y dice que lo revisa. La app confirma la dirección.
+   - **Impreso**, si no tiene ninguno de los dos. El impreso se puede entregar siempre, además del canal elegido.
+3. El profesional pulsa **"Enviar por WhatsApp"** o **"Enviar por correo"**. La gestante recibe un mensaje corto con su nombre y el enlace al carné.
+4. Si la gestante **no tiene WhatsApp ni correo**, el profesional pulsa **"Imprimir carné"** y le entrega una hoja con el mismo contenido.
+
+**Reglas del envío por correo**
+- El correo lleva solo el nombre y el enlace al carné, protegido con el mismo PIN. **Nunca adjunta el carné**: un adjunto quedaría en el buzón sin la protección del PIN.
+- El asunto y el remitente son neutros (por ejemplo, "Tu carné de control"), porque otra persona puede ver la bandeja de entrada.
+- Si el correo rebota, la app avisa al profesional en la siguiente consulta para que corrija la dirección, cambie de canal o imprima el carné.
+- El correo no reemplaza a WhatsApp como canal principal: muchas gestantes tienen una cuenta que no revisan.
 
 **Qué ve la gestante al abrir el enlace:**
 1. Le pide su PIN de 4 dígitos.
@@ -406,8 +415,8 @@ Estos datos solo los ve el profesional. El carné puede abrirse en un celular co
 
 **Qué se registra y quién lo ve**
 - Todo lo de esta sección es información **privada**, con el mismo nivel de protección que el VIH: solo la ve el profesional autorizado.
-- **Nunca** aparece en el carné, no se envía por WhatsApp ni se imprime.
-- Si la gestante solicita IVE, la app **pausa el envío del carné**: no le llegan mensajes ni actualizaciones que alguien más pueda ver. El enlace muestra solo "Comunícate con tu servicio de salud".
+- **Nunca** aparece en el carné, no se envía por WhatsApp ni por correo, ni se imprime.
+- Si la gestante solicita IVE, la app **pausa el envío del carné por todos los canales**: no le llegan mensajes ni correos ni actualizaciones que alguien más pueda ver. El enlace muestra solo "Comunícate con tu servicio de salud".
 
 **Derechos en el carné de la gestante (para todas)**
 El carné incluye una sección corta "**Tus derechos**", segura aunque la vea otra persona:
@@ -423,7 +432,7 @@ El carné incluye una sección corta "**Tus derechos**", segura aunque la vea ot
 **Sin internet en la consulta**
 - La consulta se guarda normalmente en el dispositivo.
 - Un aviso indica "pendiente de enviar". El profesional puede imprimir el carné de inmediato.
-- Cuando vuelve la señal, la información se sincroniza y el WhatsApp se envía solo. El profesional ve la confirmación.
+- Cuando vuelve la señal, la información se sincroniza y el WhatsApp o el correo se envía solo. El profesional ve la confirmación.
 
 **Datos que faltan o no cuadran**
 - **Sin FUM:** la EG se toma de la ecografía. Si no hay ninguna de las dos, la app no calcula FPP, marca "EG no confiable" y recuerda solicitar ecografía.
@@ -435,7 +444,7 @@ El carné incluye una sección corta "**Tus derechos**", segura aunque la vea ot
 **Carné y PIN**
 - **PIN equivocado:** después de 5 intentos el carné se bloquea un rato y le indica que pida ayuda en su próxima consulta.
 - **Olvidó el PIN:** el profesional le asigna uno nuevo en la consulta.
-- **Cambió de número:** el profesional actualiza el número y reenvía el enlace. El enlace anterior deja de funcionar.
+- **Cambió de número o de correo:** el profesional actualiza el dato y reenvía el enlace. El enlace anterior deja de funcionar.
 - **Enlace reenviado a otra persona:** sin el PIN no ve nada.
 - **Perdió el carné impreso:** se reimprime en cualquier consulta.
 
@@ -452,7 +461,7 @@ El carné incluye una sección corta "**Tus derechos**", segura aunque la vea ot
 - La gestante solo ve su propio carné y no puede editar nada.
 
 ## Éxito
-- **El carné se usa:** al menos 6 de cada 10 gestantes con WhatsApp abren su carné entre una consulta y la siguiente.
+- **El carné se usa:** al menos 6 de cada 10 gestantes con WhatsApp abren su carné entre una consulta y la siguiente. Para las que lo reciben por correo se mide aparte, para comparar los canales.
 - **Llegan preparadas:** aumenta la proporción de gestantes que llegan a la siguiente cita con los exámenes indicados, comparado con el carné de papel.
 - **El profesional no pierde tiempo:** registrar una consulta de seguimiento no toma más que hacerlo en papel.
 - **No se escapan alertas:** en una revisión de historias, ninguna condición amarilla del CLAP quedó sin alerta.
