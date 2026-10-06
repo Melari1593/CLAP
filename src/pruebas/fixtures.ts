@@ -1,0 +1,157 @@
+import { noCorresponde, noSeHizo, vacio, valor } from '../datos/campo';
+import type { DatosPrimeraConsulta, DatosSeguimiento, Usuario } from '../datos/modelo';
+
+export const PROFESIONAL: Usuario = {
+  id: 'prof-1',
+  nombre: 'Profesional de prueba',
+  institucionId: 'ips-1',
+  roles: ['profesional_autorizado'],
+};
+
+export const ADMINISTRATIVO: Usuario = { ...PROFESIONAL, id: 'adm-1', roles: ['administrativo'] };
+export const OTRA_INSTITUCION: Usuario = { ...PROFESIONAL, id: 'prof-2', institucionId: 'ips-2' };
+
+/** Valores centinela de datos que nunca pueden aparecer en el carné. */
+export const SECRETO = {
+  notaInterna: 'NOTA-INTERNA-SECRETA',
+  codigoVih: 'VIH-CODIGO-SECRETO',
+  notaDerechos: 'DERECHOS-NOTA-SECRETA',
+};
+
+export function primeraConsultaCompleta(): DatosPrimeraConsulta {
+  return {
+    identificacion: {
+      domicilio: valor('Calle 1 # 2-3'),
+      municipio: valor('Bogotá'),
+      altitudM: valor(2600),
+      telefono: valor('3000000000'),
+      etnia: valor('mestiza'),
+      alfabeta: valor(true),
+      estudios: valor('secundaria'),
+      aniosMayorNivel: valor(5),
+      estadoCivil: valor('union_estable'),
+      viveSola: valor(false),
+    },
+    antecedentesFamiliares: {
+      tbc: valor(false),
+      diabetes: valor(true),
+      hipertension: valor(false),
+      preeclampsia: valor(true),
+      eclampsia: valor(false),
+      otraCondicionGrave: vacio(),
+      trombosis: valor(false),
+    },
+    antecedentesPersonales: {
+      tbc: valor(false),
+      diabetes: valor('no'),
+      hipertension: valor(false),
+      preeclampsia: valor(false),
+      eclampsia: valor(false),
+      otraCondicionGrave: valor(false),
+      cirugiaGenitoUrinaria: valor(false),
+      infertilidad: valor(false),
+      cardiopatia: valor(false),
+      nefropatia: valor(false),
+      violencia: valor(true),
+    },
+    antecedentesObstetricos: {
+      gestas: valor(0),
+      partosVaginales: valor(0),
+      cesareas: valor(0),
+      abortos: valor(0),
+      tresEspontaneosConsecutivos: valor(false),
+      ectopicos: valor(0),
+      nacidosVivos: valor(0),
+      nacidosMuertos: valor(0),
+      viven: valor(0),
+      muertosPrimeraSemana: valor(0),
+      muertosDespuesPrimeraSemana: valor(0),
+      pesoUltimoRNg: noCorresponde(),
+      gemelares: noCorresponde(),
+      finEmbarazoAnterior: noCorresponde(),
+    },
+    planificacion: {
+      embarazoPlaneado: valor(false),
+      fracasoMetodo: valor('no_usaba'),
+      deseaContinuar: valor('no_ha_decidido'),
+    },
+    riesgoPreeclampsia: {
+      trastornoHipertensivoPrevio: valor(false),
+      enfermedadRenalCronica: valor(false),
+      autoinmune: valor(false),
+      diabetes1o2: valor(false),
+      hipertensionCronica: valor(false),
+      antecedenteFamiliarPreeclampsia: valor(true),
+      embarazoMultiple: valor(false),
+      alergiaASAoAINE: valor(false),
+      asmaQueEmpeoraConAINE: valor(false),
+      fertilizacionInVitro: valor(false),
+    },
+    antecedentesCalcio: {
+      hipercalcemia: valor(false),
+      hipercalciuria: valor(false),
+      hiperparatiroidismo: valor(false),
+      nefrolitiasisONefrocalcinosis: valor(false),
+      erCronicaGrave: valor(false),
+      hipersensibilidadCalcio: valor(false),
+      sarcoidosis: valor(false),
+      tiazidas: valor(false),
+      digoxina: valor(false),
+      levotiroxina: valor(true),
+      antiacidosConCalcioFrecuentes: valor(false),
+      vomitoPersistente: valor(false),
+    },
+    riesgoTrombotico: {
+      trombosisPrevia: valor(false),
+      causaTrombosisPrevia: noCorresponde(),
+      trombofilias: valor([]),
+      varicesGruesas: valor(false),
+      comorbilidades: valor([]),
+      factoresSangrado: valor([]),
+    },
+    gestacionActual: {
+      pesoAnteriorKg: valor(62),
+      tallaCm: valor(158),
+      fum: valor('2026-06-01'),
+      egConfiablePorFum: valor(true),
+      egConfiablePorEco: noSeHizo(),
+      ecografia: noSeHizo(),
+      fumaActivo: valor(true),
+      cigarrillosDia: valor('no_sabe'),
+      fumaPasivo: valor(false),
+      drogas: valor(true),
+      alcohol: valor(true),
+      violencia: valor(true),
+      violenciaSexual: valor(false),
+      antirrubeola: valor('previa'),
+      antitetanica: valor({ dosisPrevias: 2, fechaUltima: '2024-03-10', informacionConfiable: true }),
+      examenOdontologico: valor('normal'),
+      examenMamas: valor('normal'),
+      cervixInspeccion: valor('normal'),
+      cervixPap: noSeHizo(),
+      cervixColposcopia: noCorresponde(),
+      grupo: valor('O'),
+      rh: valor('+'),
+      inmunizada: noCorresponde(),
+    },
+  };
+}
+
+export function seguimiento(pesoKg: number): DatosSeguimiento {
+  return {
+    pesoKg: valor(pesoKg),
+    paSistolica: valor(110),
+    paDiastolica: valor(70),
+    alturaUterinaCm: valor(20),
+    presentacion: noCorresponde(),
+    fcfLpm: valor(145),
+    movimientosFetales: valor(true),
+    proteinuria: valor('negativa'),
+    observaciones: valor(SECRETO.notaInterna),
+    iniciales: valor('PP'),
+    cambioResidencia: noCorresponde(),
+    tomaCalcioDiario: valor(true),
+    tomaASADiario: noCorresponde(),
+    aplicaTromboprofilaxisDiario: noCorresponde(),
+  };
+}
