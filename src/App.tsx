@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { Catalogo } from './clinico/catalogo';
 import { hoyISO } from './clinico/calculos';
 import { ServicioConsultas } from './consultas/servicio';
+import { MotorAlertas } from './alertas/motor';
+import { REGLAS_CLAP } from './alertas/reglasClap';
 import { BaseDatos } from './datos/bd';
 import type { Usuario } from './datos/modelo';
 import { Repositorio } from './datos/repositorio';
@@ -39,7 +41,13 @@ export function App() {
     const catalogo = new Catalogo();
     const repo = new Repositorio(bd, { usuario: USUARIO_DEMO, dispositivoId: dispositivoId() });
     const hoy = () => hoyISO();
-    return { bd, repo, catalogo, hoy, servicio: new ServicioConsultas(repo, catalogo, hoy) };
+    const servicio = new ServicioConsultas(repo, catalogo, hoy);
+    const motor = new MotorAlertas(repo, REGLAS_CLAP, catalogo, hoy);
+    // Cada dato guardado vuelve a evaluar las reglas del embarazo (C1).
+    servicio.alCambiar(async (cambio) => {
+      await motor.sincronizar(cambio.embarazoId);
+    });
+    return { bd, repo, catalogo, hoy, servicio, motor };
   }, []);
   const [pantalla, setPantalla] = useState<Pantalla>({ tipo: 'buscar' });
   const [aviso, setAviso] = useState<string>();

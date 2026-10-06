@@ -13,6 +13,7 @@ import type { Advertencia } from '../consultas/validaciones';
 import { useApp, type Pantalla } from './contexto';
 import { Formulario } from './Formulario';
 import { PanelCalculos } from './PanelCalculos';
+import { PanelAlertas } from './PanelAlertas';
 import { SeccionesSeguimiento } from './SeccionesSeguimiento';
 
 type Cita = { fecha: string; lugar: string; queLlevar: string };
@@ -41,6 +42,8 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
   const [confirmadas, setConfirmadas] = useState<Set<string>>(new Set());
   const [vacios, setVacios] = useState<string[]>();
   const [mensaje, setMensaje] = useState<string>();
+  /** Sube con cada guardado para que el panel de alertas se actualice. */
+  const [guardados, setGuardados] = useState(0);
 
   useEffect(() => {
     void (async () => {
@@ -87,6 +90,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
     setAdvertencias(undefined);
     // No se reemplaza el formulario con lo guardado: el profesional pudo seguir escribiendo.
     setConsultaId(r.registro.id);
+    setGuardados((n) => n + 1);
     setMensaje(navigator.onLine ? 'Guardado.' : 'Guardado en este dispositivo · pendiente de enviar.');
     return r.registro;
   };
@@ -109,6 +113,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       <button type="button" className="enlace" onClick={() => ir({ tipo: 'ficha', gestanteId })}>← {gestante.nombres} {gestante.apellidos}</button>
       <h2>{tipo === 'primera' ? 'Primera consulta' : 'Control de seguimiento'}</h2>
       {cerrada && <p className="aviso">Esta consulta está cerrada. Los cambios quedan en la bitácora.</p>}
+      <PanelAlertas embarazoId={embarazoId} version={guardados} />
 
       {tipo === 'primera' ? (
         <>

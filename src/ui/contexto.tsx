@@ -4,11 +4,13 @@ import type { BaseDatos } from '../datos/bd';
 import type { FechaISO } from '../datos/modelo';
 import type { Repositorio } from '../datos/repositorio';
 import type { ServicioConsultas } from '../consultas/servicio';
+import type { MotorAlertas } from '../alertas/motor';
 
 export interface Contexto {
   bd: BaseDatos;
   repo: Repositorio;
   servicio: ServicioConsultas;
+  motor: MotorAlertas;
   catalogo: Catalogo;
   hoy: () => FechaISO;
 }

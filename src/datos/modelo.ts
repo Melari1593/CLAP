@@ -316,15 +316,31 @@ export interface DecisionAlerta {
   severidadAtendida: number;
 }
 
+export interface OpcionDecision {
+  etiqueta: string;
+  requiereMotivo?: boolean;
+}
+
+/**
+ * Una alerta por regla y embarazo. "vigente": la condición se cumple hoy.
+ * "activa": vigente y sin atender, o atendida pero la situación empeoró después (C1).
+ */
 export interface Alerta extends Meta {
   embarazoId: string;
   regla: string;
   urgente: boolean;
+  /** Nivel de la regla; si sube después de atendida, la alerta reaparece. */
   severidad: number;
   titulo: string;
   porque: string[];
+  opciones: OpcionDecision[];
+  /** Pantalla a la que lleva la alerta (por ejemplo, "Opciones y derechos", tarea E1). */
+  enlace?: 'derechos';
+  vigente: boolean;
   activa: boolean;
   decision?: DecisionAlerta;
+  /** Decisiones anteriores, si la alerta reapareció. */
+  decisionesAnteriores?: DecisionAlerta[];
 }
 
 export type TipoFactorTransitorio =

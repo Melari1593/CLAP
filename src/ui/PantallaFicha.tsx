@@ -5,6 +5,7 @@ import type { Embarazo, Gestante } from '../datos/modelo';
 import type { Historia } from '../datos/repositorio';
 import { useApp, type Pantalla } from './contexto';
 import { PanelCalculos } from './PanelCalculos';
+import { PanelAlertas } from './PanelAlertas';
 
 export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; aviso?: string; ir: (p: Pantalla) => void }) {
   const { repo, servicio } = useApp();
@@ -44,6 +45,7 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
       {activo && historia ? (
         <>
           <PanelCalculos gestante={gestante} datos={primera?.primera} />
+          <PanelAlertas embarazoId={activo.id} />
           <h3>Consultas de este embarazo</h3>
           <ul className="consultas">
             {historia.consultas.length === 0 && <li>Aún no hay consultas.</li>}

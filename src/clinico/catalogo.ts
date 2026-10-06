@@ -395,6 +395,15 @@ const BASE = {
     estado: 'pendiente',
     nota: 'Revisar contra la Ruta Materno Perinatal.',
   }),
+  'clap.antitetanicaConducta': p<{ vigenciaCuatroDosisAnios: number; dosisSinVacunaPrevia: number; dosisSiNoVigente: number }>({
+    nombre: 'Antitetánica: vigencia con 4 dosis y dosis a aplicar en el embarazo',
+    valor: { vigenciaCuatroDosisAnios: 10, dosisSinVacunaPrevia: 2, dosisSiNoVigente: 1 },
+    fuentes: ['CLAP 2007'],
+    estado: 'pendiente',
+    nota:
+      'Sin vacuna previa o con información poco confiable: 2 dosis. Con esquema no vigente: 1 refuerzo. ' +
+      'Con 4 dosis, vigente si la última fue hace menos de 10 años. A confirmar contra el manual CLAP.',
+  }),
   'clap.antitetanica': p<{
     vigenciaDosDosisAnios: number;
     vigenciaTresOMasDosisAnios: number;
