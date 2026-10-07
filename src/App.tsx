@@ -75,6 +75,7 @@ export function App() {
     <ContextoApp.Provider value={contexto}>
       <header className="barra no-imprimir">
         <h1>HCP Digital · Control prenatal</h1>
+        <p className="demo" role="note">Versión de demostración: use solo datos ficticios. Los datos quedan en este dispositivo.</p>
         <EstadoConexion bd={contexto.bd} />
         <nav className="menu">
           <button type="button" onClick={() => ir({ tipo: 'buscar' })}>Buscar gestante</button>

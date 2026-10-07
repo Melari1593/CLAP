@@ -129,3 +129,4 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
   .carne-grande, .carne-urgencia { background: none; border: 1px solid #999; }
   .carne section { break-inside: avoid; }
 }
+.demo { margin: 2px 0 4px; font-size: 0.85rem; background: #fef3c7; color: #78350f; padding: 2px 8px; border-radius: 4px; display: inline-block; }

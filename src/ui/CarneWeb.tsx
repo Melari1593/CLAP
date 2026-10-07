@@ -61,7 +61,7 @@ export function CarneWeb({ bd, token, catalogo, hoy }: { bd: BaseDatos; token: s
 
   if (existe === undefined) return <p className="carne-web">Cargando…</p>;
   if (!existe) return <p className="carne-web">Este enlace ya no funciona. Pide en tu servicio de salud que te envíen el nuevo.</p>;
-  if (datos) return <main className="carne-web"><CarneGestante datos={datos} /></main>;
+  if (datos) return <main className="carne-web"><p className="demo no-imprimir">Versión de demostración con datos ficticios.</p><CarneGestante datos={datos} /></main>;
   return (
     <main className="carne-web">
       <form onSubmit={entrar} className="carne pin">
