@@ -9,10 +9,52 @@ import { valorDe } from '../datos/campo';
 import type { Carne, FechaISO, TipoIndicacion } from '../datos/modelo';
 import type { Historia } from '../datos/repositorio';
 import { recordatorios } from '../recordatorios/recordatorios';
+import { examenesPorTrimestre, type FilaExamen } from '../examenes/porTrimestre';
 
 export const MENSAJE_CARNE_PAUSADO = 'Comunícate con tu servicio de salud.';
 
 const INDICACIONES_EN_CARNE: TipoIndicacion[] = ['hierro', 'acidoFolico', 'calcio', 'asa', 'tromboprofilaxis'];
+
+export type EstadoExamenCarne = 'hecho' | 'falta' | 'mas_adelante';
+export interface ExamenCarne {
+  texto: string;
+  estado: EstadoExamenCarne;
+  /** Fecha del último resultado del grupo, si todo está hecho. */
+  fecha?: FechaISO;
+}
+
+/**
+ * Exámenes por trimestre en el carné: grupos en lenguaje sencillo, solo hecho / te falta / más
+ * adelante. Nunca el resultado, ni el nombre de exámenes sensibles (VIH, sífilis, hepatitis B):
+ * van dentro de "exámenes de sangre".
+ */
+const EXAMENES_CARNE: { trimestre: 1 | 2 | 3; texto: string; incluye: (id: string) => boolean }[] = [
+  { trimestre: 1, texto: 'Exámenes de sangre de ingreso', incluye: (id) => id.startsWith('ingreso:') && id !== 'ingreso:bacteriuria' },
+  { trimestre: 1, texto: 'Examen de orina', incluye: (id) => id === 'ingreso:bacteriuria' },
+  { trimestre: 1, texto: 'Ecografía entre las semanas 10 y 13', incluye: (id) => id === 'eco_1t' },
+  { trimestre: 2, texto: 'Ecografía de detalle (semanas 18 a 23)', incluye: (id) => id === 'eco_detalle' },
+  { trimestre: 2, texto: 'Prueba del azúcar (semanas 24 a 28)', incluye: (id) => id === 'ptog' },
+  { trimestre: 3, texto: 'Exámenes de sangre del tercer trimestre (desde la semana 28)', incluye: (id) => id.startsWith('tercer:') },
+  { trimestre: 3, texto: 'Muestra para estreptococo B (semanas 35 a 37)', incluye: (id) => id === 'egb' },
+];
+const TITULO_TRIMESTRE = { 1: 'Primer trimestre', 2: 'Segundo trimestre', 3: 'Tercer trimestre' } as const;
+
+function examenesCarne(filas: FilaExamen[]): { trimestre: 1 | 2 | 3; titulo: string; examenes: ExamenCarne[] }[] {
+  return ([1, 2, 3] as const).map((t) => ({
+    trimestre: t,
+    titulo: TITULO_TRIMESTRE[t],
+    examenes: EXAMENES_CARNE.filter((g) => g.trimestre === t).flatMap((g): ExamenCarne[] => {
+      const del = filas.filter((f) => g.incluye(f.id));
+      if (del.length === 0) return [];
+      if (del.every((f) => f.estado === 'hecho')) {
+        const fecha = del.map((f) => f.resultado?.fecha ?? '').sort().at(-1) || undefined;
+        return [{ texto: g.texto, estado: 'hecho', fecha }];
+      }
+      const falta = del.some((f) => f.estado === 'pendiente' || f.estado === 'atrasado');
+      return [{ texto: g.texto, estado: falta ? 'falta' : 'mas_adelante' }];
+    }),
+  }));
+}
 
 export type DatosCarne =
   | { estado: 'pausado'; mensaje: string }
@@ -30,6 +72,8 @@ export type DatosCarne =
       tromboAntesDelParto?: string;
       /** Exámenes pendientes en lenguaje sencillo (sin nombrar resultados). */
       examenesPendientes: string[];
+      /** Exámenes por trimestre: solo si están hechos, faltan o vienen más adelante. */
+      examenesPorTrimestre: { trimestre: 1 | 2 | 3; titulo: string; examenes: ExamenCarne[] }[];
       grupo?: string;
       rh?: string;
       vacunas: { antirrubeola?: string; antitetanicaDosisPrevias?: number };
@@ -60,6 +104,7 @@ export function proyectarCarne(historia: Historia, carne: Carne, hoy: FechaISO, 
     senalesCoagulo: indicaciones.includes('tromboprofilaxis') || (trombo?.puntaje ?? 0) >= umbralCoagulo,
     tromboAntesDelParto: indicaciones.includes('tromboprofilaxis') ? catalogo.valor('trombo.suspensionAntesDelParto') ?? undefined : undefined,
     examenesPendientes: [...new Set(recordatorios(ctx).flatMap((r) => (r.paraGestante ? [r.paraGestante] : [])))],
+    examenesPorTrimestre: examenesCarne(examenesPorTrimestre(ctx).flatMap((g) => g.filas)),
     grupo: valorDe(actual?.grupo),
     rh: valorDe(actual?.rh),
     vacunas: {

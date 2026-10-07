@@ -75,6 +75,9 @@ const PALABRAS_PROHIBIDAS = [
   'solicita_ive',
   'no_ha_decidido',
   'Prestador X',
+  'sífilis',
+  'sifilis',
+  'hepatitis',
 ];
 
 describe('Carné: lectura restringida (A3)', () => {
@@ -98,6 +101,24 @@ describe('Carné: lectura restringida (A3)', () => {
       proximaCita: { fecha: '2026-09-20' },
     });
     if (datos.estado === 'activo') expect(datos.citas[1]).toEqual({ fecha: '2026-08-20', pesoKg: 64, presion: '110/70' });
+  });
+
+  it('exámenes por trimestre en el carné: solo hecho / te falta / más adelante, sin resultados ni nombres sensibles', async () => {
+    const { historia, carne } = await historiaSensible(repo(nuevaBD()));
+    const datos = proyectarCarne(historia, carne, '2026-10-06', new Catalogo()); // semana 18+1
+    if (datos.estado !== 'activo') throw new Error('carné pausado');
+    const [t1, t2, t3] = datos.examenesPorTrimestre;
+    expect(t1!.examenes).toEqual(
+      expect.arrayContaining([
+        { texto: 'Exámenes de sangre de ingreso', estado: 'falta' }, // solo el VIH registrado: no se dice cuál
+        { texto: 'Examen de orina', estado: 'falta' },
+      ]),
+    );
+    expect(t2!.examenes).toEqual([
+      { texto: 'Ecografía de detalle (semanas 18 a 23)', estado: 'falta' },
+      { texto: 'Prueba del azúcar (semanas 24 a 28)', estado: 'mas_adelante' },
+    ]);
+    expect(t3!.examenes.every((e) => e.estado === 'mas_adelante')).toBe(true);
   });
 
   it('un carné pausado muestra solo el mensaje', async () => {

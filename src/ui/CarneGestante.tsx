@@ -69,6 +69,27 @@ export function CarneGestante({ datos }: { datos: DatosCarne }) {
         </section>
       )}
 
+      {datos.examenesPorTrimestre.some((t) => t.examenes.length > 0) && (
+        <section>
+          <h3><span aria-hidden>🗓️</span> Tus exámenes por trimestre</h3>
+          {datos.examenesPorTrimestre.map((t) => (
+            <div key={t.trimestre} className="carne-trimestre">
+              <h4>{t.titulo}</h4>
+              <ul className="carne-lista">
+                {t.examenes.map((e) => (
+                  <li key={e.texto} className={`carne-examen ${e.estado}`}>
+                    <span aria-hidden>{e.estado === 'hecho' ? '✅' : e.estado === 'falta' ? '⏳' : '📅'}</span> {e.texto}:{' '}
+                    <strong>
+                      {e.estado === 'hecho' ? `hecho${e.fecha ? ` el ${fechaCorta(e.fecha)}` : ''}` : e.estado === 'falta' ? 'te falta' : 'más adelante'}
+                    </strong>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+      )}
+
       <section className="carne-urgencia">
         <h3><span aria-hidden>🚨</span> Ve de urgencia si tienes</h3>
         <ul className="carne-iconos">
