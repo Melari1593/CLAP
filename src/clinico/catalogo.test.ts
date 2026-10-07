@@ -86,6 +86,8 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
       'bienestarFetal',
       'ive.limite',
       'anticoncepcion.asesoriaPosparto',
+      'derechos.rutaViolenciaSexual',
+      'derechos.rutaViolenciaContraLaMujer',
     ] as const) {
       expect(cat.parametro(id), id).toMatchObject({ estado: 'decidido', revisado: '2026-10-07' });
     }
@@ -94,9 +96,7 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
   it('deja como pendientes las decisiones abiertas del plan', () => {
     const pendientes = new Catalogo().lista().filter((p) => p.estado === 'pendiente').map((p) => p.id);
     expect(pendientes).toEqual(
-      expect.arrayContaining([
-        'derechos.rutaViolenciaSexual',
-      ]),
+      expect.arrayContaining(['au.percentiles', 'derechos.normas']),
     );
   });
 });

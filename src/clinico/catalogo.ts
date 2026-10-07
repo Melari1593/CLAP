@@ -681,8 +681,9 @@ const BASE = {
       'Informar sus derechos, incluida la IVE por la causal de violencia sexual sin límite de semanas, y ofrecer atención en salud mental y psicosocial.',
     ],
     fuentes: ['Resolución 459 de 2012', 'Ley 1146 de 2007', 'Ley 1719 de 2014', 'Equipo clínico'],
-    estado: 'pendiente',
-    nota: 'Texto ajustado el 2026-10-07 con las Leyes 1146 de 2007 y 1719 de 2014, a partir de resultados de búsqueda (el texto oficial no se pudo consultar). Lo verifica el equipo clínico o jurídico antes de marcarlo como decidido.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Texto ajustado con las Leyes 1146 de 2007 y 1719 de 2014 y aprobado por la responsable del proyecto el 2026-10-07.',
   }),
   'derechos.rutaViolenciaContraLaMujer': p<string[]>({
     nombre: 'Ruta de atención a mujeres víctimas de violencia (física, psicológica, económica): pasos comunes',
@@ -695,8 +696,9 @@ const BASE = {
       'Ofrecer atención en salud mental y preguntar de nuevo, a solas, en cada control.',
     ],
     fuentes: ['Ley 1257 de 2008', 'Equipo clínico'],
-    estado: 'pendiente',
-    nota: 'Propuesto el 2026-10-07 a partir de la Ley 1257 de 2008 (resultados de búsqueda; el texto oficial no se pudo consultar). Lo verifica el equipo clínico o jurídico antes de marcarlo como decidido.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Basado en la Ley 1257 de 2008 y aprobado por la responsable del proyecto el 2026-10-07.',
   }),
 
   // ---------- Carné (F3, F4) ----------
