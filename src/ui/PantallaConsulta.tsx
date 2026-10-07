@@ -159,12 +159,6 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
         </>
       )}
 
-      {tipo === 'seguimiento' && (
-        <>
-          <GraficaAlturaUterina embarazoId={embarazoId} version={guardados} />
-          <GraficaIMC embarazoId={embarazoId} version={guardados} />
-        </>
-      )}
       {tipo === 'seguimiento' &&
         (consultaId ? (
           <SeccionesSeguimiento embarazoId={embarazoId} consultaId={consultaId} alCambiar={() => setGuardados((n) => n + 1)} />
@@ -211,6 +205,13 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
           correo={valorDe((tipo === 'primera' ? primera : primeraDelEmbarazo)?.identificacion.correo)}
           onImprimir={() => ir({ tipo: 'impresion', gestanteId, embarazoId })}
         />
+      )}
+      {/* Curvas al final de la pantalla */}
+      {tipo === 'seguimiento' && (
+        <>
+          <GraficaAlturaUterina embarazoId={embarazoId} version={guardados} />
+          <GraficaIMC embarazoId={embarazoId} version={guardados} />
+        </>
       )}
       <div className="navegacion fija">
         <button type="button" onClick={() => void guardar()}>Guardar</button>

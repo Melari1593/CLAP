@@ -50,8 +50,6 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
           <PanelCalculos gestante={gestante} datos={primera?.primera} />
           <PanelAlertas embarazoId={activo.id} abrirDerechos={() => ir({ tipo: 'derechos', gestanteId, embarazoId: activo.id })} />
           <PanelPendientes embarazoId={activo.id} />
-          <GraficaAlturaUterina embarazoId={activo.id} />
-          <GraficaIMC embarazoId={activo.id} />
           <h3>Consultas de este embarazo</h3>
           <ul className="consultas">
             {historia.consultas.length === 0 && <li>Aún no hay consultas.</li>}
@@ -82,6 +80,9 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
             <button type="button" onClick={() => ir({ tipo: 'derechos', gestanteId, embarazoId: activo.id })}>🔒 Opciones y derechos</button>
             <button type="button" onClick={nuevoEmbarazo}>Abrir embarazo nuevo</button>
           </div>
+          {/* Curvas al final de la pantalla */}
+          <GraficaAlturaUterina embarazoId={activo.id} />
+          <GraficaIMC embarazoId={activo.id} />
         </>
       ) : (
         <>
