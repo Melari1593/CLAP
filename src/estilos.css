@@ -174,3 +174,5 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 .carne-encabezado img { width: auto; height: 56px; }
 .carne-encabezado h2 { margin: 0; }
 .logo-pin { width: auto; height: 96px; align-self: center; }
+.actualizacion { margin: 4px 0; font-size: 0.9rem; background: #fff; color: var(--texto, #1f2937); padding: 4px 8px; border-radius: 4px; display: inline-block; }
+.actualizacion button { margin-left: 4px; }

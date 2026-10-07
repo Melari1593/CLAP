@@ -4,14 +4,21 @@ import type { Campo } from '../datos/campo';
 import { aplicarNoCorresponde, type Bloque, type ContextoFormulario } from '../consultas/esquema';
 import { asignar, obtener } from '../consultas/rutas';
 import { FilaCampo } from './campos';
+import { guardarBorrador, leerBorrador } from './borrador';
 
-export function Formulario<D>({ bloques, datos, onCambio, ctx = {} }: {
+export function Formulario<D>({ bloques, datos, onCambio, ctx = {}, clave }: {
   bloques: Bloque<D>[];
   datos: D;
   onCambio: (datos: D) => void;
   ctx?: ContextoFormulario;
+  /** Si se da, el bloque abierto sobrevive a una recarga de la página. */
+  clave?: string;
 }) {
-  const [actual, setActual] = useState(0);
+  const [actual, setActualEstado] = useState(() => (clave ? leerBorrador<number>(`bloque:${clave}`) : undefined) ?? 0);
+  const setActual = (i: number) => {
+    setActualEstado(i);
+    if (clave) guardarBorrador(`bloque:${clave}`, i);
+  };
   const bloque = bloques[actual] ?? bloques[0]!;
 
   const cambiar = (ruta: string, campo: Campo<unknown>) => {

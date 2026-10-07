@@ -7,7 +7,8 @@ export default defineConfig({
     react(),
     // Precarga toda la app para que la consulta funcione sin internet (A4).
     VitePWA({
-      registerType: 'autoUpdate',
+      // Sin recarga automática: la app avisa y el profesional decide cuándo actualizar.
+      registerType: 'prompt',
       workbox: { globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'] },
       manifest: {
         name: 'HCP Digital — Control prenatal',

@@ -20,8 +20,10 @@ import { PanelPendientes } from './PanelPendientes';
 import { GraficaAlturaUterina } from './GraficaAlturaUterina';
 import { GraficaIMC } from './GraficaIMC';
 import { valorDe } from '../datos/campo';
+import { borrarBorrador, guardarBorrador, leerBorrador } from './borrador';
 
 type Cita = { fecha: string; lugar: string; queLlevar: string };
+type Borrador = { primera?: DatosPrimeraConsulta; seguimiento?: DatosSeguimiento; cita: Cita; consultaId?: string };
 
 interface Props {
   tipo: 'primera' | 'seguimiento';
@@ -51,6 +53,9 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
   const [guardados, setGuardados] = useState(0);
   /** Para medir la duración de la consulta (G2). */
   const inicio = useRef(new Date());
+  /** Lo que se estaba llenando antes de una recarga de la página, si la hubo. */
+  const clave = `${embarazoId}:${tipo}:${idInicial ?? 'nueva'}`;
+  const borrador = useRef(leerBorrador<Borrador>(clave));
 
   useEffect(() => {
     void (async () => {
@@ -69,10 +74,28 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
         setCerrada(existente.cerrada);
         if (existente.proximaCita.estado === 'valor') setCita(existente.proximaCita.valor);
       }
-      if (tipo === 'primera') setPrimera(existente?.primera ?? aplicarNoCorresponde(BLOQUES_PRIMERA, primeraConsultaVacia(), {}));
-      else setSeguimiento(existente?.seguimiento ?? seguimientoVacio());
+      const b = borrador.current;
+      if (tipo === 'primera') setPrimera(b?.primera ?? existente?.primera ?? aplicarNoCorresponde(BLOQUES_PRIMERA, primeraConsultaVacia(), {}));
+      else setSeguimiento(b?.seguimiento ?? existente?.seguimiento ?? seguimientoVacio());
+      if (b) {
+        setCita(b.cita);
+        if (b.consultaId) setConsultaId(b.consultaId);
+        setMensaje('Se recuperó lo que estaba llenando antes de que se recargara la página. Guarde para no perderlo.');
+      }
     })();
   }, [repo, servicio, gestanteId, embarazoId, idInicial, tipo]);
+
+  // Copia de trabajo para recuperar lo escrito si la página se recarga; se borra al salir de la pantalla.
+  useEffect(() => {
+    if (primera || seguimiento) guardarBorrador(clave, { primera, seguimiento, cita, consultaId } satisfies Borrador);
+  }, [clave, primera, seguimiento, cita, consultaId]);
+  useEffect(
+    () => () => {
+      borrarBorrador(clave);
+      borrarBorrador(`bloque:${clave}`);
+    },
+    [clave],
+  );
 
   if (!gestante || (tipo === 'primera' ? !primera : !seguimiento)) return <p>Cargando…</p>;
 
@@ -126,13 +149,13 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       {tipo === 'primera' ? (
         <>
           <PanelCalculos gestante={gestante} datos={primera} />
-          <Formulario bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} />
+          <Formulario bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} />
         </>
       ) : (
         <>
           <PanelCalculos gestante={gestante} datos={primeraDelEmbarazo} />
           <p className="suave">EG del día: {egTexto ?? 'no calculable'}</p>
-          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} ctx={{ egSemanas, rhNegativo: valorDe(primeraDelEmbarazo?.gestacionActual.rh) === '-' }} />
+          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} clave={clave} ctx={{ egSemanas, rhNegativo: valorDe(primeraDelEmbarazo?.gestacionActual.rh) === '-' }} />
         </>
       )}
 

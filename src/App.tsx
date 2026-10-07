@@ -19,6 +19,8 @@ import { PantallaBuscar } from './ui/PantallaBuscar';
 import { PantallaCatalogo } from './ui/Catalogo';
 import { PantallaConsulta } from './ui/PantallaConsulta';
 import { PantallaFicha } from './ui/PantallaFicha';
+import { AvisoActualizacion } from './ui/Actualizacion';
+import { guardarBorrador, leerBorrador } from './ui/borrador';
 import { CONFIGURACION_DEMO } from './institucion/configuracion';
 
 // El inicio de sesión con roles reales llega con el servidor. Mientras tanto, la app
@@ -59,7 +61,8 @@ export function App() {
     const carnes = new ServicioCarne(bd, repo, catalogo, hoy, undefined, eventos);
     return { bd, repo, catalogo, hoy, servicio, motor, derechos, carnes };
   }, []);
-  const [pantalla, setPantalla] = useState<Pantalla>({ tipo: 'buscar' });
+  // La pantalla actual sobrevive a una recarga de la página en esta pestaña.
+  const [pantalla, setPantalla] = useState<Pantalla>(() => leerBorrador<Pantalla>('pantalla') ?? { tipo: 'buscar' });
   const [aviso, setAviso] = useState<string>();
 
   // Enlace del carné de la gestante: #/carne/<token>
@@ -69,6 +72,7 @@ export function App() {
   const ir = (p: Pantalla) => {
     setAviso(undefined);
     setPantalla(p);
+    guardarBorrador('pantalla', p);
     window.scrollTo(0, 0);
   };
 
@@ -81,6 +85,7 @@ export function App() {
         </div>
         <p className="demo" role="note">Versión de demostración: use solo datos ficticios. Los datos quedan en este dispositivo.</p>
         <EstadoConexion bd={contexto.bd} />
+        <AvisoActualizacion />
         <nav className="menu">
           <button type="button" onClick={() => ir({ tipo: 'buscar' })}>Buscar gestante</button>
           <button type="button" onClick={() => ir({ tipo: 'catalogo' })}>Catálogo clínico</button>
