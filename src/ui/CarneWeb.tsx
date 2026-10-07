@@ -65,6 +65,7 @@ export function CarneWeb({ bd, token, catalogo, hoy }: { bd: BaseDatos; token: s
   return (
     <main className="carne-web">
       <form onSubmit={entrar} className="carne pin">
+        <img src="/logo.png" alt="" width={45} height={96} className="logo-pin" />
         <h2>Tu carné de control prenatal</h2>
         <label>
           Escribe tu PIN de 4 números

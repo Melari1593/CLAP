@@ -75,7 +75,10 @@ export function App() {
   return (
     <ContextoApp.Provider value={contexto}>
       <header className="barra no-imprimir">
-        <h1>HCP Digital · Control prenatal</h1>
+        <div className="marca">
+          <img src="/logo.png" alt="" width={36} height={77} />
+          <h1>HCP Digital · Control prenatal</h1>
+        </div>
         <p className="demo" role="note">Versión de demostración: use solo datos ficticios. Los datos quedan en este dispositivo.</p>
         <EstadoConexion bd={contexto.bd} />
         <nav className="menu">

@@ -166,3 +166,11 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 .grafica-imc .limite { stroke-width: 1.5; }
 .grafica-imc .rotulo-zona { font-size: calc(12px * var(--escala, 1) * 0.9); fill: #374151; font-weight: 600; letter-spacing: 0.02em; }
 @media print { .grafica-imc { display: none; } }
+
+/* ---------- Logo ---------- */
+.marca { display: flex; align-items: center; gap: 10px; }
+.marca img { width: auto; height: 60px; background: #fff; border-radius: 10px; padding: 4px 8px; }
+.carne-encabezado { display: flex; align-items: center; gap: 12px; padding-bottom: 6px; }
+.carne-encabezado img { width: auto; height: 56px; }
+.carne-encabezado h2 { margin: 0; }
+.logo-pin { width: auto; height: 96px; align-self: center; }
