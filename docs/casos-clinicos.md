@@ -48,6 +48,27 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 | HTA-05 | PA 162/100: rango severo (urgente). | Control 2026-10-26 (21+0): PA 162/100, proteinuria 2+; Evaluada el 2026-10-26 | **Hipertensión en rango severo**<br>incluye «manejo inmediato y remisión»<br>incluye «sospecha de preeclampsia con criterios de severidad» | ☐ Sí ☐ No | |
 | HTA-06 | PA 135/85: sin alerta. | Control 2026-10-26 (21+0): PA 135/85; Evaluada el 2026-10-26 | Sin alertas | ☐ Sí ☐ No | |
 
+## Crecimiento y bienestar fetal
+
+| Caso | Qué se prueba | Datos | Resultado esperado | ¿Correcto? | Observaciones |
+|---|---|---|---|---|---|
+| AU-01 | Altura uterina de 14 cm en la semana 21: por debajo del percentil 10. | Control 2026-10-26 (21+0): altura uterina 14 cm; Evaluada el 2026-10-26 | **Altura uterina por debajo del percentil 10**<br>incluye «percentil 10: 15,8»<br>incluye «solicitar ecografía» | ☐ Sí ☐ No | |
+| AU-02 | Altura uterina de 25 cm en la semana 21: por encima del percentil 90. | Control 2026-10-26 (21+0): altura uterina 25 cm; Evaluada el 2026-10-26 | **Altura uterina por encima del percentil 90** | ☐ Sí ☐ No | |
+| AU-03 | Altura uterina de 19 cm en la semana 21: dentro de los percentiles. | Control 2026-10-26 (21+0): altura uterina 19 cm; Evaluada el 2026-10-26 | Sin alertas | ☐ Sí ☐ No | |
+| MF-01 | Movimientos fetales "No" en la semana 21: urgente. | Control 2026-10-26 (21+0): movimientos fetales No; Evaluada el 2026-10-26 | **Movimientos fetales ausentes o disminuidos** | ☐ Sí ☐ No | |
+| FCF-01 | FCF de 100 lpm: fuera de rango (urgente). | Control 2026-10-26 (21+0): FCF 100; Evaluada el 2026-10-26 | **Frecuencia cardíaca fetal fuera de rango**<br>incluye «rango normal 110–160» | ☐ Sí ☐ No | |
+| FCF-02 | FCF de 165 lpm: fuera de rango (urgente). | Control 2026-10-26 (21+0): FCF 165; Evaluada el 2026-10-26 | **Frecuencia cardíaca fetal fuera de rango** | ☐ Sí ☐ No | |
+| MF-02 | Movimientos fetales "No" en la semana 18: todavía no se evalúan, sin alerta. | Control 2026-10-06 (18+1): movimientos fetales No | Sin alertas | ☐ Sí ☐ No | |
+
+## Estado nutricional
+
+| Caso | Qué se prueba | Datos | Resultado esperado | ¿Correcto? | Observaciones |
+|---|---|---|---|---|---|
+| NUT-01 | Peso 52 kg y talla 158 cm en la semana 21 (IMC 20,8): bajo peso para la EG. | Control 2026-10-26 (21+0): peso 52 kg; Evaluada el 2026-10-26 | **Estado nutricional: bajo peso para la edad gestacional**<br>incluye «IMC 20,8» | ☐ Sí ☐ No | |
+| NUT-02 | Peso 70 kg en la semana 21 (IMC 28,0): sobrepeso para la EG. | Control 2026-10-26 (21+0): peso 70 kg; Evaluada el 2026-10-26 | **Estado nutricional: sobrepeso para la edad gestacional** | ☐ Sí ☐ No | |
+| NUT-03 | Peso 80 kg en la semana 21 (IMC 32,0): obesidad para la EG. | Control 2026-10-26 (21+0): peso 80 kg; Evaluada el 2026-10-26 | **Estado nutricional: obesidad para la edad gestacional** | ☐ Sí ☐ No | |
+| NUT-04 | Peso 62 kg en la semana 21 (IMC 24,8): adecuado, sin alerta. | Control 2026-10-26 (21+0): peso 62 kg; Evaluada el 2026-10-26 | Sin alertas | ☐ Sí ☐ No | |
+
 ## Antitetánica
 
 | Caso | Qué se prueba | Datos | Resultado esperado | ¿Correcto? | Observaciones |
