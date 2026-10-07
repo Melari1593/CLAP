@@ -112,8 +112,8 @@ describe('Métricas de éxito calculadas con los eventos (G2)', () => {
 
     // El carné se usa: abrió en el primer intervalo, no en el segundo.
     expect(usoDelCarne(ev, 'whatsapp')).toEqual({ intervalos: p(1, 2), gestantes: p(1, 1) });
-    // Llegan preparadas: de 7 exámenes pendientes trajo 2 (Hb y VDRL); de los 5 que quedaban, 0.
-    expect(llegadaPreparada(ev)).toEqual(p(2, 12));
+    // Llegan preparadas: de 8 exámenes pendientes trajo 2 (Hb y VDRL); de los 6 que quedaban, 0.
+    expect(llegadaPreparada(ev)).toEqual(p(2, 14));
     // Duración de los controles de seguimiento: 15 y 25 minutos.
     expect(duracionConsultas(ev)).toEqual({ consultas: 2, medianaMinutos: 20 });
     // ASA decidido el mismo día en que apareció la alerta.

@@ -31,6 +31,7 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 | CLAP-13 | Fuma (cantidad desconocida) y consume alcohol. Sumar tabaquismo da 1 punto trombótico, sin alerta. | Fuma, no sabe cuánto; Alcohol | **Hábitos de riesgo** | ☐ Sí ☐ No | |
 | CLAP-14 | Violencia sexual: urgente, ruta y derechos. | Violencia SÍ; Violencia sexual SÍ | **Violencia sexual**<br>incluye «después de la semana 24» | ☐ Sí ☐ No | |
 | CLAP-15 | Antirrubéola no recibida. | Antirrubéola: no | **Antirrubéola no recibida** | ☐ Sí ☐ No | |
+| CLAP-16 | Hepatitis B con antígeno de superficie positivo. | HBsAg positivo | **Infecciones**<br>incluye «Hepatitis B: antígeno de superficie positivo»<br>incluye «profilaxis del recién nacido» | ☐ Sí ☐ No | |
 
 ## Antitetánica
 

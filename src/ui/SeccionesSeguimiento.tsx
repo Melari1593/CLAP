@@ -24,6 +24,7 @@ const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }[] = [
   { tipo: 'inflamacion', etiqueta: 'Inflamación o infección' },
   { tipo: 'vdrl', etiqueta: 'VDRL / RPR' },
   { tipo: 'vih', etiqueta: 'VIH', privado: true },
+  { tipo: 'hepatitisB', etiqueta: 'Hepatitis B (antígeno de superficie)' },
   { tipo: 'toxoplasmosis', etiqueta: 'Toxoplasmosis' },
   { tipo: 'chagas', etiqueta: 'Chagas' },
   { tipo: 'malaria', etiqueta: 'Malaria' },
@@ -64,6 +65,7 @@ function resumen(e: ResultadoExamen): string {
     case 'inflamacion': { const v = r as ResultadoPorTipo['inflamacion']; return v.presente ? `Presente: ${v.descripcion}` : 'Ausente'; }
     case 'vdrl': { const v = r as ResultadoPorTipo['vdrl']; return `${v.reactivo ? 'Reactivo' : 'No reactivo'} · FTA ${sn(v.fta)} · Tto ${sn(v.tratamiento)} · Tto pareja ${sn(v.tratamientoPareja)}`; }
     case 'vih': { const v = r as ResultadoPorTipo['vih']; return `Solicitado ${sn(v.solicitado)} · Realizado ${sn(v.realizado)} · ${v.resultado.replace('_', ' ')}`; }
+    case 'hepatitisB': return `Antígeno de superficie ${(r as ResultadoPorTipo['hepatitisB']).antigenoSuperficie}`;
     case 'toxoplasmosis': { const v = r as ResultadoPorTipo['toxoplasmosis']; return `IgG ${v.igg ?? '—'} · IgM ${v.igm ?? '—'}`; }
     case 'ptog': { const v = r as ResultadoPorTipo['ptog']; return `${valorDe(v.ayunas) ?? '—'} / ${valorDe(v.unaHora) ?? '—'} / ${valorDe(v.dosHoras) ?? '—'} mg/dL`; }
     default: return pos((r as { positivo: boolean }).positivo);
@@ -101,6 +103,7 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
     inflamacion: <>{siNo('presente', 'Presente')}{campo('descripcion', 'Descripción', <input value={f.descripcion ?? ''} onChange={(e) => setF({ ...f, descripcion: e.target.value })} />)}</>,
     vdrl: <>{opcion('reactivo', 'Resultado', [['si', 'Reactivo'], ['no', 'No reactivo']])}{siNo('fta', 'FTA')}{siNo('tratamiento', 'Tratamiento')}{siNo('tratamientoPareja', 'Tratamiento de la pareja')}</>,
     vih: <>{siNo('solicitado', 'Solicitado')}{siNo('realizado', 'Realizado')}{opcion('resultado', 'Resultado', [['negativo', 'Negativo'], ['positivo', 'Positivo'], ['no_realizado', 'No realizado']])}</>,
+    hepatitisB: opcion('antigenoSuperficie', 'Antígeno de superficie', [['negativo', 'Negativo'], ['positivo', 'Positivo']]),
     toxoplasmosis: <>{opcion('igg', 'IgG', [['positivo', 'Positivo'], ['negativo', 'Negativo']])}{opcion('igm', 'IgM', [['positivo', 'Positivo'], ['negativo', 'Negativo']])}</>,
     chagas: positivo('positivo', 'Resultado'),
     malaria: positivo('positivo', 'Resultado'),
@@ -119,6 +122,7 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
       case 'inflamacion': return b('presente') === null ? undefined : { presente: b('presente'), descripcion: f.descripcion ?? '' };
       case 'vdrl': return b('reactivo') === null ? undefined : { reactivo: b('reactivo'), fta: b('fta'), tratamiento: b('tratamiento'), tratamientoPareja: b('tratamientoPareja') };
       case 'vih': return f.resultado ? { solicitado: b('solicitado') ?? false, realizado: b('realizado') ?? false, resultado: f.resultado } : undefined;
+      case 'hepatitisB': return f.antigenoSuperficie ? { antigenoSuperficie: f.antigenoSuperficie } : undefined;
       case 'toxoplasmosis': return f.igg || f.igm ? { igg: f.igg || null, igm: f.igm || null } : undefined;
       case 'ptog': return { ayunas: c(n('ayunas')), unaHora: c(n('unaHora')), dosHoras: c(n('dosHoras')) };
       default: return b('positivo') === null ? undefined : { positivo: b('positivo') };

@@ -417,8 +417,9 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
   },
   {
     id: 'adherencia',
-    titulo: 'Adherencia',
+    titulo: 'Adherencia y vacunas',
     campos: [
+      { ruta: 'tdapAplicada', etiqueta: 'Vacuna Tdap (tosferina) aplicada hoy', ayuda: 'Desde la semana 26, en cada embarazo.', control: sino },
       { ruta: 'tomaCalcioDiario', etiqueta: '¿Toma el calcio todos los días?', control: sino },
       { ruta: 'tomaASADiario', etiqueta: '¿Toma la aspirina todos los días?', control: sino },
       { ruta: 'aplicaTromboprofilaxisDiario', etiqueta: '¿Se aplica la tromboprofilaxis todos los días?', control: sino },

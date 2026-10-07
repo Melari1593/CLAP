@@ -122,7 +122,7 @@ export const sifilis: Regla = {
 export const infecciones: Regla = {
   id: 'infecciones',
   evaluar(ctx) {
-    const positivas = (
+    const positivas: string[] = (
       [
         ['malaria', 'Malaria'],
         ['chagas', 'Chagas'],
@@ -133,6 +133,10 @@ export const infecciones: Regla = {
       const r = ctx.ultimo(tipo);
       return r?.positivo ? [`${nombre} positivo (${r.fecha}).`] : [];
     });
+    const hepatitisB = ctx.ultimo('hepatitisB');
+    if (hepatitisB?.antigenoSuperficie === 'positivo') {
+      positivas.push(`Hepatitis B: antígeno de superficie positivo (${hepatitisB.fecha}). Planear la profilaxis del recién nacido.`);
+    }
     if (positivas.length === 0) return null;
     return { titulo: 'Infecciones', porque: positivas, severidad: positivas.length };
   },

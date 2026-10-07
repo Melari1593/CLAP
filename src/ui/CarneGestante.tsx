@@ -61,7 +61,7 @@ export function CarneGestante({ datos }: { datos: DatosCarne }) {
 
       {datos.examenesPendientes.length > 0 && (
         <section>
-          <h3><span aria-hidden>🧪</span> Exámenes que te faltan</h3>
+          <h3><span aria-hidden>🧪</span> Exámenes y vacunas que te faltan</h3>
           <ul className="carne-lista">{datos.examenesPendientes.map((e) => <li key={e}>{e}</li>)}</ul>
         </section>
       )}

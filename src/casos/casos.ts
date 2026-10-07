@@ -190,6 +190,16 @@ export const CASOS: CasoClinico[] = [
   }),
   caso({ id: 'CLAP-15', grupo: 'CLAP', descripcion: 'Antirrubéola no recibida.', datos: ['Antirrubéola: no'], cambios: (d) => (d.gestacionActual.antirrubeola = valor('no')), alertas: { antirrubeola: 'Antirrubéola no recibida' } }),
 
+  caso({
+    id: 'CLAP-16',
+    grupo: 'CLAP',
+    descripcion: 'Hepatitis B con antígeno de superficie positivo.',
+    datos: ['HBsAg positivo'],
+    extra: { examenes: [{ tipo: 'hepatitisB', valor: { antigenoSuperficie: 'positivo' }, fecha: T2 }] },
+    alertas: { infecciones: 'Infecciones' },
+    contiene: { infecciones: ['Hepatitis B: antígeno de superficie positivo', 'profilaxis del recién nacido'] },
+  }),
+
   // ---------------- Antitetánica
   caso({
     id: 'AT-01',

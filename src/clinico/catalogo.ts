@@ -83,16 +83,18 @@ const BASE = {
     ],
     unidad: 'kg/m²',
     fuentes: ['OMS (IMC adultos)'],
-    estado: 'pendiente',
-    nota: 'El spec pide la clasificación sin fijar la tabla. El equipo clínico la confirma.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'IMC pregestacional con la clasificación de la OMS para adultos. Aprobado por la responsable del proyecto el 2026-10-07.',
   }),
   'trimestres.limites': p<{ finPrimeroSemanas: number; finSegundoSemanas: number }>({
     nombre: 'Límites de los trimestres',
     valor: { finPrimeroSemanas: 14, finSegundoSemanas: 28 },
     unidad: 'semanas (límite exclusivo: 1.º hasta 13+6, 2.º de 14+0 a 27+6, 3.º desde 28+0)',
     fuentes: ['Spec HCP Digital v1'],
-    estado: 'pendiente',
-    nota: 'Propuesto en el spec; la OMS 2024 da cortes por trimestre sin fijar las semanas.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: '1.º hasta 13+6, 2.º de 14+0 a 27+6, 3.º desde 28+0. Aprobado por la responsable del proyecto el 2026-10-07.',
   }),
 
   // ---------- Anemia (D1) ----------
@@ -451,10 +453,20 @@ const BASE = {
   }),
   'recordatorios.examenesPrimeraConsulta': p<string[]>({
     nombre: 'Exámenes de la primera consulta',
-    valor: ['hb', 'vdrl', 'vih', 'bacteriuria', 'toxoplasmosis', 'chagas', 'malaria'],
+    valor: ['hb', 'vdrl', 'vih', 'hepatitisB', 'bacteriuria', 'toxoplasmosis', 'chagas', 'malaria'],
     fuentes: ['Spec HCP Digital v1'],
     estado: 'pendiente',
-    nota: 'Toxoplasmosis, Chagas y malaria según lo que exija la norma del país y la zona. Revisar contra la Ruta Materno Perinatal.',
+    nota: 'Hepatitis B (antígeno de superficie) agregada el 2026-10-07 por decisión de la responsable del proyecto. Toxoplasmosis, Chagas y malaria según lo que exija la norma del país y la zona. Revisar el resto de la lista (sífilis treponémica rápida, rubéola, citología) contra la Ruta Materno Perinatal.',
+  }),
+
+  'vacunas.tdap': p<{ desdeSemana: number; hastaSemana: number | null }>({
+    nombre: 'Vacuna Tdap (tosferina) en cada embarazo',
+    valor: { desdeSemana: 26, hastaSemana: null },
+    unidad: 'semanas',
+    fuentes: ['Equipo clínico'],
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Recordatorio desde la semana 26 hasta que se registre aplicada. Sin semana límite para marcarla atrasada. Decidido por la responsable del proyecto el 2026-10-07.',
   }),
 
   // ---------- Validaciones de datos imposibles (B2) ----------
@@ -469,8 +481,9 @@ const BASE = {
       hbGdl: { min: 3, max: 22 },
     },
     fuentes: ['Equipo clínico'],
-    estado: 'pendiente',
-    nota: 'El spec da ejemplos (PA 300/20, peso 400 kg); los rangos los fija el equipo clínico.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Fuera de estos rangos la app pide confirmar el dato; nunca bloquea el guardado. Aprobado por la responsable del proyecto el 2026-10-07.',
   }),
 
   // ---------- Derechos sexuales y reproductivos (E1) ----------
@@ -535,8 +548,9 @@ const BASE = {
     valor: 15,
     unidad: 'minutos',
     fuentes: ['Equipo clínico'],
-    estado: 'pendiente',
-    nota: 'El spec dice "un rato"; 15 minutos es un valor provisional.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: '15 minutos después de 5 intentos fallidos. Aprobado por la responsable del proyecto el 2026-10-07.',
   }),
 } as const;
 

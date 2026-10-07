@@ -14,6 +14,7 @@ const examenesIniciales = (fecha: string): Examen[] => [
   { tipo: 'hb', valor: { gdl: 13, muestra: 'venosa' }, fecha },
   { tipo: 'vdrl', valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha },
   { tipo: 'vih', valor: { solicitado: true, realizado: true, resultado: 'negativo' }, fecha },
+  { tipo: 'hepatitisB', valor: { antigenoSuperficie: 'negativo' }, fecha },
   { tipo: 'bacteriuria', valor: neg, fecha },
   { tipo: 'toxoplasmosis', valor: { igg: 'negativo', igm: 'negativo' }, fecha },
   { tipo: 'chagas', valor: neg, fecha },
@@ -37,7 +38,7 @@ describe('Recordatorios por semana (F1)', () => {
     // Semana 8, sin exámenes: los de la primera consulta pendientes, nada atrasado.
     const s8 = ids(semana(8), base);
     expect(exam(s8.filter((r) => r.tipo === 'examen').map((r) => r.id))).toEqual(
-      ['inicial:hb', 'inicial:vdrl', 'inicial:vih', 'inicial:bacteriuria', 'inicial:toxoplasmosis', 'inicial:chagas', 'inicial:malaria'],
+      ['inicial:hb', 'inicial:vdrl', 'inicial:vih', 'inicial:hepatitisB', 'inicial:bacteriuria', 'inicial:toxoplasmosis', 'inicial:chagas', 'inicial:malaria'],
     );
     expect(s8.some((r) => r.estado === 'atrasado')).toBe(false);
 
@@ -65,6 +66,14 @@ describe('Recordatorios por semana (F1)', () => {
     // Semana 35: estreptococo B pendiente; semana 38 sin hacerlo: atrasado.
     expect(ids(semana(35), conIniciales).find((r) => r.id === 'egb')?.estado).toBe('pendiente');
     expect(ids(semana(38), conIniciales).find((r) => r.id === 'egb')?.estado).toBe('atrasado');
+  });
+
+  it('Tdap desde la semana 26 hasta que se registre aplicada', () => {
+    expect(ids(semana(25)).map((r) => r.id)).not.toContain('tdap');
+    expect(ids(semana(26)).find((r) => r.id === 'tdap')).toMatchObject({ estado: 'pendiente', tipo: 'accion' });
+    expect(ids(semana(38)).find((r) => r.id === 'tdap')?.estado).toBe('pendiente'); // sin semana límite
+    const aplicada = { seguimientos: [{ fecha: semana(27), cambios: (d: { tdapAplicada: unknown }) => (d.tdapAplicada = valor(true)) }] };
+    expect(ids(semana(30), aplicada).map((r) => r.id)).not.toContain('tdap');
   });
 
   it('pregunta por tabaco, alcohol y violencia una vez por trimestre', () => {

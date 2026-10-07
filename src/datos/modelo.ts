@@ -241,6 +241,8 @@ export interface DatosSeguimiento {
   iniciales: Campo<string>;
   /** Cambio de residencia: la anemia se reclasifica desde este control (D1). */
   cambioResidencia: Campo<{ municipio: string; altitudM: number }>;
+  /** Vacuna Tdap (tosferina) aplicada en este control (recordatorio desde la semana 26). */
+  tdapAplicada: Campo<SiNo>;
   tomaCalcioDiario: Campo<SiNo>;
   tomaASADiario: Campo<SiNo>;
   aplicaTromboprofilaxisDiario: Campo<SiNo>;
@@ -267,6 +269,8 @@ export type ResultadoPorTipo = {
   vdrl: { reactivo: SiNo; fta: SiNo | null; tratamiento: SiNo | null; tratamientoPareja: SiNo | null };
   /** Privado, nunca en el carné. */
   vih: { solicitado: SiNo; realizado: SiNo; resultado: 'positivo' | 'negativo' | 'no_realizado'; codigo?: string };
+  /** Antígeno de superficie de hepatitis B. */
+  hepatitisB: { antigenoSuperficie: 'positivo' | 'negativo' };
   toxoplasmosis: { igg: 'positivo' | 'negativo' | null; igm: 'positivo' | 'negativo' | null };
   chagas: { positivo: SiNo };
   malaria: { positivo: SiNo };

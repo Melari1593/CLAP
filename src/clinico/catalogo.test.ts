@@ -30,13 +30,15 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
     const cat = new Catalogo();
     cat.valor('anemia.cortesHb'); // decidido
     expect(cat.avisos()).toEqual([]);
-    trimestreDeEG(100, cat); // trimestres.limites está pendiente
-    expect(cat.avisos().map((a) => a.id)).toEqual(['trimestres.limites']);
+    trimestreDeEG(100, cat); // trimestres.limites ya está decidido
+    expect(cat.avisos()).toEqual([]);
+    cat.valor('clap.edadRiesgo'); // pendiente
+    expect(cat.avisos().map((a) => a.id)).toEqual(['clap.edadRiesgo']);
   });
 
   it('un parámetro validado por el equipo clínico deja de avisar', () => {
-    const cat = new Catalogo({ 'trimestres.limites': { estado: 'decidido', revisado: '2026-11-01' } });
-    trimestreDeEG(100, cat);
+    const cat = new Catalogo({ 'clap.edadRiesgo': { estado: 'decidido', revisado: '2026-11-01' } });
+    cat.valor('clap.edadRiesgo');
     expect(cat.avisos()).toEqual([]);
   });
 
@@ -65,15 +67,20 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
     expect(cat.valor('hierro.ferritinaSinAnemia')).not.toBe(15);
   });
 
+  it('el grupo A aprobado el 2026-10-07 quedó decidido', () => {
+    const cat = new Catalogo();
+    for (const id of ['calculo.imcClasificacion', 'trimestres.limites', 'validacion.rangos', 'carne.minutosBloqueo', 'vacunas.tdap'] as const) {
+      expect(cat.parametro(id), id).toMatchObject({ estado: 'decidido', revisado: '2026-10-07' });
+    }
+  });
+
   it('deja como pendientes las decisiones abiertas del plan', () => {
     const pendientes = new Catalogo().lista().filter((p) => p.estado === 'pendiente').map((p) => p.id);
     expect(pendientes).toEqual(
       expect.arrayContaining([
-        'trimestres.limites',
         'trombo.suspensionAntesDelParto',
         'derechos.prestadorIVE',
         'derechos.rutaViolenciaSexual',
-        'carne.minutosBloqueo',
         'clap.edadRiesgo',
       ]),
     );

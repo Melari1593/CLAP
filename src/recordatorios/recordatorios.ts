@@ -22,6 +22,7 @@ const NOMBRE_EXAMEN: Partial<Record<TipoExamen, string>> = {
   hb: 'Hemoglobina',
   vdrl: 'VDRL/RPR',
   vih: 'VIH',
+  hepatitisB: 'Hepatitis B (antígeno de superficie)',
   bacteriuria: 'Urocultivo (bacteriuria)',
   toxoplasmosis: 'Toxoplasmosis',
   chagas: 'Chagas',
@@ -33,6 +34,7 @@ const PARA_GESTANTE: Partial<Record<TipoExamen, string>> = {
   hb: SANGRE,
   vdrl: SANGRE,
   vih: SANGRE,
+  hepatitisB: SANGRE,
   toxoplasmosis: SANGRE,
   chagas: SANGRE,
   malaria: SANGRE,
@@ -123,6 +125,18 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
     if (!reevaluado) {
       lista.push({ id: 'trombo28', texto: 'Semana 28: reevaluar el riesgo trombótico (y recordar el inicio si el puntaje era 3).', tipo: 'accion', estado: estadoEn(v28.hastaSemana) });
     }
+  }
+
+  // Vacuna Tdap (tosferina) desde la semana 26, en cada embarazo
+  const tdap = catalogo.valor('vacunas.tdap');
+  if (desde(tdap.desdeSemana) && !ctx.seguimientos.some((c) => valorDe(c.seguimiento?.tdapAplicada) === true)) {
+    lista.push({
+      id: 'tdap',
+      texto: `Aplicar la vacuna Tdap (tosferina) desde la semana ${tdap.desdeSemana}.`,
+      tipo: 'accion',
+      estado: estadoEn(tdap.hastaSemana),
+      paraGestante: 'Te aplicarán la vacuna contra la tosferina, que protege a tu bebé en sus primeros meses.',
+    });
   }
 
   // Estreptococo B 35–37
