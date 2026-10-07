@@ -32,13 +32,13 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
     expect(cat.avisos()).toEqual([]);
     trimestreDeEG(100, cat); // trimestres.limites ya está decidido
     expect(cat.avisos()).toEqual([]);
-    cat.valor('ive.limite'); // pendiente
-    expect(cat.avisos().map((a) => a.id)).toEqual(['ive.limite']);
+    cat.valor('au.percentiles'); // pendiente
+    expect(cat.avisos().map((a) => a.id)).toEqual(['au.percentiles']);
   });
 
   it('un parámetro validado por el equipo clínico deja de avisar', () => {
-    const cat = new Catalogo({ 'ive.limite': { estado: 'decidido', revisado: '2026-11-01' } });
-    cat.valor('ive.limite');
+    const cat = new Catalogo({ 'au.percentiles': { estado: 'decidido', revisado: '2026-11-01' } });
+    cat.valor('au.percentiles');
     expect(cat.avisos()).toEqual([]);
   });
 
@@ -84,6 +84,7 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
       'trombo.suspensionAntesDelParto',
       'hta.umbrales',
       'bienestarFetal',
+      'ive.limite',
     ] as const) {
       expect(cat.parametro(id), id).toMatchObject({ estado: 'decidido', revisado: '2026-10-07' });
     }
@@ -94,7 +95,6 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
     expect(pendientes).toEqual(
       expect.arrayContaining([
         'derechos.rutaViolenciaSexual',
-        'ive.limite',
       ]),
     );
   });

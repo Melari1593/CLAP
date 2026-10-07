@@ -439,6 +439,39 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
       { ruta: 'aplicaTromboprofilaxisDiario', etiqueta: '¿Se aplica la tromboprofilaxis todos los días?', control: sino },
     ],
   },
+  {
+    id: 'anticoncepcion',
+    titulo: 'Anticoncepción después del parto',
+    campos: [
+      {
+        ruta: 'asesoriaAnticoncepcion',
+        etiqueta: 'Asesoría en anticoncepción para después del parto',
+        ayuda: 'Informe todos los métodos, incluidos los que se pueden aplicar antes del alta (DIU e implante). La decisión es de ella.',
+        control: sino,
+      },
+      {
+        ruta: 'metodoAnticonceptivoPosparto',
+        etiqueta: 'Método elegido para después del parto',
+        privado: true,
+        control: {
+          tipo: 'opciones',
+          opciones: ops(
+            ['diu_posparto', 'DIU posparto (antes del alta)'],
+            ['diu', 'DIU'],
+            ['implante', 'Implante subdérmico'],
+            ['hormonal', 'Hormonal (píldora o inyectable)'],
+            ['barrera', 'Barrera'],
+            ['ligadura', 'Ligadura de trompas'],
+            ['natural', 'Natural'],
+            ['otro', 'Otro'],
+            ['ninguno', 'Ninguno'],
+            ['no_ha_decidido', 'No ha decidido'],
+          ),
+        },
+        aplica: (d) => es(d.asesoriaAnticoncepcion, true),
+      },
+    ],
+  },
 ];
 
 function camposDe<D>(bloques: Bloque<D>[]): DefCampo<D>[] {

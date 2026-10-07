@@ -252,7 +252,24 @@ export interface DatosSeguimiento {
   tomaCalcioDiario: Campo<SiNo>;
   tomaASADiario: Campo<SiNo>;
   aplicaTromboprofilaxisDiario: Campo<SiNo>;
+  /** Asesoría en anticoncepción para después del parto realizada en este control. */
+  asesoriaAnticoncepcion: Campo<SiNo>;
+  /** Método que la gestante eligió para después del parto. Privado, nunca en el carné. */
+  metodoAnticonceptivoPosparto: Campo<MetodoAnticonceptivoPosparto>;
 }
+
+/** Opciones de la HCP del CLAP (anticoncepción al egreso), con el implante y la no decisión. */
+export type MetodoAnticonceptivoPosparto =
+  | 'diu_posparto'
+  | 'diu'
+  | 'implante'
+  | 'hormonal'
+  | 'barrera'
+  | 'ligadura'
+  | 'natural'
+  | 'otro'
+  | 'ninguno'
+  | 'no_ha_decidido';
 
 export interface Consulta extends Meta {
   embarazoId: string;

@@ -159,5 +159,7 @@ export function seguimiento(pesoKg: number): DatosSeguimiento {
     tomaCalcioDiario: valor(true),
     tomaASADiario: noCorresponde(),
     aplicaTromboprofilaxisDiario: noCorresponde(),
+    asesoriaAnticoncepcion: valor(false),
+    metodoAnticonceptivoPosparto: noCorresponde(),
   };
 }

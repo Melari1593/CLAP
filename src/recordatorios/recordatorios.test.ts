@@ -122,6 +122,13 @@ describe('Recordatorios por semana (F1)', () => {
     expect(ids(semana(30), aplicada).map((r) => r.id)).not.toContain('tdap');
   });
 
+  it('asesoría en anticoncepción después del parto desde la semana 28 hasta que se registre', () => {
+    expect(ids(semana(27)).map((r) => r.id)).not.toContain('anticoncepcion');
+    expect(ids(semana(28)).find((r) => r.id === 'anticoncepcion')).toMatchObject({ estado: 'pendiente', tipo: 'accion' });
+    const hecha = { seguimientos: [{ fecha: semana(29), cambios: (d: { asesoriaAnticoncepcion: unknown }) => (d.asesoriaAnticoncepcion = valor(true)) }] };
+    expect(ids(semana(32), hecha).map((r) => r.id)).not.toContain('anticoncepcion');
+  });
+
   it('pregunta por tabaco, alcohol y violencia una vez por trimestre', () => {
     expect(ids(semana(10)).map((r) => r.id)).not.toContain('tamizaje:1'); // la primera consulta fue en el 1.er trimestre
     expect(ids(semana(16)).map((r) => r.id)).toContain('tamizaje:2');

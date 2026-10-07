@@ -194,6 +194,17 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
     });
   }
 
+  // Asesoría en anticoncepción para después del parto (tercer trimestre)
+  const anticoncepcion = catalogo.valor('anticoncepcion.asesoriaPosparto');
+  if (desde(anticoncepcion.desdeSemana) && !ctx.seguimientos.some((c) => valorDe(c.seguimiento?.asesoriaAnticoncepcion) === true)) {
+    lista.push({
+      id: 'anticoncepcion',
+      texto: 'Asesoría en anticoncepción para después del parto y registrar el método elegido.',
+      tipo: 'accion',
+      estado: 'pendiente',
+    });
+  }
+
   // Estreptococo B 35–37
   const vEgb = v.egb!;
   if (desde(vEgb.desdeSemana) && !hechoDesde('egb', vEgb.desdeSemana)) {

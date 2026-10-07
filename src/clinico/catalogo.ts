@@ -578,6 +578,14 @@ const BASE = {
     nota:
       'Semana 28 aprobada por la responsable del proyecto el 2026-10-07. También después de sangrado, trauma abdominal o procedimientos invasivos. Con Coombs indirecto positivo o inmunizada: no aplica; remitir. Verificar contra la GPC vigente.',
   }),
+  'anticoncepcion.asesoriaPosparto': p<{ desdeSemana: number }>({
+    nombre: 'Asesoría en anticoncepción para después del parto',
+    valor: { desdeSemana: 28 },
+    unidad: 'semanas (recordatorio hasta que se registre la asesoría)',
+    fuentes: ['Equipo clínico'],
+    estado: 'pendiente',
+    nota: 'Semana 28 propuesta el 2026-10-07 (tercer trimestre, antes del parto). Verificar contra la Ruta Materno Perinatal (Resolución 3280 de 2018).',
+  }),
   'vacunas.tdap': p<{ desdeSemana: number; hastaSemana: number | null }>({
     nombre: 'Vacuna Tdap (tosferina) en cada embarazo',
     valor: { desdeSemana: 26, hastaSemana: null },
@@ -618,9 +626,10 @@ const BASE = {
     valor: { hastaDiasInclusive: 24 * 7, margenEGDudosaSemanas: 2 },
     unidad: 'días de EG / semanas',
     fuentes: ['Sentencia C-055 de 2022', 'Equipo clínico'],
-    estado: 'pendiente',
+    estado: 'decidido',
+    revisado: '2026-10-07',
     nota:
-      'Se toma "hasta la semana 24" como EG de hasta 24+0. Con EG no confiable entre las semanas 22 y 26 la app pide confirmar la EG sin dilatar la atención. Validar la interpretación con asesoría jurídica.',
+      '"Hasta la semana 24" se toma como EG de hasta 24+0, por decisión de la responsable del proyecto el 2026-10-07. Con EG no confiable entre las semanas 22 y 26 la app pide confirmar la EG sin dilatar la atención.',
   }),
   'ive.plazoExcepcionalDias': p<number>({
     nombre: 'Plazo máximo excepcional y justificado de la atención de IVE',
