@@ -17,16 +17,13 @@ export function CarneGestante({ datos }: { datos: DatosCarne }) {
   const queHacer = datos.indicaciones.flatMap((i) => (QUE_HACER[i] ? [{ id: i, ...QUE_HACER[i]! }] : []));
   return (
     <article className="carne" aria-label="Carné de control prenatal">
-      <header className="carne-encabezado">
-        <img src="/logo.png" alt="" width={30} height={64} />
-        <div>
-          <h2>Hola, {datos.nombre}</h2>
-          <small>Actualizado el {fechaCorta(datos.actualizado)}</small>
-        </div>
+      <header>
+        <h2>Hola, {datos.nombre}</h2>
+        <small>Actualizado el {fechaCorta(datos.actualizado)}</small>
       </header>
 
       <section className="carne-grande">
-        <span aria-hidden>🤰</span>
+        <img src="/logo.png" alt="" width={34} height={72} className="logo-semanas" />
         {datos.semanas ? (
           <p>
             Vas en la semana <strong>{datos.semanas.semanas}</strong>

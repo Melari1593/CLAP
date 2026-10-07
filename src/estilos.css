@@ -108,7 +108,7 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 .carne h2 { margin: 8px 0 0; }
 .carne h3 { margin: 16px 0 6px; font-size: 1.1rem; }
 .carne-grande { display: flex; gap: 12px; align-items: center; background: #f0fdfa; border-radius: 10px; padding: 12px; }
-.carne-grande span { font-size: 2.4rem; }
+.carne-grande .logo-semanas { width: auto; height: 72px; flex: none; }
 .carne-lista { padding-left: 20px; margin: 4px 0; }
 .carne-lista li { margin: 6px 0; }
 .carne-iconos { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 4px 12px; }
@@ -170,9 +170,6 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 /* ---------- Logo ---------- */
 .marca { display: flex; align-items: center; gap: 10px; }
 .marca img { width: auto; height: 60px; background: #fff; border-radius: 10px; padding: 4px 8px; }
-.carne-encabezado { display: flex; align-items: center; gap: 12px; padding-bottom: 6px; }
-.carne-encabezado img { width: auto; height: 56px; }
-.carne-encabezado h2 { margin: 0; }
 .logo-pin { width: auto; height: 96px; align-self: center; }
 .actualizacion { margin: 4px 0; font-size: 0.9rem; background: #fff; color: var(--texto, #1f2937); padding: 4px 8px; border-radius: 4px; display: inline-block; }
 .actualizacion button { margin-left: 4px; }
