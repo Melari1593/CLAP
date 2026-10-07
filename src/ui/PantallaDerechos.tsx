@@ -61,6 +61,8 @@ export function PantallaDerechos({ gestanteId, embarazoId, ir }: { gestanteId: s
 
   if (!gestante || !historia || !marco) return <p>Cargando…</p>;
   const ctx = derechos.contexto(historia);
+  const menor14 = detectados.includes('menor_14') || desencadenante === 'menor_14';
+  const rutaVS = derechos.rutaViolenciaSexual(menor14);
   const conRuta = detectados.includes('violencia_sexual') || detectados.includes('menor_14') || desencadenante === 'violencia_sexual' || desencadenante === 'menor_14';
 
   const registrar = async (e: FormEvent) => {
@@ -135,6 +137,27 @@ export function PantallaDerechos({ gestanteId, embarazoId, ir }: { gestanteId: s
         {conRuta && (
           <fieldset>
             <legend>Ruta de atención a víctimas de violencia sexual</legend>
+            <ol>{rutaVS.pasos.map((t) => <li key={t}>{t}</li>)}</ol>
+            {rutaVS.contactos.length > 0 && (
+              <>
+                <p><strong>Contactos de la institución</strong>{rutaVS.ficticia && <span className="suave"> (de demostración, ficticios)</span>}</p>
+                <ul className="contactos-ruta">
+                  {rutaVS.contactos.map((c) => (
+                    <li key={c.entidad}>
+                      {c.entidad} · {c.contacto}{' '}
+                      <button
+                        type="button"
+                        className="enlace"
+                        disabled={notificaciones.some((n) => n.a === c.entidad)}
+                        onClick={() => setNotificaciones([...notificaciones, { a: c.entidad, fechaHora: ahoraLocal() }])}
+                      >
+                        Registrar notificación
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
             <label>Activación de la ruta (fecha y hora) <input type="datetime-local" value={ruta} onChange={(e) => setRuta(e.target.value)} /></label>
             <button type="button" className="enlace" onClick={() => setRuta(ahoraLocal())}>Ahora</button>
             {notificaciones.map((n, i) => (
@@ -175,6 +198,7 @@ export function PantallaDerechos({ gestanteId, embarazoId, ir }: { gestanteId: s
                 </div>
               )}
               {!configurado && <p className="error">{AVISO_SIN_PRESTADOR}</p>}
+              {configurado && <p className="suave">Prestador de referencia de la institución: {configurado}. Puede cambiarlo si remite a otro.</p>}
               <label>Prestador al que se remite <input required value={prestador} onChange={(e) => setPrestador(e.target.value)} /></label>
               <label>Remisión (fecha y hora) <input type="datetime-local" value={remision} onChange={(e) => setRemision(e.target.value)} /></label>
               <button type="button" className="enlace" onClick={() => setRemision(ahoraLocal())}>Ahora</button>

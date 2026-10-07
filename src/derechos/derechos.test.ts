@@ -10,6 +10,7 @@ import { historiaDePrueba } from '../pruebas/historia';
 import { nuevaBD, repo } from '../pruebas/util';
 import { carneDebeEstarPausado, disparadores, ErrorDerechos, marcoSegunEG, ServicioDerechos } from './servicio';
 import { avisoRuta } from './textos';
+import { CONFIGURACION_DEMO } from '../institucion/configuracion';
 
 const cat = new Catalogo();
 type Opciones = NonNullable<Parameters<typeof historiaDePrueba>[0]>;
@@ -60,7 +61,7 @@ describe('Marco según la EG (E1)', () => {
   });
 });
 
-async function preparar(hoy = '2026-10-06', ahora = '2026-10-06T15:00:00.000Z') {
+async function preparar(hoy = '2026-10-06', ahora = '2026-10-06T15:00:00.000Z', institucion?: typeof CONFIGURACION_DEMO) {
   const bd = nuevaBD();
   const r = repo(bd);
   const consultas = new ServicioConsultas(r, cat, () => hoy);
@@ -68,7 +69,7 @@ async function preparar(hoy = '2026-10-06', ahora = '2026-10-06T15:00:00.000Z') 
   consultas.alCambiar(async (c) => {
     await motor.sincronizar(c.embarazoId);
   });
-  const derechos = new ServicioDerechos(r, motor, cat, () => hoy, () => new Date(ahora));
+  const derechos = new ServicioDerechos(r, motor, cat, () => hoy, () => new Date(ahora), undefined, institucion);
   const { embarazo } = await consultas.registrarOAbrir({
     documentoTipo: 'CC',
     documentoNumero: '1',
@@ -176,5 +177,32 @@ describe('Registro de la decisión (E1)', () => {
       expect(texto).not.toContain(prohibido);
     }
     expect(carneDebeEstarPausado(historia.derechos)).toBe(false);
+  });
+});
+
+describe('Configuración de la institución (prestador de IVE y ruta de violencia sexual)', () => {
+  it('con prestador configurado, remitir a él no es manual; a otro, sí', async () => {
+    const { derechos, embarazoId } = await preparar(undefined, undefined, CONFIGURACION_DEMO);
+    const nombre = CONFIGURACION_DEMO.prestadorIVE!.nombre;
+    expect(derechos.prestadorConfigurado()).toBe(nombre);
+    const base = { desencadenante: 'no_planeado' as const, momentoASolas: true, decision: 'solicita_ive' as const };
+    expect((await derechos.registrar(embarazoId, { ...base, prestador: nombre })).solicitudIVE?.manual).toBe(false);
+    expect((await derechos.registrar(embarazoId, { ...base, prestador: 'Otro prestador' })).solicitudIVE?.manual).toBe(true);
+  });
+
+  it('la ruta combina los pasos del catálogo con los contactos de la institución; el ICBF solo con menores de 14', async () => {
+    const { derechos } = await preparar(undefined, undefined, CONFIGURACION_DEMO);
+    const adulta = derechos.rutaViolenciaSexual(false);
+    expect(adulta.pasos.join(' ')).toContain('SIVIGILA');
+    expect(adulta.pasos.join(' ')).toContain('no aplica la anticoncepción de emergencia');
+    expect(adulta.contactos.map((c) => c.entidad)).not.toContain('ICBF');
+    expect(derechos.rutaViolenciaSexual(true).contactos.map((c) => c.entidad)).toContain('ICBF');
+    expect(adulta.ficticia).toBe(true);
+  });
+
+  it('sin configuración: sin prestador ni contactos, la remisión es manual', async () => {
+    const { derechos } = await preparar();
+    expect(derechos.prestadorConfigurado()).toBeNull();
+    expect(derechos.rutaViolenciaSexual(true).contactos).toEqual([]);
   });
 });

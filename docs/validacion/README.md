@@ -9,4 +9,4 @@ Antes de usar la app con pacientes hay que completar cuatro cosas. Las dos prime
 | 3 | Verificar las normas que citan los textos legales (G3) | Equipo clínico y asesoría jurídica | [`verificacion-normativa.md`](verificacion-normativa.md) | Cada texto legal cita su norma y muestra la fecha de verificación. |
 | 4 | Probar los textos con gestantes y medir el tiempo de consulta (G3) | Equipo del piloto | [`pruebas-con-gestantes.md`](pruebas-con-gestantes.md) y [`tiempo-de-consulta.md`](tiempo-de-consulta.md) | Las gestantes saben decir su próxima cita y dos signos de alarma; la consulta no toma más que en papel. |
 
-Además, las decisiones pendientes del plan (prestador de IVE y ruta de violencia sexual de la institución) se configuran en el catálogo: `derechos.prestadorIVE` y `derechos.rutaViolenciaSexual`.
+Además, las decisiones pendientes del plan (prestador de IVE y ruta de violencia sexual de la institución) se configuran por institución en `src/institucion/configuracion.ts` (prestador de IVE y contactos de la ruta; la demostración usa datos ficticios). Los pasos comunes de la ruta están en el catálogo: `derechos.rutaViolenciaSexual`.

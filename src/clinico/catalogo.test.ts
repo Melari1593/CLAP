@@ -81,6 +81,9 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
       'clap.antitetanicaConducta',
       'recordatorios.ventanas',
       'recordatorios.examenesPrimeraConsulta',
+      'trombo.suspensionAntesDelParto',
+      'hta.umbrales',
+      'bienestarFetal',
     ] as const) {
       expect(cat.parametro(id), id).toMatchObject({ estado: 'decidido', revisado: '2026-10-07' });
     }
@@ -90,8 +93,6 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
     const pendientes = new Catalogo().lista().filter((p) => p.estado === 'pendiente').map((p) => p.id);
     expect(pendientes).toEqual(
       expect.arrayContaining([
-        'trombo.suspensionAntesDelParto',
-        'derechos.prestadorIVE',
         'derechos.rutaViolenciaSexual',
         'ive.limite',
       ]),

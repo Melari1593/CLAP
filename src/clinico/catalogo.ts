@@ -15,6 +15,7 @@ export type Fuente =
   | 'Sentencia C-055 de 2022'
   | 'Resolución 051 de 2023'
   | 'Resolución 2465 de 2016'
+  | 'Resolución 459 de 2012'
   | 'Spec HCP Digital v1'
   | 'Equipo clínico';
 
@@ -388,8 +389,9 @@ const BASE = {
     valor:
       'Si tienes programada la inducción del parto o una cesárea, el equipo de salud te dirá cuándo aplicarte la última inyección. Por lo general, no te la aplicas el día del procedimiento.',
     fuentes: ['RCOG 37a + declaración de posición', 'Equipo clínico'],
-    estado: 'pendiente',
-    nota: 'Texto provisional (basado en la RCOG) usado por decisión de la responsable del proyecto el 2026-10-07. Lo valida el equipo clínico.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Texto basado en la RCOG, aprobado por la responsable del proyecto el 2026-10-07.',
   }),
 
   // ---------- Alertas básicas del CLAP (C2, C3) ----------
@@ -489,9 +491,9 @@ const BASE = {
     valor: { pas: 140, pad: 90, pasSevera: 160, padSevera: 110, semanaGestacional: 20, proteinuriaMinima: '1+' },
     unidad: 'mmHg / semanas / proteinuria en tira',
     fuentes: ['GPC Colombia 2013', 'Equipo clínico'],
-    estado: 'pendiente',
-    nota:
-      'Aprobados por la responsable del proyecto el 2026-10-07 (proteinuria de 1+ o más). Pendiente de que el equipo clínico confirme los umbrales contra la GPC vigente.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Aprobados por la responsable del proyecto el 2026-10-07 (proteinuria de 1+ o más). Confirmar contra la GPC vigente.',
   }),
   'au.percentiles': p<Record<number, { p10: number; p90: number }>>({
     nombre: 'Altura uterina: percentiles 10 y 90 por semana (CLAP)',
@@ -562,8 +564,9 @@ const BASE = {
     valor: { fcfMin: 110, fcfMax: 160, movimientosDesdeSemana: 20 },
     unidad: 'lpm / semanas',
     fuentes: ['Equipo clínico'],
-    estado: 'pendiente',
-    nota: 'Aprobado por la responsable del proyecto el 2026-10-07. Pendiente de confirmación clínica.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Aprobado por la responsable del proyecto el 2026-10-07. Confirmar contra la GPC vigente.',
   }),
   'rh.antiD': p<{ desdeSemana: number; hastaSemana: number | null }>({
     nombre: 'Inmunoglobulina anti-D en gestantes Rh negativo no sensibilizadas',
@@ -638,18 +641,19 @@ const BASE = {
     estado: 'pendiente',
     nota: 'Falta registrar la fecha de verificación de cada norma (tarea G3).',
   }),
-  'derechos.prestadorIVE': p<string | null>({
-    nombre: 'Prestador de referencia para IVE de la institución',
-    valor: null,
-    fuentes: ['Equipo clínico'],
+  // El prestador de IVE y los contactos de la ruta son de cada institución: src/institucion/configuracion.ts.
+  'derechos.rutaViolenciaSexual': p<string[]>({
+    nombre: 'Ruta de atención a víctimas de violencia sexual: pasos comunes a todas las instituciones',
+    valor: [
+      'Atender como urgencia médica, con prioridad, según el protocolo de atención integral en salud para víctimas de violencia sexual (Resolución 459 de 2012).',
+      'Si la agresión ocurrió en las últimas 72 horas: profilaxis para VIH e ITS y toma de muestras con cadena de custodia. En la gestante no aplica la anticoncepción de emergencia.',
+      'Notificar al SIVIGILA (evento 875, violencia de género e intrafamiliar).',
+      'Activar la ruta de protección y justicia (comisaría de familia, Fiscalía; en menores de 14 años también ICBF). La atención en salud no se condiciona a la denuncia.',
+      'Ofrecer atención en salud mental y seguimiento.',
+    ],
+    fuentes: ['Resolución 459 de 2012', 'Equipo clínico'],
     estado: 'pendiente',
-    nota: 'Sin prestador configurado, la app permite registrar la remisión de forma manual.',
-  }),
-  'derechos.rutaViolenciaSexual': p<string | null>({
-    nombre: 'Ruta de atención a víctimas de violencia sexual y notificaciones',
-    valor: null,
-    fuentes: ['Equipo clínico'],
-    estado: 'pendiente',
+    nota: 'Texto base propuesto el 2026-10-07 y aprobado como borrador por la responsable del proyecto. Lo verifica el equipo clínico o jurídico antes de marcarlo como decidido.',
   }),
 
   // ---------- Carné (F3, F4) ----------

@@ -14,6 +14,7 @@ import type { Historia, Repositorio } from '../datos/repositorio';
 import { construirContexto, type ContextoClinico, type MotorAlertas } from '../alertas/motor';
 import { CAUSALES, cita } from './textos';
 import type { RegistroEventos } from '../eventos/eventos';
+import type { ConfiguracionInstitucional, ContactoRuta } from '../institucion/configuracion';
 
 export type Marco =
   | { tipo: 'voluntad'; texto: string; norma: string }
@@ -88,14 +89,25 @@ export class ServicioDerechos {
     private readonly hoy: () => FechaISO,
     private readonly ahora: () => Date = () => new Date(),
     private readonly eventos?: RegistroEventos,
+    private readonly institucion?: ConfiguracionInstitucional,
   ) {}
 
   contexto(historia: Historia): ContextoClinico {
     return construirContexto(historia, this.hoy(), this.catalogo);
   }
 
+  /** Prestador de referencia para IVE de la institución, o null si no lo ha definido. */
   prestadorConfigurado(): string | null {
-    return this.catalogo.valor('derechos.prestadorIVE');
+    return this.institucion?.prestadorIVE?.nombre ?? null;
+  }
+
+  /** Pasos comunes de la ruta (catálogo) y contactos de la institución que aplican a la gestante. */
+  rutaViolenciaSexual(menor14: boolean): { pasos: string[]; contactos: ContactoRuta[]; ficticia: boolean } {
+    return {
+      pasos: this.catalogo.valor('derechos.rutaViolenciaSexual'),
+      contactos: (this.institucion?.rutaViolenciaSexual ?? []).filter((c) => menor14 || !c.soloMenores14),
+      ficticia: this.institucion?.ficticia ?? false,
+    };
   }
 
   async registrar(embarazoId: string, d: NuevaDecision): Promise<RegistroDerechos> {

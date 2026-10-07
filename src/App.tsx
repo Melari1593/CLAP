@@ -19,6 +19,7 @@ import { PantallaBuscar } from './ui/PantallaBuscar';
 import { PantallaCatalogo } from './ui/Catalogo';
 import { PantallaConsulta } from './ui/PantallaConsulta';
 import { PantallaFicha } from './ui/PantallaFicha';
+import { CONFIGURACION_DEMO } from './institucion/configuracion';
 
 // El inicio de sesión con roles reales llega con el servidor. Mientras tanto, la app
 // usa un profesional autorizado de demostración en este dispositivo.
@@ -54,7 +55,7 @@ export function App() {
     servicio.alCambiar(async (cambio) => {
       await motor.sincronizar(cambio.embarazoId);
     });
-    const derechos = new ServicioDerechos(repo, motor, catalogo, hoy, undefined, eventos);
+    const derechos = new ServicioDerechos(repo, motor, catalogo, hoy, undefined, eventos, CONFIGURACION_DEMO);
     const carnes = new ServicioCarne(bd, repo, catalogo, hoy, undefined, eventos);
     return { bd, repo, catalogo, hoy, servicio, motor, derechos, carnes };
   }, []);

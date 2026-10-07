@@ -19,7 +19,7 @@ Los textos de "Opciones y derechos" y de "Tus derechos" informan normas vigentes
 | Atención urgente; plazo máximo excepcional de 5 días calendario | Al registrar "Solicita IVE" | Resolución 051 de 2023 | Plazo y condiciones del caso excepcional. | | |
 | Objeción de conciencia individual; remisión inmediata | Al registrar "Solicita IVE" | Resolución 051 de 2023, SU-096 de 2018 | Que la objeción sea individual y la obligación de remitir. | | |
 | Niñas y adolescentes pueden acceder a la IVE | Guía de asesoría | Resolución 051 de 2023 | Redacción. | | |
-| Menor de 14 años: se presume violencia sexual; activar la ruta y notificar | Alerta y Opciones y derechos | Normas de protección vigentes y ruta de violencia sexual | A quién se notifica y en qué plazo; completar `derechos.rutaViolenciaSexual`. | | |
+| Menor de 14 años: se presume violencia sexual; activar la ruta y notificar | Alerta y Opciones y derechos | Normas de protección vigentes y ruta de violencia sexual | A quién se notifica y en qué plazo; verificar los pasos de `derechos.rutaViolenciaSexual` y los contactos de la institución. | | |
 | Causal de violencia sexual sin límite de edad gestacional | Alerta y Opciones y derechos | Sentencia C-055 de 2022, C-355 de 2006 | Redacción. | | |
 | "Tus derechos" (seis puntos) | Carné de la gestante | Ruta Materno Perinatal (Resolución 3280 de 2018) y normas de derechos sexuales y reproductivos | Que cada punto sea correcto y comprensible (ver también las pruebas con gestantes). | | |
 
