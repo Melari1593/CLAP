@@ -532,7 +532,7 @@ const BASE = {
       { semana: 23, adecuado: [22.1, 26.7], sobrepeso: [26.8, 31.3] },
       { semana: 24, adecuado: [22.3, 26.9], sobrepeso: [27.0, 31.5] },
       { semana: 25, adecuado: [22.5, 27.0], sobrepeso: [27.1, 31.6] },
-      { semana: 26, adecuado: [22.7, 27.2], sobrepeso: [27.2, 31.7] },
+      { semana: 26, adecuado: [22.7, 27.2], sobrepeso: [27.3, 31.7] },
       { semana: 27, adecuado: [22.8, 27.3], sobrepeso: [27.4, 31.8] },
       { semana: 28, adecuado: [23.0, 27.5], sobrepeso: [27.6, 31.9] },
       { semana: 29, adecuado: [23.2, 27.6], sobrepeso: [27.7, 32.0] },
@@ -555,7 +555,7 @@ const BASE = {
     estado: 'decidido',
     revisado: '2026-10-07',
     nota:
-      'Cuadro 12 de la Resolución 2465 de 2016 (Atalah, Universidad de Chile), transcrito por la responsable del proyecto el 2026-10-07. En la semana 26 el cuadro da 27,2 como fin de adecuado y como inicio de sobrepeso; se clasifica como adecuado (se evalúa primero ese rango).',
+      'Cuadro 12 de la Resolución 2465 de 2016 (Atalah, Universidad de Chile), transcrito por la responsable del proyecto el 2026-10-07. En la semana 26 el cuadro publicado repite 27,2 como fin de adecuado y como inicio de sobrepeso; por decisión de la responsable del proyecto (2026-10-07) sobrepeso empieza en 27,3, como en el resto de semanas.',
   }),
   'bienestarFetal': p<{ fcfMin: number; fcfMax: number; movimientosDesdeSemana: number }>({
     nombre: 'Bienestar fetal: FCF normal y semana desde la que se evalúan los movimientos',

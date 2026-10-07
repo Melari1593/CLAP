@@ -15,12 +15,12 @@ describe('IMC para la edad gestacional (cuadro 12, Resolución 2465 de 2016)', (
     expect(cat.parametro('nutricion.atalah').estado).toBe('decidido');
   });
 
-  it('los rangos son contiguos (fin de adecuado + 0,1 = inicio de sobrepeso), salvo la semana 26 del cuadro', () => {
+  it('los rangos son contiguos (fin de adecuado + 0,1 = inicio de sobrepeso), en todas las semanas', () => {
     const saltos = cat
       .valor('nutricion.atalah')
       .filter((f) => Math.round((f.sobrepeso[0] - f.adecuado[1]) * 10) !== 1)
       .map((f) => f.semana);
-    expect(saltos).toEqual([26]);
+    expect(saltos).toEqual([]);
   });
 
   it.each([
@@ -49,7 +49,7 @@ describe('IMC para la edad gestacional (cuadro 12, Resolución 2465 de 2016)', (
     expect(clasificar(22.4, 25, 0)).toBe('bajo_peso');
   });
 
-  it('semana 26: 27,2 queda como adecuado (el cuadro lo pone en los dos rangos)', () => {
+  it('semana 26: sobrepeso empieza en 27,3 (el cuadro publicado repetía 27,2)', () => {
     expect(clasificar(27.2, 26)).toBe('adecuado');
     expect(clasificar(27.3, 26)).toBe('sobrepeso');
   });
