@@ -130,3 +130,28 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
   .carne section { break-inside: avoid; }
 }
 .demo { margin: 2px 0 4px; font-size: 0.85rem; background: #fef3c7; color: #78350f; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+
+/* ---------- Gráfica de altura uterina ---------- */
+.grafica-au { margin: 16px 0; }
+.grafica-au svg { width: 100%; height: auto; max-width: 720px; display: block; background: #fcfcfb; border: 1px solid var(--borde); border-radius: 8px; }
+.grafica-au .rejilla { stroke: #e5e7eb; stroke-width: 1; }
+.grafica-au .eje { font-size: calc(11px * var(--escala, 1) * 0.9); fill: #6b7280; }
+.grafica-au .banda { fill: #ccfbf1; fill-opacity: 0.7; }
+.grafica-au .percentil { fill: none; stroke: #64748b; stroke-width: 2; }
+.grafica-au .trayectoria { fill: none; stroke: #0d9488; stroke-width: 2; stroke-opacity: 0.6; }
+.grafica-au .punto circle:not(.objetivo), .grafica-au .punto polygon { fill: #0d9488; stroke: #fcfcfb; stroke-width: 2; }
+.grafica-au .punto.fuera polygon { fill: #b45309; }
+.grafica-au .punto .objetivo { fill: transparent; stroke: none; cursor: pointer; }
+.grafica-au .punto:focus { outline: none; }
+.grafica-au .punto:focus .objetivo { stroke: #1f2937; stroke-width: 1; stroke-dasharray: 2 2; }
+.grafica-au .tooltip rect { fill: #ffffff; stroke: #d1d5db; }
+.grafica-au .tooltip text { font-size: 11px; fill: #374151; }
+.grafica-au .tooltip text.fuerte { font-weight: 600; fill: #111827; }
+.leyenda-au { font-size: 0.85rem; color: var(--suave); display: flex; gap: 4px 14px; align-items: center; flex-wrap: wrap; }
+.leyenda-au .item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.leyenda-au .muestra { display: inline-block; width: 10px; height: 10px; }
+.leyenda-au .muestra.dentro { background: #0d9488; border-radius: 50%; }
+.leyenda-au .muestra.fuera { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid #b45309; }
+.tabla-au { border-collapse: collapse; font-size: 0.85rem; margin-top: 6px; }
+.tabla-au th, .tabla-au td { border-bottom: 1px solid var(--borde); padding: 4px 8px; text-align: left; }
+@media print { .grafica-au { display: none; } }

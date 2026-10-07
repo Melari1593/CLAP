@@ -17,6 +17,7 @@ import { PanelAlertas } from './PanelAlertas';
 import { SeccionesSeguimiento } from './SeccionesSeguimiento';
 import { CierreCarne } from './CierreCarne';
 import { PanelPendientes } from './PanelPendientes';
+import { GraficaAlturaUterina } from './GraficaAlturaUterina';
 import { valorDe } from '../datos/campo';
 
 type Cita = { fecha: string; lugar: string; queLlevar: string };
@@ -134,6 +135,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
         </>
       )}
 
+      {tipo === 'seguimiento' && <GraficaAlturaUterina embarazoId={embarazoId} version={guardados} />}
       {tipo === 'seguimiento' &&
         (consultaId ? (
           <SeccionesSeguimiento embarazoId={embarazoId} consultaId={consultaId} alCambiar={() => setGuardados((n) => n + 1)} />
