@@ -18,12 +18,13 @@ interface Punto {
   estado: EstadoNutricional;
 }
 
+// Límites entre zonas por semana: inicio de adecuado, inicio de sobrepeso y fin de sobrepeso (después, obesidad).
 type Limite = { semana: number; adecuadoDesde: number; sobrepesoDesde: number; obesidadDesde: number };
 
 const ANCHO = 640;
 const ALTO = 360;
 const M = { izq: 44, der: 16, arr: 16, aba: 40 };
-const SEM_MIN = 10;
+const SEM_MIN = 6;
 const SEM_MAX = 42;
 const IMC_MIN = 15;
 const IMC_MAX = 40;
@@ -55,7 +56,17 @@ export function GraficaIMC({ embarazoId, version = 0 }: { embarazoId: string; ve
       const historia = await repo.historia(embarazoId);
       if (!historia) return;
       const ctx = construirContexto(historia, hoy(), catalogo);
-      setLimites(catalogo.valor('nutricion.atalah'));
+      // Cada fila vale para la semana cumplida: el límite se dibuja escalonado, de s a s+1.
+      setLimites(
+        catalogo.valor('nutricion.atalah').flatMap((f) =>
+          [f.semana, Math.min(f.semana + 1, SEM_MAX)].map((semana) => ({
+            semana,
+            adecuadoDesde: f.adecuado[0],
+            sobrepesoDesde: f.sobrepeso[0],
+            obesidadDesde: f.sobrepeso[1],
+          })),
+        ),
+      );
       const t = valorDe(ctx.primera?.gestacionActual.tallaCm);
       setTalla(t);
       const lista: Punto[] = [];
@@ -95,7 +106,7 @@ export function GraficaIMC({ embarazoId, version = 0 }: { embarazoId: string; ve
     <section className="grafica-au grafica-imc" aria-label="IMC para la edad gestacional">
       <h3>IMC para la edad gestacional</h3>
       <p className="suave">
-        Zonas de Atalah (Resolución 2465 de 2016), semanas 10 a 42.
+        Zonas de Atalah (cuadro 12 de la Resolución 2465 de 2016), semanas 6 a 42.
         {!talla && ' Falta la talla de la primera consulta para calcular el IMC.'}
         {talla && puntos.length === 0 && ' Aún no hay controles con peso en ese rango.'}
       </p>

@@ -14,6 +14,7 @@ export type Fuente =
   | 'Sentencia SU-096 de 2018'
   | 'Sentencia C-055 de 2022'
   | 'Resolución 051 de 2023'
+  | 'Resolución 2465 de 2016'
   | 'Spec HCP Digital v1'
   | 'Equipo clínico';
 
@@ -49,6 +50,13 @@ export interface CortesHbTrimestre {
   leve: number;
   /** Hb ≥ este valor (y < leve): moderada. Por debajo: grave. */
   moderada: number;
+}
+
+/** Fila del cuadro 12 de la Resolución 2465 de 2016: rangos [desde, hasta] en kg/m², ambos inclusive. */
+export interface FilaAtalah {
+  semana: number;
+  adecuado: [number, number];
+  sobrepeso: [number, number];
 }
 
 export interface DosisHeparina {
@@ -501,22 +509,53 @@ const BASE = {
     estado: 'pendiente',
     nota: 'Leídos de la curva del CLAP que entregó la responsable del proyecto (2026-10-07). Reemplazar por la tabla numérica oficial del CLAP.',
   }),
-  'nutricion.atalah': p<{ semana: number; adecuadoDesde: number; sobrepesoDesde: number; obesidadDesde: number }[]>({
+  'nutricion.atalah': p<FilaAtalah[]>({
     nombre: 'IMC para la edad gestacional (Atalah)',
     valor: [
-      { semana: 10, adecuadoDesde: 20.0, sobrepesoDesde: 25.0, obesidadDesde: 30.1 },
-      { semana: 15, adecuadoDesde: 20.6, sobrepesoDesde: 25.5, obesidadDesde: 30.6 },
-      { semana: 20, adecuadoDesde: 21.5, sobrepesoDesde: 26.3, obesidadDesde: 31.1 },
-      { semana: 25, adecuadoDesde: 22.3, sobrepesoDesde: 27.1, obesidadDesde: 31.7 },
-      { semana: 30, adecuadoDesde: 23.2, sobrepesoDesde: 27.9, obesidadDesde: 32.3 },
-      { semana: 35, adecuadoDesde: 24.1, sobrepesoDesde: 28.6, obesidadDesde: 32.8 },
-      { semana: 40, adecuadoDesde: 24.9, sobrepesoDesde: 29.2, obesidadDesde: 33.2 },
-      { semana: 42, adecuadoDesde: 25.1, sobrepesoDesde: 29.3, obesidadDesde: 33.3 },
+      { semana: 6, adecuado: [20.0, 24.9], sobrepeso: [25.0, 30.0] },
+      { semana: 7, adecuado: [20.1, 24.9], sobrepeso: [25.0, 30.0] },
+      { semana: 8, adecuado: [20.2, 25.0], sobrepeso: [25.1, 30.1] },
+      { semana: 9, adecuado: [20.2, 25.1], sobrepeso: [25.2, 30.2] },
+      { semana: 10, adecuado: [20.3, 25.2], sobrepeso: [25.3, 30.2] },
+      { semana: 11, adecuado: [20.4, 25.3], sobrepeso: [25.4, 30.3] },
+      { semana: 12, adecuado: [20.5, 25.4], sobrepeso: [25.5, 30.3] },
+      { semana: 13, adecuado: [20.7, 25.6], sobrepeso: [25.7, 30.4] },
+      { semana: 14, adecuado: [20.8, 25.7], sobrepeso: [25.8, 30.5] },
+      { semana: 15, adecuado: [20.9, 25.8], sobrepeso: [25.9, 30.6] },
+      { semana: 16, adecuado: [21.1, 25.9], sobrepeso: [26.0, 30.7] },
+      { semana: 17, adecuado: [21.2, 26.0], sobrepeso: [26.1, 30.8] },
+      { semana: 18, adecuado: [21.3, 26.1], sobrepeso: [26.2, 30.9] },
+      { semana: 19, adecuado: [21.5, 26.2], sobrepeso: [26.3, 30.9] },
+      { semana: 20, adecuado: [21.6, 26.3], sobrepeso: [26.4, 31.0] },
+      { semana: 21, adecuado: [21.8, 26.4], sobrepeso: [26.5, 31.1] },
+      { semana: 22, adecuado: [21.9, 26.6], sobrepeso: [26.7, 31.2] },
+      { semana: 23, adecuado: [22.1, 26.7], sobrepeso: [26.8, 31.3] },
+      { semana: 24, adecuado: [22.3, 26.9], sobrepeso: [27.0, 31.5] },
+      { semana: 25, adecuado: [22.5, 27.0], sobrepeso: [27.1, 31.6] },
+      { semana: 26, adecuado: [22.7, 27.2], sobrepeso: [27.2, 31.7] },
+      { semana: 27, adecuado: [22.8, 27.3], sobrepeso: [27.4, 31.8] },
+      { semana: 28, adecuado: [23.0, 27.5], sobrepeso: [27.6, 31.9] },
+      { semana: 29, adecuado: [23.2, 27.6], sobrepeso: [27.7, 32.0] },
+      { semana: 30, adecuado: [23.4, 27.8], sobrepeso: [27.9, 32.1] },
+      { semana: 31, adecuado: [23.5, 27.9], sobrepeso: [28.0, 32.2] },
+      { semana: 32, adecuado: [23.7, 28.0], sobrepeso: [28.1, 32.3] },
+      { semana: 33, adecuado: [23.9, 28.1], sobrepeso: [28.2, 32.4] },
+      { semana: 34, adecuado: [24.0, 28.3], sobrepeso: [28.4, 32.5] },
+      { semana: 35, adecuado: [24.2, 28.4], sobrepeso: [28.5, 32.6] },
+      { semana: 36, adecuado: [24.3, 28.5], sobrepeso: [28.6, 32.7] },
+      { semana: 37, adecuado: [24.5, 28.7], sobrepeso: [28.8, 32.8] },
+      { semana: 38, adecuado: [24.6, 28.8], sobrepeso: [28.9, 32.9] },
+      { semana: 39, adecuado: [24.8, 28.9], sobrepeso: [29.0, 33.0] },
+      { semana: 40, adecuado: [25.0, 29.1], sobrepeso: [29.2, 33.1] },
+      { semana: 41, adecuado: [25.1, 29.2], sobrepeso: [29.3, 33.2] },
+      { semana: 42, adecuado: [25.1, 29.2], sobrepeso: [29.3, 33.2] },
     ],
-    unidad: 'kg/m² por semana de gestación (10 a 42); entre puntos se interpola',
-    fuentes: ['Equipo clínico'],
-    estado: 'pendiente',
-    nota: 'Resolución 2465 de 2016 (Atalah et al., 1997). Leídos de la gráfica que entregó la responsable del proyecto (2026-10-07). Reemplazar por la tabla numérica oficial.',
+    unidad: 'kg/m² por semana de gestación cumplida (6 a 42). Bajo peso: < inicio de adecuado; obesidad: > fin de sobrepeso',
+    fuentes: ['Resolución 2465 de 2016'],
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota:
+      'Cuadro 12 de la Resolución 2465 de 2016 (Atalah, Universidad de Chile), transcrito por la responsable del proyecto el 2026-10-07. En la semana 26 el cuadro da 27,2 como fin de adecuado y como inicio de sobrepeso; se clasifica como adecuado (se evalúa primero ese rango).',
   }),
   'bienestarFetal': p<{ fcfMin: number; fcfMax: number; movimientosDesdeSemana: number }>({
     nombre: 'Bienestar fetal: FCF normal y semana desde la que se evalúan los movimientos',

@@ -59,19 +59,16 @@ export const alturaUterina: Regla = {
 
 export type EstadoNutricional = 'bajo_peso' | 'adecuado' | 'sobrepeso' | 'obesidad';
 
-/** Clasifica el IMC para la edad gestacional con la tabla de Atalah (interpolada). */
+/**
+ * Clasifica el IMC (ya redondeado a un decimal) con el cuadro 12 de la Resolución 2465 de 2016,
+ * usando la fila de la semana de gestación cumplida. Fuera de las semanas 6 a 42 no clasifica.
+ */
 export function clasificarIMCGestacional(ctx: ContextoClinico, imcValor: number, egDias: number): EstadoNutricional | undefined {
-  const tabla = ctx.catalogo.valor('nutricion.atalah');
-  const s = egDias / 7;
-  if (s < tabla[0]!.semana || s > tabla.at(-1)!.semana) return undefined;
-  const i = Math.max(0, tabla.findIndex((t) => t.semana > s) - 1);
-  const a = tabla[i]!;
-  const b = tabla[Math.min(i + 1, tabla.length - 1)]!;
-  const f = b.semana === a.semana ? 0 : (s - a.semana) / (b.semana - a.semana);
-  const lim = (k: 'adecuadoDesde' | 'sobrepesoDesde' | 'obesidadDesde') => a[k] + (b[k] - a[k]) * f;
-  if (imcValor < lim('adecuadoDesde')) return 'bajo_peso';
-  if (imcValor < lim('sobrepesoDesde')) return 'adecuado';
-  if (imcValor < lim('obesidadDesde')) return 'sobrepeso';
+  const fila = ctx.catalogo.valor('nutricion.atalah').find((f) => f.semana === Math.floor(egDias / 7));
+  if (!fila) return undefined;
+  if (imcValor < fila.adecuado[0]) return 'bajo_peso';
+  if (imcValor <= fila.adecuado[1]) return 'adecuado';
+  if (imcValor <= fila.sobrepeso[1]) return 'sobrepeso';
   return 'obesidad';
 }
 
