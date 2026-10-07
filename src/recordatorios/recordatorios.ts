@@ -113,7 +113,7 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
     lista.push({ id: 'cuello_uterino', texto: 'Citología cervicovaginal según el esquema de tamizaje vigente.', tipo: 'accion', estado: 'pendiente' });
   }
   if (!valorDe(primera.gestacionActual.grupo) || !valorDe(primera.gestacionActual.rh)) {
-    lista.push({ id: 'grupo_rh', texto: 'Grupo sanguíneo y Rh.', tipo: 'examen', estado: estadoEn(ventanaInicial.hastaSemana), paraGestante: SANGRE });
+    lista.push({ id: 'grupo_rh', texto: 'Hemoclasificación (grupo sanguíneo y Rh).', tipo: 'examen', estado: estadoEn(ventanaInicial.hastaSemana), paraGestante: SANGRE });
   }
   const antitetanica = valorDe(primera.gestacionActual.antitetanica);
   if (!antitetanica) {

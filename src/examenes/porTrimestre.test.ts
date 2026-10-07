@@ -14,7 +14,11 @@ describe('Laboratorios y ecografías por trimestre', () => {
   it('agrupa lo esperado en los tres trimestres', () => {
     const g = grupos(semana(12));
     expect(g.map((x) => x.titulo)).toEqual(['Primer trimestre y exámenes de ingreso', 'Segundo trimestre', 'Tercer trimestre']);
-    expect(g[0]!.filas.map((f) => f.id)).toEqual(expect.arrayContaining(['ingreso:hb', 'ingreso:vih', 'ingreso:hepatitisB', 'eco_1t']));
+    expect(g[0]!.filas.map((f) => f.id)).toEqual(expect.arrayContaining(['ingreso:hemoclasificacion', 'ingreso:hb', 'ingreso:vih', 'ingreso:hepatitisB', 'eco_1t']));
+    // Grupo y Rh de la primera consulta de prueba: O positivo.
+    expect(fila(g, 'ingreso:hemoclasificacion')).toMatchObject({ estado: 'hecho', resultado: { texto: 'O positivo', alterado: false } });
+    const sinGrupo = grupos(semana(12), { primera: (d) => (d.gestacionActual.grupo = { estado: 'vacio' }) });
+    expect(fila(sinGrupo, 'ingreso:hemoclasificacion')?.estado).toBe('pendiente');
     expect(g[1]!.filas.map((f) => f.id)).toEqual(['segundo:vih', 'segundo:sifilis', 'eco_detalle', 'ptog']);
     expect(g[2]!.filas.map((f) => f.id)).toEqual(['tercer:hb', 'tercer:vih', 'tercer:sifilis', 'egb']);
   });

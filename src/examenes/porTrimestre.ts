@@ -110,10 +110,23 @@ export function examenesPorTrimestre(ctx: ContextoClinico): GrupoTrimestre[] {
   };
   const tiposIngreso = (catalogo.valor('recordatorios.examenesPrimeraConsulta') as TipoExamen[]).filter((t) => aplica[t] !== false);
   if (valorDe(g?.rh) === '-') tiposIngreso.push('coombsIndirecto');
-  const filas1 = tiposIngreso.map((t) => {
-    const tipos: TipoExamen[] = t === 'sifilisTreponemica' ? ['sifilisTreponemica', 'vdrl'] : [t];
-    return fila(`ingreso:${t}`, etiquetaExamen(t), ingreso, buscar(tipos, 0, tercer.desdeSemana));
-  });
+  // Hemoclasificación: grupo y Rh se registran en la primera consulta.
+  const grupo = valorDe(g?.grupo);
+  const rh = valorDe(g?.rh);
+  const filaHemo = fila('ingreso:hemoclasificacion', 'Hemoclasificación (grupo y Rh)', ingreso);
+  if (grupo && rh) {
+    const fechaPrimera = historia.consultas.find((c) => c.tipo === 'primera')?.fecha ?? ctx.hoy;
+    const d = ctx.egEn(fechaPrimera);
+    filaHemo.estado = 'hecho';
+    filaHemo.resultado = { fecha: fechaPrimera, semana: d !== undefined ? semanaTexto(d) : undefined, texto: `${grupo} ${rh === '+' ? 'positivo' : 'negativo'}`, alterado: rh === '-' };
+  }
+  const filas1 = [
+    filaHemo,
+    ...tiposIngreso.map((t) => {
+      const tipos: TipoExamen[] = t === 'sifilisTreponemica' ? ['sifilisTreponemica', 'vdrl'] : [t];
+      return fila(`ingreso:${t}`, etiquetaExamen(t), ingreso, buscar(tipos, 0, tercer.desdeSemana));
+    }),
+  ];
   const eco1 = v.ecografiaPrimerTrimestre!;
   const ecoGestacion = valorDe(g?.ecografia);
   const filaEco1 = fila('eco_1t', 'Ecografía de 10+6 a 13+6', eco1, buscar(['ecografia'], 0, null, esEco('primer_trimestre')));
