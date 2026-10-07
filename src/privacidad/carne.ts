@@ -14,7 +14,7 @@ import { grupoRh } from '../clinico/grupoRh';
 
 export const MENSAJE_CARNE_PAUSADO = 'Comunícate con tu servicio de salud.';
 
-const INDICACIONES_EN_CARNE: TipoIndicacion[] = ['hierro', 'acidoFolico', 'calcio', 'asa', 'tromboprofilaxis'];
+const INDICACIONES_EN_CARNE: TipoIndicacion[] = ['hierro', 'acidoFolico', 'calcio', 'asa', 'tromboprofilaxis', 'espiramicina', 'toxoTratamientoPleno'];
 
 export type EstadoExamenCarne = 'hecho' | 'falta' | 'mas_adelante';
 export interface ExamenCarne {

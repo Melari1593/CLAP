@@ -64,7 +64,11 @@ export function alterado(ctx: ContextoClinico, e: ResultadoExamen): boolean {
     case 'plaquetas': return (r as ResultadoPorTipo['plaquetas']).x10e9L < ctx.catalogo.valor('plaquetas.normalDesde');
     case 'rubeolaIgG': return !(r as ResultadoPorTipo['rubeolaIgG']).positivo; // sin inmunidad
     case 'varicelaIgG': return !(r as ResultadoPorTipo['varicelaIgG']).positivo; // sin inmunidad
-    case 'toxoplasmosis': return (r as ResultadoPorTipo['toxoplasmosis']).igm === 'positivo';
+    case 'toxoplasmosis': {
+      const v = r as ResultadoPorTipo['toxoplasmosis'];
+      return v.igm === 'positivo' || v.iga === 'positivo' || v.avidez === 'baja';
+    }
+    case 'pcrLiquidoAmniotico': return (r as ResultadoPorTipo['pcrLiquidoAmniotico']).positivo;
     case 'ecografia': return (r as ResultadoPorTipo['ecografia']).hallazgos === 'anormal';
     case 'coombsIndirecto':
     case 'chagas':

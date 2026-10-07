@@ -18,6 +18,7 @@ export const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }
   { tipo: 'coombsIndirecto', etiqueta: 'Coombs indirecto' },
   { tipo: 'ecografia', etiqueta: 'Ecografía' },
   { tipo: 'toxoplasmosis', etiqueta: 'Toxoplasmosis (IgG e IgM)' },
+  { tipo: 'pcrLiquidoAmniotico', etiqueta: 'PCR para toxoplasma en líquido amniótico' },
   { tipo: 'chagas', etiqueta: 'Chagas' },
   { tipo: 'malaria', etiqueta: 'Malaria' },
   { tipo: 'bacteriuria', etiqueta: 'Urocultivo' },
@@ -48,7 +49,13 @@ export function resumenExamen(e: ResultadoExamen): string {
     case 'varicelaIgG': return inmune((r as ResultadoPorTipo['varicelaIgG']).positivo);
     case 'ecografia': { const v = r as ResultadoPorTipo['ecografia']; return `${v.momento === 'primer_trimestre' ? 'De 10+6 a 13+6' : v.momento === 'detalle' ? 'De detalle' : 'Otra'} · ${v.hallazgos}`; }
     case 'hepatitisB': return `Antígeno de superficie ${(r as ResultadoPorTipo['hepatitisB']).antigenoSuperficie}`;
-    case 'toxoplasmosis': { const v = r as ResultadoPorTipo['toxoplasmosis']; return `IgG ${v.igg ?? '—'} · IgM ${v.igm ?? '—'}`; }
+    case 'toxoplasmosis': {
+      const v = r as ResultadoPorTipo['toxoplasmosis'];
+      const partes = [`IgG ${v.igg ?? '—'}${v.iggTitulo != null ? ` (${v.iggTitulo} UI/mL)` : ''}`, `IgM ${v.igm ?? '—'}`];
+      if (v.iga) partes.push(`IgA ${v.iga}`);
+      if (v.avidez) partes.push(`avidez ${v.avidez}`);
+      return partes.join(' · ');
+    }
     case 'ptog': { const v = r as ResultadoPorTipo['ptog']; return `${valorDe(v.ayunas) ?? '—'} / ${valorDe(v.unaHora) ?? '—'} / ${valorDe(v.dosHoras) ?? '—'} mg/dL`; }
     default: return pos((r as { positivo: boolean }).positivo);
   }

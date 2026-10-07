@@ -366,31 +366,6 @@ export const antirrubeola: Regla = {
   },
 };
 
-/** Toxoplasmosis: IgM positiva o IgG que pasa de negativa a positiva (seroconversión). */
-export const toxoplasmosis: Regla = {
-  id: 'toxoplasmosis',
-  evaluar(ctx) {
-    const pruebas = ctx.historia.examenes
-      .filter((e) => e.tipo === 'toxoplasmosis' && e.resultado.estado === 'valor')
-      .sort((a, b) => a.fecha.localeCompare(b.fecha))
-      .map((e) => ({ fecha: e.fecha, ...(e.resultado.estado === 'valor' ? (e.resultado.valor as { igg: string | null; igm: string | null }) : { igg: null, igm: null }) }));
-    const ultima = pruebas.at(-1);
-    if (!ultima) return null;
-    const previaNegativa = pruebas.slice(0, -1).some((p) => p.igg === 'negativo');
-    const seroconversion = previaNegativa && ultima.igg === 'positivo';
-    if (ultima.igm !== 'positivo' && !seroconversion) return null;
-    return {
-      titulo: 'Posible toxoplasmosis aguda',
-      porque: [
-        seroconversion ? `Seroconversión: IgG negativa antes y positiva el ${ultima.fecha}.` : `IgM positiva para toxoplasmosis (${ultima.fecha}).`,
-        'Remitir para confirmar la infección (por ejemplo, avidez de IgG) y definir el tratamiento.',
-      ],
-      severidad: 2,
-      opciones: [{ etiqueta: 'Referida' }, { etiqueta: 'En estudio', requiereMotivo: true }],
-    };
-  },
-};
-
 export const varicela: Regla = {
   id: 'varicela',
   evaluar(ctx) {
@@ -449,7 +424,6 @@ export const REGLAS_CLAP: Regla[] = [
   violencia,
   antirrubeola,
   varicela,
-  toxoplasmosis,
   hemoclasificacionDistinta,
   antitetanica,
 ];

@@ -23,6 +23,14 @@ export const QUE_HACER: Partial<Record<TipoIndicacion, { icono: string; texto: s
     texto:
       'Tómate 2 tabletas de calcio todos los días hasta el parto. Ayuda a prevenir la presión alta del embarazo y a formar los huesos de tu bebé. No lo tomes al mismo tiempo que el hierro: deja al menos 1 hora entre uno y otro. Tómalo 2 horas antes o 2 horas después del desayuno, el almuerzo o la comida, y no con leche.',
   },
+  espiramicina: {
+    icono: '💊',
+    texto: 'Tómate la espiramicina 3 veces al día, todos los días, hasta el parto. Protege a tu bebé de una infección (toxoplasmosis). No la suspendas sin preguntar.',
+  },
+  toxoTratamientoPleno: {
+    icono: '💊',
+    texto: 'Toma los medicamentos para la toxoplasmosis tal como te indicaron, todos los días. Hazte el examen de sangre cada semana mientras los tomas.',
+  },
   tromboprofilaxis: {
     icono: '💉',
     texto:

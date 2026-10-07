@@ -311,8 +311,19 @@ export type ResultadoPorTipo = {
   /** IgG para varicela zóster. */
   varicelaIgG: { positivo: SiNo };
   ecografia: { momento: 'primer_trimestre' | 'detalle' | 'otra'; hallazgos: 'normal' | 'anormal' };
-  /** Toxoplasmosis: se registran IgG e IgM. */
-  toxoplasmosis: { igg: 'positivo' | 'negativo' | null; igm: 'positivo' | 'negativo' | null };
+  /**
+   * Toxoplasmosis: IgG e IgM. El título de IgG (UI/mL) permite ver si se duplica entre dos muestras;
+   * IgA y avidez de IgG se piden cuando la IgG se duplica con IgM negativa.
+   */
+  toxoplasmosis: {
+    igg: 'positivo' | 'negativo' | null;
+    igm: 'positivo' | 'negativo' | null;
+    iggTitulo?: number | null;
+    iga?: 'positivo' | 'negativo' | null;
+    avidez?: 'alta' | 'intermedia' | 'baja' | null;
+  };
+  /** PCR para toxoplasma en líquido amniótico. */
+  pcrLiquidoAmniotico: { positivo: SiNo };
   chagas: { positivo: SiNo };
   malaria: { positivo: SiNo };
   bacteriuria: { positivo: SiNo };
@@ -341,6 +352,10 @@ export type TipoIndicacion =
   | 'calcio'
   | 'asa'
   | 'tromboprofilaxis'
+  /** Toxoplasmosis: tratamiento placentario. */
+  | 'espiramicina'
+  /** Toxoplasmosis: tratamiento pleno (sulfadiazina + pirimetamina + ácido folínico). */
+  | 'toxoTratamientoPleno'
   | 'preparacionParto'
   | 'lactancia';
 

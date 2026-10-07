@@ -72,7 +72,16 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
     coombsIndirecto: positivo('positivo', 'Resultado'),
     ecografia: <>{opcion('momento', 'Momento', [['primer_trimestre', 'De 10+6 a 13+6'], ['detalle', 'De detalle (18–23+6)'], ['otra', 'Otra']])}{opcion('hallazgos', 'Hallazgos', [['normal', 'Normales'], ['anormal', 'Anormales']])}</>,
     hepatitisB: opcion('antigenoSuperficie', 'Antígeno de superficie', [['negativo', 'Negativo'], ['positivo', 'Positivo']]),
-    toxoplasmosis: <>{opcion('igg', 'IgG', [['positivo', 'Positivo'], ['negativo', 'Negativo']])}{opcion('igm', 'IgM', [['positivo', 'Positivo'], ['negativo', 'Negativo']])}</>,
+    toxoplasmosis: (
+      <>
+        {opcion('igg', 'IgG', [['positivo', 'Positivo'], ['negativo', 'Negativo']])}
+        {numero('iggTitulo', 'Título de IgG', 'UI/mL')}
+        {opcion('igm', 'IgM', [['positivo', 'Positivo'], ['negativo', 'Negativo']])}
+        {opcion('iga', 'IgA (si se pidió)', [['positivo', 'Positivo'], ['negativo', 'Negativo']])}
+        {opcion('avidez', 'Avidez de IgG (si se pidió)', [['alta', 'Alta'], ['intermedia', 'Intermedia'], ['baja', 'Baja']])}
+      </>
+    ),
+    pcrLiquidoAmniotico: positivo('positivo', 'Resultado'),
     chagas: positivo('positivo', 'Resultado'),
     malaria: positivo('positivo', 'Resultado'),
     bacteriuria: positivo('positivo', 'Resultado'),
@@ -94,7 +103,8 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
       case 'sifilisTreponemica': return b('reactiva') === null ? undefined : { reactiva: b('reactiva') };
       case 'ecografia': return f.momento && f.hallazgos ? { momento: f.momento, hallazgos: f.hallazgos } : undefined;
       case 'hepatitisB': return f.antigenoSuperficie ? { antigenoSuperficie: f.antigenoSuperficie } : undefined;
-      case 'toxoplasmosis': return f.igg && f.igm ? { igg: f.igg, igm: f.igm } : undefined; // IgG e IgM
+      case 'toxoplasmosis': // IgG e IgM obligatorias; título, IgA y avidez si se tienen
+        return f.igg && f.igm ? { igg: f.igg, igm: f.igm, iggTitulo: n('iggTitulo') ?? null, iga: f.iga || null, avidez: f.avidez || null } : undefined;
       case 'ptog': return { ayunas: c(n('ayunas')), unaHora: c(n('unaHora')), dosHoras: c(n('dosHoras')) };
       default: return b('positivo') === null ? undefined : { positivo: b('positivo') };
     }

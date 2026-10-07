@@ -600,13 +600,56 @@ const BASE = {
     revisado: '2026-10-07',
     nota: 'Cada mes con IgG negativa, por decisión de la responsable del proyecto el 2026-10-07. IgM positiva o seroconversión de la IgG: alerta.',
   }),
+  'toxoplasmosis.protocolo': p<{
+    segundaMuestraDias: number;
+    factorDuplicacion: number;
+    avidezHastaSemana: number;
+    pcrDesdeSemana: number;
+    pcrDiasDesdeSospecha: number;
+    ecoMensualDesdeSemana: number;
+    hemogramaCadaDias: number;
+    plenoHastaSemanasAntesFpp: number;
+  }>({
+    nombre: 'Toxoplasmosis: momentos del protocolo',
+    valor: {
+      segundaMuestraDias: 14,
+      factorDuplicacion: 2,
+      avidezHastaSemana: 16,
+      pcrDesdeSemana: 20,
+      pcrDiasDesdeSospecha: 28,
+      ecoMensualDesdeSemana: 30,
+      hemogramaCadaDias: 7,
+      plenoHastaSemanasAntesFpp: 2,
+    },
+    unidad: 'días / semanas',
+    fuentes: ['Equipo clínico'],
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota:
+      'Protocolo entregado por la responsable del proyecto el 2026-10-07: segunda muestra (IgG con título + IgM) a las 2 semanas; IgG duplicada = título ≥ 2 veces el anterior; avidez antes de la semana 16; PCR en líquido amniótico después de la semana 20 y al menos 4 semanas desde la sospecha; ecografía mensual desde la semana 30; hemograma semanal con tratamiento pleno, hasta 2 semanas antes de la FPP.',
+  }),
+  'toxoplasmosis.esquemas': p<{ placentario: string; pleno: string; alternativos: string }>({
+    nombre: 'Toxoplasmosis: esquemas de tratamiento',
+    valor: {
+      placentario: 'Espiramicina 9 MUI/día en 3 dosis, hasta el parto.',
+      pleno:
+        'Sulfadiazina 50–100 mg/kg/día (3–4 g/día en 4 dosis) + pirimetamina 1 mg/kg/día (máx. 75 mg) + ácido folínico 5–20 mg/día, desde la semana 20 hasta 2 semanas antes de la FPP, con hemograma semanal (toxicidad medular de la pirimetamina).',
+      alternativos:
+        'Sin disponibilidad del esquema ideal: sulfadoxina-pirimetamina, o ciclos alternando espiramicina con sulfadiazina-pirimetamina.',
+    },
+    fuentes: ['Equipo clínico'],
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Entregados por la responsable del proyecto el 2026-10-07.',
+  }),
   'plaquetas.normalDesde': p<number>({
     nombre: 'Recuento de plaquetas normal (hemograma)',
     valor: 150,
     unidad: '× 10⁹/L; por debajo se marca en la sección de laboratorios',
     fuentes: ['Equipo clínico'],
-    estado: 'pendiente',
-    nota: 'Propuesto el 2026-10-07 (150 × 10⁹/L, límite inferior habitual). La trombocitopenia que contraindica la heparina (< 75) está en el riesgo trombótico.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Decidido por la responsable del proyecto el 2026-10-07. La trombocitopenia que contraindica la heparina (< 75) está en el riesgo trombótico.',
   }),
   'vacunas.tdap': p<{ desdeSemana: number; hastaSemana: number | null }>({
     nombre: 'Vacuna Tdap (tosferina) en cada embarazo',

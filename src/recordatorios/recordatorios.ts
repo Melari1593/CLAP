@@ -2,6 +2,7 @@
 // Un pendiente que ya pasó su ventana aparece como "atrasado".
 import { grupoRh } from '../clinico/grupoRh';
 import { toxoMensual } from '../examenes/porTrimestre';
+import { diasDesde, evaluarToxo } from '../alertas/toxoplasmosis';
 import { trimestreDeEG } from '../clinico/trimestre';
 import { valorDe } from '../datos/campo';
 import type { TipoExamen, TipoIndicacion } from '../datos/modelo';
@@ -226,6 +227,33 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
       estado: 'pendiente',
       paraGestante: SANGRE,
     });
+  }
+
+  // Protocolo de toxoplasmosis con IgG positiva
+  const fToxo = evaluarToxo(ctx);
+  const pToxo = catalogo.valor('toxoplasmosis.protocolo');
+  if (fToxo?.fase === 'segunda_muestra' && ctx.hoy >= fToxo.desde) {
+    lista.push({ id: 'toxo_segunda', texto: 'Toxoplasmosis: segunda muestra (IgG con título e IgM en la misma muestra).', tipo: 'examen', examen: 'toxoplasmosis', estado: 'pendiente', paraGestante: SANGRE });
+  }
+  if (fToxo?.fase === 'iga_igm') {
+    lista.push({ id: 'toxo_iga', texto: fToxo.avidez ? 'Toxoplasmosis: IgA y repetir IgM, o avidez de IgG.' : 'Toxoplasmosis: IgA y repetir IgM.', tipo: 'examen', examen: 'toxoplasmosis', estado: 'pendiente', paraGestante: SANGRE });
+  }
+  if (fToxo?.fase === 'infeccion') {
+    if (!fToxo.pcr && fToxo.pcrDesde && ctx.hoy >= fToxo.pcrDesde) {
+      lista.push({ id: 'toxo_pcr', texto: 'Toxoplasmosis: PCR en líquido amniótico, con ecografía en el mismo momento.', tipo: 'examen', examen: 'pcrLiquidoAmniotico', estado: 'pendiente', paraGestante: 'Un examen del líquido que rodea a tu bebé (amniocentesis) y una ecografía.' });
+    }
+    if (desde(pToxo.ecoMensualDesdeSemana)) {
+      const ultimaEco = historia.examenes.filter((e) => e.tipo === 'ecografia' && e.resultado.estado === 'valor').map((e) => e.fecha).sort().at(-1);
+      if (!ultimaEco || diasDesde(ctx, ultimaEco) >= 30) {
+        lista.push({ id: 'toxo_eco', texto: 'Toxoplasmosis: ecografía mensual (hidrocefalia, calcificaciones, placenta, ascitis, RCIU, hepatomegalia, hidrops).', tipo: 'examen', examen: 'ecografia', estado: 'pendiente', paraGestante: 'Ecografía de este mes.' });
+      }
+    }
+  }
+  if (vigente('toxoTratamientoPleno')) {
+    const ultimaHbFecha = historia.examenes.filter((e) => e.tipo === 'hb' && e.resultado.estado === 'valor').map((e) => e.fecha).sort().at(-1);
+    if (!ultimaHbFecha || diasDesde(ctx, ultimaHbFecha) >= pToxo.hemogramaCadaDias) {
+      lista.push({ id: 'toxo_hemograma', texto: 'Tratamiento pleno de toxoplasmosis: hemograma semanal (toxicidad de la pirimetamina).', tipo: 'examen', examen: 'hb', estado: 'pendiente', paraGestante: 'Examen de sangre de cada semana mientras tomas el tratamiento.' });
+    }
   }
 
   // Asesoría en anticoncepción para después del parto, desde el inicio del control prenatal
