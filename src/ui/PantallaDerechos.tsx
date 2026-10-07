@@ -62,8 +62,14 @@ export function PantallaDerechos({ gestanteId, embarazoId, ir }: { gestanteId: s
   if (!gestante || !historia || !marco) return <p>Cargando…</p>;
   const ctx = derechos.contexto(historia);
   const menor14 = detectados.includes('menor_14') || desencadenante === 'menor_14';
-  const rutaVS = derechos.rutaViolenciaSexual(menor14);
-  const conRuta = detectados.includes('violencia_sexual') || detectados.includes('menor_14') || desencadenante === 'violencia_sexual' || desencadenante === 'menor_14';
+  const hay = (d: DesencadenanteDerechos) => detectados.includes(d) || desencadenante === d;
+  const conRutaSexual = hay('violencia_sexual') || hay('menor_14');
+  const conRutaMujer = !conRutaSexual && hay('violencia_mujer');
+  const conRuta = conRutaSexual || conRutaMujer;
+  const infoRuta = conRutaSexual ? derechos.rutaViolenciaSexual(menor14) : derechos.rutaViolenciaContraLaMujer();
+  const tituloRuta = conRutaSexual
+    ? 'Ruta de atención a víctimas de violencia sexual'
+    : 'Ruta de atención a mujeres víctimas de violencia (Ley 1257 de 2008)';
 
   const registrar = async (e: FormEvent) => {
     e.preventDefault();
@@ -111,7 +117,7 @@ export function PantallaDerechos({ gestanteId, embarazoId, ir }: { gestanteId: s
         {'norma' in marco && <small className="suave">{marco.norma}</small>}
       </div>
 
-      {conRuta && (
+      {conRutaSexual && (
         <div className="dialogo" role="alert">
           {avisoRuta(detectados.includes('menor_14') || desencadenante === 'menor_14').map((t) => <p key={t}>{t}</p>)}
         </div>
@@ -136,13 +142,13 @@ export function PantallaDerechos({ gestanteId, embarazoId, ir }: { gestanteId: s
 
         {conRuta && (
           <fieldset>
-            <legend>Ruta de atención a víctimas de violencia sexual</legend>
-            <ol>{rutaVS.pasos.map((t) => <li key={t}>{t}</li>)}</ol>
-            {rutaVS.contactos.length > 0 && (
+            <legend>{tituloRuta}</legend>
+            <ol>{infoRuta.pasos.map((t) => <li key={t}>{t}</li>)}</ol>
+            {infoRuta.contactos.length > 0 && (
               <>
-                <p><strong>Contactos de la institución</strong>{rutaVS.ficticia && <span className="suave"> (de demostración, ficticios)</span>}</p>
+                <p><strong>Contactos de la institución</strong>{infoRuta.ficticia && <span className="suave"> (de demostración, ficticios)</span>}</p>
                 <ul className="contactos-ruta">
-                  {rutaVS.contactos.map((c) => (
+                  {infoRuta.contactos.map((c) => (
                     <li key={c.entidad}>
                       {c.entidad} · {c.contacto}{' '}
                       <button
@@ -206,7 +212,14 @@ export function PantallaDerechos({ gestanteId, embarazoId, ir }: { gestanteId: s
             </>
           )}
 
-          <label>Notas privadas <textarea rows={2} value={notas} onChange={(e) => setNotas(e.target.value)} /></label>
+          {decision === 'solicita_ive' && causal === 'violencia_sexual' ? (
+            <label>
+              Consigne en la historia clínica el hecho de violencia sexual (obligatorio; no se exige denuncia)
+              <textarea rows={3} required value={notas} onChange={(e) => setNotas(e.target.value)} />
+            </label>
+          ) : (
+            <label>Notas privadas <textarea rows={2} value={notas} onChange={(e) => setNotas(e.target.value)} /></label>
+          )}
         </fieldset>
 
         {error && <p className="error" role="alert">{error}</p>}

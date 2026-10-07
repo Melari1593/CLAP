@@ -18,15 +18,20 @@ const ctx = (op: Opciones = {}, hoy = '2026-10-06') => construirContexto(histori
 // FUM 2026-06-01: semana 24+0 = 2026-11-16.
 
 describe('Disparadores del flujo (E1)', () => {
-  it('embarazo no planeado sin decisión de continuar, violencia sexual y menor de 14 años', () => {
-    expect(disparadores(ctx())).toEqual(['no_planeado']); // no ha decidido
-    expect(disparadores(ctx({ primera: (d) => (d.planificacion.deseaContinuar = valor('no')) }))).toEqual(['no_planeado']);
-    expect(disparadores(ctx({ primera: (d) => (d.planificacion.deseaContinuar = valor('si')) }))).toEqual([]);
+  it('embarazo no planeado sin decisión de continuar, violencia y menor de 14 años', () => {
+    // Los datos de prueba registran violencia no sexual en el embarazo actual.
+    expect(disparadores(ctx())).toEqual(['no_planeado', 'violencia_mujer']); // no ha decidido
+    expect(disparadores(ctx({ primera: (d) => (d.planificacion.deseaContinuar = valor('no')) }))).toEqual(['no_planeado', 'violencia_mujer']);
+    expect(disparadores(ctx({ primera: (d) => (d.planificacion.deseaContinuar = valor('si')) }))).toEqual(['violencia_mujer']);
+    expect(disparadores(ctx({ primera: (d) => {
+      d.planificacion.deseaContinuar = valor('si');
+      d.gestacionActual.violencia = valor(false);
+    } }))).toEqual([]);
     expect(disparadores(ctx({ primera: (d) => {
       d.planificacion.embarazoPlaneado = valor(true);
       d.gestacionActual.violenciaSexual = valor(true);
     } }))).toEqual(['violencia_sexual']);
-    expect(disparadores(ctx({ fechaNacimiento: '2013-01-01', primera: (d) => (d.planificacion.embarazoPlaneado = valor(true)) }))).toEqual(['menor_14']);
+    expect(disparadores(ctx({ fechaNacimiento: '2013-01-01', primera: (d) => (d.planificacion.embarazoPlaneado = valor(true)) }))).toEqual(['violencia_mujer', 'menor_14']);
   });
 
   it('las alertas de esos disparadores enlazan con "Opciones y derechos"', () => {
@@ -139,6 +144,10 @@ describe('Registro de la decisión (E1)', () => {
     await expect(derechos.registrar(embarazoId, base)).rejects.toThrow('causal');
     const reg = await derechos.registrar(embarazoId, { ...base, causal: 'salud' });
     expect(reg.causal).toBe('salud');
+    // Causal de violencia sexual: sin denuncia, pero consignada en la historia clínica.
+    await expect(derechos.registrar(embarazoId, { ...base, causal: 'violencia_sexual' })).rejects.toThrow('No se exige denuncia');
+    const vs = await derechos.registrar(embarazoId, { ...base, causal: 'violencia_sexual', notas: 'Relata agresión sexual en junio por conocido.' });
+    expect(vs.causal).toBe('violencia_sexual');
   });
 
   it('activar la ruta de violencia sexual registra fecha, notificaciones y atiende la alerta', async () => {
@@ -204,5 +213,37 @@ describe('Configuración de la institución (prestador de IVE y ruta de violenci
     const { derechos } = await preparar();
     expect(derechos.prestadorConfigurado()).toBeNull();
     expect(derechos.rutaViolenciaSexual(true).contactos).toEqual([]);
+  });
+});
+
+describe('Ruta de violencia contra la mujer (Ley 1257 de 2008)', () => {
+  it('la alerta de violencia no sexual enlaza con la ruta y se atiende al activarla', async () => {
+    const { r, motor, derechos, embarazoId } = await preparar(undefined, undefined, CONFIGURACION_DEMO);
+    const alerta = (await motor.sincronizar(embarazoId)).find((a) => a.regla === 'violencia')!;
+    expect(alerta).toMatchObject({ activa: true, enlace: 'derechos', titulo: 'Violencia en el embarazo actual' });
+    expect(alerta.porque.join(' ')).toContain('Ley 1257 de 2008');
+
+    const ruta = derechos.rutaViolenciaContraLaMujer();
+    expect(ruta.pasos.join(' ')).toContain('medidas de atención');
+    expect(ruta.contactos.map((c) => c.entidad)).toContain('Comisaría de familia');
+
+    await derechos.registrar(embarazoId, {
+      desencadenante: 'violencia_mujer',
+      momentoASolas: true,
+      decision: 'continua',
+      rutaActivadaFechaHora: '2026-10-06T15:05:00.000Z',
+      notificaciones: [{ a: 'Comisaría de familia', fechaHora: '2026-10-06T15:20:00.000Z' }],
+    });
+    const despues = (await motor.sincronizar(embarazoId)).find((a) => a.regla === 'violencia')!;
+    expect(despues).toMatchObject({ activa: false, decision: { opcion: 'Ruta activada' } });
+    expect((await r.historia(embarazoId))!.derechos[0]?.rutaViolencia?.notificaciones).toHaveLength(1);
+  });
+
+  it('la ruta de violencia sexual dice que es gratuita y sin importar el tiempo ni la denuncia (Ley 1719 de 2014)', () => {
+    const pasos = cat.valor('derechos.rutaViolenciaSexual').join(' ');
+    expect(pasos).toContain('gratis');
+    expect(pasos).toContain('sin importar el tiempo transcurrido');
+    expect(pasos).toContain('Ley 1719 de 2014');
+    expect(cat.valor('derechos.normas').map((n) => n.norma)).toEqual(expect.arrayContaining(['Ley 1146 de 2007', 'Ley 1257 de 2008', 'Ley 1719 de 2014']));
   });
 });

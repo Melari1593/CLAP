@@ -16,6 +16,9 @@ export type Fuente =
   | 'Resolución 051 de 2023'
   | 'Resolución 2465 de 2016'
   | 'Resolución 459 de 2012'
+  | 'Ley 1146 de 2007'
+  | 'Ley 1257 de 2008'
+  | 'Ley 1719 de 2014'
   | 'Spec HCP Digital v1'
   | 'Equipo clínico';
 
@@ -646,8 +649,23 @@ const BASE = {
       { norma: 'Sentencia SU-096 de 2018', contenido: 'Reglas sobre el acceso a la IVE.', fechaVerificacion: null },
       { norma: 'Sentencia C-055 de 2022', contenido: 'IVE hasta la semana 24 por la sola voluntad.', fechaVerificacion: null },
       { norma: 'Resolución 051 de 2023', contenido: 'Regulación única de la atención integral de la IVE.', fechaVerificacion: null },
+      {
+        norma: 'Ley 1146 de 2007',
+        contenido: 'Violencia sexual contra niñas, niños y adolescentes: atención de urgencia e integral, aunque no esté definida la afiliación (art. 9); protocolo de atención (art. 10).',
+        fechaVerificacion: null,
+      },
+      {
+        norma: 'Ley 1257 de 2008',
+        contenido: 'Violencias contra las mujeres: derechos de la víctima (art. 8), medidas en salud (art. 13) y medidas de atención (art. 19).',
+        fechaVerificacion: null,
+      },
+      {
+        norma: 'Ley 1719 de 2014',
+        contenido: 'Violencia sexual: derechos y confidencialidad (art. 13); atención prioritaria como urgencia médica, gratuita, sin importar el tiempo ni la denuncia, y protocolo obligatorio (art. 23; Sentencia C-754 de 2015).',
+        fechaVerificacion: null,
+      },
     ],
-    fuentes: ['Sentencia C-355 de 2006', 'Sentencia SU-096 de 2018', 'Sentencia C-055 de 2022', 'Resolución 051 de 2023'],
+    fuentes: ['Sentencia C-355 de 2006', 'Sentencia SU-096 de 2018', 'Sentencia C-055 de 2022', 'Resolución 051 de 2023', 'Ley 1146 de 2007', 'Ley 1257 de 2008', 'Ley 1719 de 2014'],
     estado: 'pendiente',
     nota: 'Falta registrar la fecha de verificación de cada norma (tarea G3).',
   }),
@@ -655,15 +673,30 @@ const BASE = {
   'derechos.rutaViolenciaSexual': p<string[]>({
     nombre: 'Ruta de atención a víctimas de violencia sexual: pasos comunes a todas las instituciones',
     valor: [
-      'Atender como urgencia médica, con prioridad, según el protocolo de atención integral en salud para víctimas de violencia sexual (Resolución 459 de 2012).',
-      'Si la agresión ocurrió en las últimas 72 horas: profilaxis para VIH e ITS y toma de muestras con cadena de custodia. En la gestante no aplica la anticoncepción de emergencia.',
+      'Atender como urgencia médica, con prioridad y gratis, sin importar el tiempo transcurrido desde la agresión, la afiliación al sistema de salud ni si hay denuncia (Ley 1719 de 2014, art. 23; Ley 1146 de 2007, art. 9), según el protocolo de la Resolución 459 de 2012.',
+      'Si la agresión ocurrió en las últimas 72 horas: profilaxis para VIH e ITS y toma de muestras con cadena de custodia. Pasadas las 72 horas también se atiende. En la gestante no aplica la anticoncepción de emergencia.',
       'Notificar al SIVIGILA (evento 875, violencia de género e intrafamiliar).',
-      'Activar la ruta de protección y justicia (comisaría de familia, Fiscalía; en menores de 14 años también ICBF). La atención en salud no se condiciona a la denuncia.',
-      'Ofrecer atención en salud mental y seguimiento.',
+      'Activar la ruta de protección y justicia (comisaría de familia, Fiscalía; en menores de 14 años siempre también ICBF). La atención en salud no se condiciona a la denuncia.',
+      'Proteger su intimidad: nombre, dirección, teléfono y datos de su familia son confidenciales (Ley 1719 de 2014, art. 13). No confrontarla con el agresor ni repetir exámenes o preguntas innecesarias.',
+      'Informar sus derechos, incluida la IVE por la causal de violencia sexual sin límite de semanas, y ofrecer atención en salud mental y psicosocial.',
     ],
-    fuentes: ['Resolución 459 de 2012', 'Equipo clínico'],
+    fuentes: ['Resolución 459 de 2012', 'Ley 1146 de 2007', 'Ley 1719 de 2014', 'Equipo clínico'],
     estado: 'pendiente',
-    nota: 'Texto base propuesto el 2026-10-07 y aprobado como borrador por la responsable del proyecto. Lo verifica el equipo clínico o jurídico antes de marcarlo como decidido.',
+    nota: 'Texto ajustado el 2026-10-07 con las Leyes 1146 de 2007 y 1719 de 2014, a partir de resultados de búsqueda (el texto oficial no se pudo consultar). Lo verifica el equipo clínico o jurídico antes de marcarlo como decidido.',
+  }),
+  'derechos.rutaViolenciaContraLaMujer': p<string[]>({
+    nombre: 'Ruta de atención a mujeres víctimas de violencia (física, psicológica, económica): pasos comunes',
+    valor: [
+      'Atender las lesiones y valorar el riesgo (amenazas de muerte, violencia más frecuente o más grave, acceso a armas). Con riesgo alto, activar la protección el mismo día.',
+      'Notificar al SIVIGILA (evento 875, violencia de género e intrafamiliar).',
+      'Informarle que puede pedir medidas de protección a la comisaría de familia (o al juez donde no haya comisaría) y denunciar ante la Fiscalía. Ella decide; la atención en salud no depende de la denuncia.',
+      'Si su salud física o mental está afectada, informarle sobre las medidas de atención (alojamiento, alimentación y transporte) que ordena la autoridad competente y presta el sistema de salud (Ley 1257 de 2008, art. 19; Decreto 4796 de 2011).',
+      'Respetar su derecho a recibir información clara, completa, veraz y oportuna y a decidir si acepta ser confrontada con el agresor (Ley 1257 de 2008, art. 8). La atención a ella y al agresor no la presta la misma persona ni en el mismo lugar.',
+      'Ofrecer atención en salud mental y preguntar de nuevo, a solas, en cada control.',
+    ],
+    fuentes: ['Ley 1257 de 2008', 'Equipo clínico'],
+    estado: 'pendiente',
+    nota: 'Propuesto el 2026-10-07 a partir de la Ley 1257 de 2008 (resultados de búsqueda; el texto oficial no se pudo consultar). Lo verifica el equipo clínico o jurídico antes de marcarlo como decidido.',
   }),
 
   // ---------- Carné (F3, F4) ----------

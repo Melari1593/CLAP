@@ -8,13 +8,15 @@ export const CAUSALES: { id: Causal; texto: string }[] = [
   { id: 'malformacion', texto: 'Malformación fetal incompatible con la vida extrauterina, certificada por un médico.' },
   {
     id: 'violencia_sexual',
-    texto: 'Embarazo producto de violencia sexual, incesto, o inseminación o transferencia de óvulo no consentidas, con denuncia.',
+    texto:
+      'Embarazo producto de violencia sexual, incesto, o inseminación o transferencia de óvulo no consentidas. No se exige denuncia; el hecho debe quedar consignado en la historia clínica.',
   },
 ];
 
 export const DESENCADENANTES: Record<DesencadenanteDerechos, string> = {
   no_planeado: 'Embarazo no planeado: la gestante no desea continuarlo o no ha decidido',
   violencia_sexual: 'Violencia sexual',
+  violencia_mujer: 'Violencia contra la mujer (física, psicológica o económica)',
   menor_14: 'Gestante menor de 14 años',
   causal_clinica: 'Malformación fetal grave o condición que pone en riesgo la vida o la salud de la gestante',
   pregunta_gestante: 'La gestante pregunta por la IVE',

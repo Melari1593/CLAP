@@ -54,6 +54,7 @@ export function disparadores(ctx: ContextoClinico): DesencadenanteDerechos[] {
   const desea = valorDe(d?.planificacion.deseaContinuar);
   if (valorDe(d?.planificacion.embarazoPlaneado) === false && (desea === 'no' || desea === 'no_ha_decidido')) lista.push('no_planeado');
   if (valorDe(d?.gestacionActual.violenciaSexual) === true) lista.push('violencia_sexual');
+  else if (valorDe(d?.gestacionActual.violencia) === true) lista.push('violencia_mujer');
   const menorDe = ctx.catalogo.valor('clap.edadRiesgo').presuncionViolenciaMenorDe;
   if (ctx.edad !== undefined && ctx.edad < menorDe) lista.push('menor_14');
   return lista;
@@ -79,6 +80,12 @@ export interface NuevaDecision {
   notas?: string;
 }
 
+export interface RutaViolencia {
+  pasos: string[];
+  contactos: ContactoRuta[];
+  ficticia: boolean;
+}
+
 export class ErrorDerechos extends Error {}
 
 export class ServicioDerechos {
@@ -102,10 +109,19 @@ export class ServicioDerechos {
   }
 
   /** Pasos comunes de la ruta (catálogo) y contactos de la institución que aplican a la gestante. */
-  rutaViolenciaSexual(menor14: boolean): { pasos: string[]; contactos: ContactoRuta[]; ficticia: boolean } {
+  rutaViolenciaSexual(menor14: boolean): RutaViolencia {
     return {
       pasos: this.catalogo.valor('derechos.rutaViolenciaSexual'),
       contactos: (this.institucion?.rutaViolenciaSexual ?? []).filter((c) => menor14 || !c.soloMenores14),
+      ficticia: this.institucion?.ficticia ?? false,
+    };
+  }
+
+  /** Ruta para la violencia contra la mujer que no es sexual (Ley 1257 de 2008). */
+  rutaViolenciaContraLaMujer(): RutaViolencia {
+    return {
+      pasos: this.catalogo.valor('derechos.rutaViolenciaContraLaMujer'),
+      contactos: this.institucion?.rutaViolenciaContraLaMujer ?? [],
       ficticia: this.institucion?.ficticia ?? false,
     };
   }
@@ -122,6 +138,9 @@ export class ServicioDerechos {
       if (marco.tipo === 'causales' && !d.causal) throw new ErrorDerechos('Después de la semana 24 marque la causal identificada.');
     }
     if (d.causal && !CAUSALES.some((c) => c.id === d.causal)) throw new ErrorDerechos('Causal no válida.');
+    if (d.causal === 'violencia_sexual' && !d.notas?.trim()) {
+      throw new ErrorDerechos('Consigne en las notas de la historia clínica el hecho de violencia sexual. No se exige denuncia.');
+    }
 
     const fechaHora = this.ahora().toISOString();
     const configurado = this.prestadorConfigurado();
@@ -173,7 +192,7 @@ export class ServicioDerechos {
     return guardado;
   }
 
-  /** Registra la activación de la ruta de violencia sexual y sus notificaciones. */
+  /** Registra la activación de la ruta de violencia (sexual o contra la mujer) y sus notificaciones. */
   async registrarRuta(
     registroId: string,
     activadaFechaHora: FechaHoraISO,

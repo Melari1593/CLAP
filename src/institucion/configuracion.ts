@@ -18,6 +18,8 @@ export interface ConfiguracionInstitucional {
   prestadorIVE: { nombre: string; contacto: string } | null;
   /** Contactos de la ruta de violencia sexual de la institución. */
   rutaViolenciaSexual: ContactoRuta[];
+  /** Contactos de la ruta de violencia contra la mujer (física, psicológica, económica). */
+  rutaViolenciaContraLaMujer: ContactoRuta[];
   /** Fecha (AAAA-MM-DD) en que la institución revisó estos datos; null en la demostración. */
   revisado: string | null;
   /** Datos de ejemplo, no reales. */
@@ -33,6 +35,12 @@ export const CONFIGURACION_DEMO: ConfiguracionInstitucional = {
     { entidad: 'Comisaría de familia', contacto: 'Tel. 000 000 0001 (ficticio)' },
     { entidad: 'ICBF', contacto: 'Línea 141', soloMenores14: true },
     { entidad: 'Fiscalía (CAIVAS / URI)', contacto: 'Línea 122' },
+  ],
+  rutaViolenciaContraLaMujer: [
+    { entidad: 'SIVIGILA (evento 875)', contacto: 'Epidemiología de la IPS · ext. 000 (ficticio)' },
+    { entidad: 'Comisaría de familia', contacto: 'Tel. 000 000 0001 (ficticio)' },
+    { entidad: 'Línea 155 (orientación a mujeres)', contacto: 'Línea 155' },
+    { entidad: 'Fiscalía (URI)', contacto: 'Línea 122' },
   ],
   revisado: null,
   ficticia: true,

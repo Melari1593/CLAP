@@ -306,7 +306,15 @@ export const violencia: Regla = {
     }
     return {
       titulo: 'Violencia en el embarazo actual',
-      porque: ['Respuesta SÍ en el tamizaje de violencia.', 'Ofrezca un momento a solas.'],
+      porque: [
+        'Respuesta SÍ en el tamizaje de violencia.',
+        'Ofrezca un momento a solas.',
+        'Activar la ruta de atención a mujeres víctimas de violencia (Ley 1257 de 2008): valorar el riesgo, notificar al SIVIGILA e informarle sobre las medidas de protección y de atención.',
+        enDerechos,
+      ],
+      severidad: 1,
+      enlace: 'derechos',
+      opciones: [{ etiqueta: 'Ruta activada' }, { etiqueta: 'Referida' }, { etiqueta: 'No desea activarla ahora', requiereMotivo: true }],
     };
   },
 };

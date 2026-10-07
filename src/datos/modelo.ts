@@ -403,7 +403,7 @@ export interface FactorTransitorio extends Meta {
 
 // ---------------------------------------------------------------- Derechos (sección 7): todo privado
 
-export type DesencadenanteDerechos = 'no_planeado' | 'violencia_sexual' | 'menor_14' | 'causal_clinica' | 'pregunta_gestante';
+export type DesencadenanteDerechos = 'no_planeado' | 'violencia_sexual' | 'violencia_mujer' | 'menor_14' | 'causal_clinica' | 'pregunta_gestante';
 export type DecisionDerechos = 'continua' | 'solicita_ive' | 'lo_pensara' | 'no_desea_hablar';
 export type Causal = 'salud' | 'malformacion' | 'violencia_sexual';
 

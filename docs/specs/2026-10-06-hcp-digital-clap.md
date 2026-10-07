@@ -98,7 +98,7 @@ Cuando un dato cumple una condición amarilla del CLAP, la app la muestra destac
 | **Diabetes gestacional** | PTOG de 75 g con al menos un valor alterado: ayunas de 92 mg/dL o más, 1 hora de 180 mg/dL o más, o 2 horas de 153 mg/dL o más (ver abajo) |
 | Rh negativo | Rh negativo, y si está inmunizada |
 | Hábitos | Tabaco activo, drogas o alcohol en cualquier trimestre |
-| Violencia | SÍ en el embarazo actual. Si es violencia sexual, activa la ruta de atención y el flujo de la sección 7 |
+| Violencia | SÍ en el embarazo actual. Si es violencia sexual, activa la ruta de atención a víctimas de violencia sexual (Leyes 1146 de 2007 y 1719 de 2014) y el flujo de la sección 7. Si no es sexual, enlaza con la ruta de atención a mujeres víctimas de violencia (Ley 1257 de 2008): valoración del riesgo, SIVIGILA, medidas de protección y de atención |
 | Antitetánica | Esquema no vigente |
 | Vacunas | Antirrubéola no recibida (recordar aplicar en el puerperio) |
 | **Considerar ASA** | 1 o más factores de alto riesgo, o 2 o más de riesgo moderado de preeclampsia (ver abajo) |
@@ -319,7 +319,7 @@ Para la tromboprofilaxis, el equipo clínico también fija la norma antes de con
 
 Para derechos sexuales y reproductivos e IVE:
 - **Contenido legal (decidido):** por ahora la app informa sobre las sentencias y normas vigentes en Colombia: Sentencia C-355 de 2006 (tres causales), Sentencia SU-096 de 2018, Sentencia C-055 de 2022 (IVE hasta la semana 24) y Resolución 051 de 2023 (regulación única de la atención). Los textos citan la norma y muestran la fecha de la última verificación; se actualizan si cambia la jurisprudencia o la regulación.
-- **Ruta de la institución:** prestador de referencia para IVE, ruta de violencia sexual y a quién se notifica en cada caso.
+- **Ruta de la institución:** prestador de referencia para IVE, rutas de violencia sexual y de violencia contra la mujer, y a quién se notifica en cada caso.
 - **Textos de asesoría y de "Tus derechos":** se validan con el equipo clínico y, si es posible, con gestantes de la población objetivo.
 
 ### 5. Recordatorios por semana
@@ -384,7 +384,7 @@ Estos datos solo los ve el profesional. El carné puede abrirse en un celular co
 ### 7. Derechos sexuales y reproductivos e IVE
 
 **Marco que sigue la app (Colombia)**
-- **Sentencia C-055 de 2022 de la Corte Constitucional:** la IVE no es delito hasta la semana 24 de gestación, por la sola voluntad de la mujer o persona gestante, sin que tenga que dar razones. Después de la semana 24 sigue siendo legal bajo las tres causales de la Sentencia C-355 de 2006: riesgo para la vida o la salud (física o mental) de la gestante; malformación fetal incompatible con la vida extrauterina, certificada por un médico; embarazo producto de violencia sexual, incesto, o inseminación o transferencia de óvulo no consentidas, con denuncia.
+- **Sentencia C-055 de 2022 de la Corte Constitucional:** la IVE no es delito hasta la semana 24 de gestación, por la sola voluntad de la mujer o persona gestante, sin que tenga que dar razones. Después de la semana 24 sigue siendo legal bajo las tres causales de la Sentencia C-355 de 2006: riesgo para la vida o la salud (física o mental) de la gestante; malformación fetal incompatible con la vida extrauterina, certificada por un médico; embarazo producto de violencia sexual, incesto, o inseminación o transferencia de óvulo no consentidas. Para esta causal no se exige denuncia, pero el hecho debe quedar consignado en la historia clínica; la app no deja registrar la causal sin esa nota.
 - **Resolución 051 de 2023 del Ministerio de Salud:** regulación única de la atención integral de la IVE, que modifica la Ruta Materno Perinatal (Resolución 3280 de 2018). Puntos que la app refleja:
   - La IVE es parte de los derechos sexuales y reproductivos y su atención es **urgente**. No se puede dilatar; solo en casos excepcionales y justificados puede haber un plazo máximo de 5 días calendario, y se registra en la historia.
   - Después de la semana 24, una vez el profesional identifica una causal, **solo la gestante decide** qué riesgo asume para continuar o no, y su voluntad se registra en la historia clínica.
