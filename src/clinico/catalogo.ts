@@ -580,11 +580,12 @@ const BASE = {
   }),
   'anticoncepcion.asesoriaPosparto': p<{ desdeSemana: number }>({
     nombre: 'Asesoría en anticoncepción para después del parto',
-    valor: { desdeSemana: 28 },
+    valor: { desdeSemana: 0 },
     unidad: 'semanas (recordatorio hasta que se registre la asesoría)',
     fuentes: ['Equipo clínico'],
-    estado: 'pendiente',
-    nota: 'Semana 28 propuesta el 2026-10-07 (tercer trimestre, antes del parto). Verificar contra la Ruta Materno Perinatal (Resolución 3280 de 2018).',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Desde el inicio del control prenatal, por decisión de la responsable del proyecto el 2026-10-07. Se registra en la primera consulta o en cualquier control.',
   }),
   'vacunas.tdap': p<{ desdeSemana: number; hastaSemana: number | null }>({
     nombre: 'Vacuna Tdap (tosferina) en cada embarazo',

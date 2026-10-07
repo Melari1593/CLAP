@@ -77,6 +77,8 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       embarazoPlaneado: valor(false),
       fracasoMetodo: valor('no_usaba'),
       deseaContinuar: valor('no_ha_decidido'),
+      asesoriaAnticoncepcion: valor(false),
+      metodoAnticonceptivoPosparto: noCorresponde(),
     },
     riesgoPreeclampsia: {
       trastornoHipertensivoPrevio: valor(false),

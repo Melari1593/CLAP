@@ -85,6 +85,7 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
       'hta.umbrales',
       'bienestarFetal',
       'ive.limite',
+      'anticoncepcion.asesoriaPosparto',
     ] as const) {
       expect(cat.parametro(id), id).toMatchObject({ estado: 'decidido', revisado: '2026-10-07' });
     }

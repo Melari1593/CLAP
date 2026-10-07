@@ -122,9 +122,10 @@ describe('Recordatorios por semana (F1)', () => {
     expect(ids(semana(30), aplicada).map((r) => r.id)).not.toContain('tdap');
   });
 
-  it('asesoría en anticoncepción después del parto desde la semana 28 hasta que se registre', () => {
-    expect(ids(semana(27)).map((r) => r.id)).not.toContain('anticoncepcion');
-    expect(ids(semana(28)).find((r) => r.id === 'anticoncepcion')).toMatchObject({ estado: 'pendiente', tipo: 'accion' });
+  it('asesoría en anticoncepción después del parto desde el inicio hasta que se registre', () => {
+    expect(ids(semana(8)).find((r) => r.id === 'anticoncepcion')).toMatchObject({ estado: 'pendiente', tipo: 'accion' });
+    const enPrimera = { primera: (d: { planificacion: { asesoriaAnticoncepcion: unknown } }) => (d.planificacion.asesoriaAnticoncepcion = valor(true)) };
+    expect(ids(semana(8), enPrimera).map((r) => r.id)).not.toContain('anticoncepcion');
     const hecha = { seguimientos: [{ fecha: semana(29), cambios: (d: { asesoriaAnticoncepcion: unknown }) => (d.asesoriaAnticoncepcion = valor(true)) }] };
     expect(ids(semana(32), hecha).map((r) => r.id)).not.toContain('anticoncepcion');
   });

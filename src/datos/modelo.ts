@@ -110,6 +110,10 @@ export interface Planificacion {
   fracasoMetodo: Campo<FracasoMetodo>;
   /** Privado, nunca en el carné. Solo si el embarazo no fue planeado. */
   deseaContinuar: Campo<'si' | 'no' | 'no_ha_decidido'>;
+  /** Asesoría en anticoncepción para después del parto (también se registra en los controles). */
+  asesoriaAnticoncepcion: Campo<SiNo>;
+  /** Privado, nunca en el carné. */
+  metodoAnticonceptivoPosparto: Campo<MetodoAnticonceptivoPosparto>;
 }
 
 export interface RiesgoPreeclampsia {

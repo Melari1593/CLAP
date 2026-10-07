@@ -56,6 +56,39 @@ const es = <T>(campo: unknown, valor: T) => (campo as Campo<T> | undefined)?.est
 
 type P = DatosPrimeraConsulta;
 
+/** Asesoría en anticoncepción para después del parto: en la primera consulta y en cada control. */
+function camposAnticoncepcion<D>(prefijo: string): DefCampo<D>[] {
+  return [
+    {
+      ruta: `${prefijo}asesoriaAnticoncepcion`,
+      etiqueta: 'Asesoría en anticoncepción para después del parto',
+      ayuda: 'Informe todos los métodos, incluidos los que se pueden aplicar antes del alta (DIU e implante). La decisión es de ella.',
+      control: sino,
+    },
+    {
+      ruta: `${prefijo}metodoAnticonceptivoPosparto`,
+      etiqueta: 'Método elegido para después del parto',
+      privado: true,
+      control: {
+        tipo: 'opciones',
+        opciones: ops(
+          ['diu_posparto', 'DIU posparto (antes del alta)'],
+          ['diu', 'DIU'],
+          ['implante', 'Implante subdérmico'],
+          ['hormonal', 'Hormonal (píldora o inyectable)'],
+          ['barrera', 'Barrera'],
+          ['ligadura', 'Ligadura de trompas'],
+          ['natural', 'Natural'],
+          ['otro', 'Otro'],
+          ['ninguno', 'Ninguno'],
+          ['no_ha_decidido', 'No ha decidido'],
+        ),
+      },
+      aplica: (d) => es(obtener(d, `${prefijo}asesoriaAnticoncepcion`), true),
+    },
+  ];
+}
+
 export const BLOQUES_PRIMERA: Bloque<P>[] = [
   {
     id: 'identificacion',
@@ -130,6 +163,7 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
         control: { tipo: 'opciones', opciones: ops(['si', 'Sí'], ['no', 'No'], ['no_ha_decidido', 'No ha decidido']) },
         aplica: (d) => es(d.planificacion.embarazoPlaneado, false),
       },
+      ...camposAnticoncepcion<P>('planificacion.'),
       { ruta: 'gestacionActual.fumaActivo', etiqueta: 'Fuma (tabaco activo)', control: sino },
       {
         ruta: 'gestacionActual.cigarrillosDia',
@@ -442,35 +476,7 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
   {
     id: 'anticoncepcion',
     titulo: 'Anticoncepción después del parto',
-    campos: [
-      {
-        ruta: 'asesoriaAnticoncepcion',
-        etiqueta: 'Asesoría en anticoncepción para después del parto',
-        ayuda: 'Informe todos los métodos, incluidos los que se pueden aplicar antes del alta (DIU e implante). La decisión es de ella.',
-        control: sino,
-      },
-      {
-        ruta: 'metodoAnticonceptivoPosparto',
-        etiqueta: 'Método elegido para después del parto',
-        privado: true,
-        control: {
-          tipo: 'opciones',
-          opciones: ops(
-            ['diu_posparto', 'DIU posparto (antes del alta)'],
-            ['diu', 'DIU'],
-            ['implante', 'Implante subdérmico'],
-            ['hormonal', 'Hormonal (píldora o inyectable)'],
-            ['barrera', 'Barrera'],
-            ['ligadura', 'Ligadura de trompas'],
-            ['natural', 'Natural'],
-            ['otro', 'Otro'],
-            ['ninguno', 'Ninguno'],
-            ['no_ha_decidido', 'No ha decidido'],
-          ),
-        },
-        aplica: (d) => es(d.asesoriaAnticoncepcion, true),
-      },
-    ],
+    campos: camposAnticoncepcion<S>(''),
   },
 ];
 

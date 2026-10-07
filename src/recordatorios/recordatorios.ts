@@ -194,9 +194,12 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
     });
   }
 
-  // Asesoría en anticoncepción para después del parto (tercer trimestre)
+  // Asesoría en anticoncepción para después del parto, desde el inicio del control prenatal
   const anticoncepcion = catalogo.valor('anticoncepcion.asesoriaPosparto');
-  if (desde(anticoncepcion.desdeSemana) && !ctx.seguimientos.some((c) => valorDe(c.seguimiento?.asesoriaAnticoncepcion) === true)) {
+  const asesorada =
+    valorDe(primera.planificacion.asesoriaAnticoncepcion) === true ||
+    ctx.seguimientos.some((c) => valorDe(c.seguimiento?.asesoriaAnticoncepcion) === true);
+  if (desde(anticoncepcion.desdeSemana) && !asesorada) {
     lista.push({
       id: 'anticoncepcion',
       texto: 'Asesoría en anticoncepción para después del parto y registrar el método elegido.',
