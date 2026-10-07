@@ -475,12 +475,12 @@ const BASE = {
   }),
   'recordatorios.examenesPrimeraConsulta': p<string[]>({
     nombre: 'Exámenes de la primera consulta',
-    valor: ['hb', 'sifilisTreponemica', 'vih', 'hepatitisB', 'bacteriuria', 'toxoplasmosis', 'rubeolaIgG', 'varicelaIgG', 'chagas', 'malaria'],
+    valor: ['hemoclasificacion', 'hb', 'sifilisTreponemica', 'vih', 'hepatitisB', 'bacteriuria', 'toxoplasmosis', 'rubeolaIgG', 'varicelaIgG', 'chagas', 'malaria'],
     fuentes: ['Spec HCP Digital v1', 'Equipo clínico'],
     estado: 'decidido',
     revisado: '2026-10-07',
     nota:
-      'Según la Ruta Materno Perinatal, aprobado por la responsable del proyecto el 2026-10-07: hemograma, prueba treponémica rápida, VIH, hepatitis B, urocultivo (no solo bacteriuria), toxoplasmosis (IgG e IgM), IgG para varicela zóster; IgG de rubéola solo sin vacuna previa; Chagas y malaria solo en zona endémica. Además, grupo y Rh, tamizaje de cuello uterino y ecografía de 10+6 a 13+6. Verificar contra la versión vigente.',
+      'Según la Ruta Materno Perinatal, aprobado por la responsable del proyecto el 2026-10-07: hemograma, prueba treponémica rápida, VIH, hepatitis B, urocultivo (no solo bacteriuria), toxoplasmosis (IgG e IgM), hemoclasificación de laboratorio a todas (aunque declare su grupo); IgG para varicela zóster solo sin antecedente de vacuna; IgG de rubéola solo sin vacuna previa; Chagas y malaria solo en zona endémica. Además, grupo y Rh, tamizaje de cuello uterino y ecografía de 10+6 a 13+6. Verificar contra la versión vigente.',
   }),
 
   'hta.umbrales': p<{
@@ -590,6 +590,23 @@ const BASE = {
     estado: 'decidido',
     revisado: '2026-10-07',
     nota: 'Desde el inicio del control prenatal, por decisión de la responsable del proyecto el 2026-10-07. Se registra en la primera consulta o en cualquier control.',
+  }),
+  'toxoplasmosis.repeticion': p<{ cadaDias: number }>({
+    nombre: 'Toxoplasmosis: repetición si la IgG es negativa',
+    valor: { cadaDias: 30 },
+    unidad: 'días entre pruebas (cada mes) mientras la IgG sea negativa',
+    fuentes: ['Equipo clínico'],
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Cada mes con IgG negativa, por decisión de la responsable del proyecto el 2026-10-07. IgM positiva o seroconversión de la IgG: alerta.',
+  }),
+  'plaquetas.normalDesde': p<number>({
+    nombre: 'Recuento de plaquetas normal (hemograma)',
+    valor: 150,
+    unidad: '× 10⁹/L; por debajo se marca en la sección de laboratorios',
+    fuentes: ['Equipo clínico'],
+    estado: 'pendiente',
+    nota: 'Propuesto el 2026-10-07 (150 × 10⁹/L, límite inferior habitual). La trombocitopenia que contraindica la heparina (< 75) está en el riesgo trombótico.',
   }),
   'vacunas.tdap': p<{ desdeSemana: number; hastaSemana: number | null }>({
     nombre: 'Vacuna Tdap (tosferina) en cada embarazo',

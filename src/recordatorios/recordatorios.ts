@@ -1,5 +1,7 @@
 // F1 — Recordatorios por semana: qué exámenes y acciones tocan según la EG y lo ya registrado.
 // Un pendiente que ya pasó su ventana aparece como "atrasado".
+import { grupoRh } from '../clinico/grupoRh';
+import { toxoMensual } from '../examenes/porTrimestre';
 import { trimestreDeEG } from '../clinico/trimestre';
 import { valorDe } from '../datos/campo';
 import type { TipoExamen, TipoIndicacion } from '../datos/modelo';
@@ -19,7 +21,8 @@ export interface Recordatorio {
 }
 
 const NOMBRE_EXAMEN: Partial<Record<TipoExamen, string>> = {
-  hb: 'Hemograma (hemoglobina)',
+  hemoclasificacion: 'Hemoclasificación (grupo y Rh)',
+  hb: 'Hemograma (Hb y plaquetas)',
   vdrl: 'VDRL/RPR',
   sifilisTreponemica: 'Sífilis (prueba treponémica rápida)',
   coombsIndirecto: 'Coombs indirecto (Rh negativo)',
@@ -36,6 +39,7 @@ const NOMBRE_EXAMEN: Partial<Record<TipoExamen, string>> = {
 const SANGRE = 'Exámenes de sangre del control prenatal.';
 const PARA_GESTANTE: Partial<Record<TipoExamen, string>> = {
   hb: SANGRE,
+  hemoclasificacion: SANGRE,
   vdrl: SANGRE,
   vih: SANGRE,
   hepatitisB: SANGRE,
@@ -88,13 +92,15 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
     rubeolaIgG: !['previa', 'embarazo'].includes(valorDe(g.antirrubeola) ?? ''),
     chagas: valorDe(primera.identificacion.zonaEndemicaChagas) === true,
     malaria: valorDe(primera.identificacion.zonaEndemicaMalaria) === true,
+    // IgG de varicela solo sin antecedente de vacuna.
+    varicelaIgG: valorDe(g.antivaricela) !== 'previa',
   };
   for (const tipo of catalogo.valor('recordatorios.examenesPrimeraConsulta') as TipoExamen[]) {
     if (aplicaInicial[tipo] === false) continue;
     if (!hechoDesde(tipo, 0)) examen(`inicial:${tipo}`, tipo, `${NOMBRE_EXAMEN[tipo] ?? tipo} (primera consulta).`, ventanaInicial.hastaSemana);
   }
   // Rh negativo: Coombs indirecto y, si no está sensibilizada, anti-D desde la semana 28.
-  if (valorDe(g.rh) === '-') {
+  if (grupoRh(primera, historia.examenes).rh === '-') {
     if (!hechoDesde('coombsIndirecto', 0)) examen('inicial:coombsIndirecto', 'coombsIndirecto', 'Coombs indirecto (Rh negativo).', ventanaInicial.hastaSemana);
     const sensibilizada = valorDe(g.inmunizada) === true || ctx.ultimo('coombsIndirecto')?.positivo === true;
     const antiD = catalogo.valor('rh.antiD');
@@ -111,9 +117,6 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
   }
   if (g.cervixPap.estado === 'vacio') {
     lista.push({ id: 'cuello_uterino', texto: 'Citología cervicovaginal según el esquema de tamizaje vigente.', tipo: 'accion', estado: 'pendiente' });
-  }
-  if (!valorDe(primera.gestacionActual.grupo) || !valorDe(primera.gestacionActual.rh)) {
-    lista.push({ id: 'grupo_rh', texto: 'Hemoclasificación (grupo sanguíneo y Rh).', tipo: 'examen', estado: estadoEn(ventanaInicial.hastaSemana), paraGestante: SANGRE });
   }
   const antitetanica = valorDe(primera.gestacionActual.antitetanica);
   if (!antitetanica) {
@@ -209,6 +212,19 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
       tipo: 'accion',
       estado: estadoEn(tdap.hastaSemana),
       paraGestante: 'Te aplicarán la vacuna contra la tosferina, que protege a tu bebé en sus primeros meses.',
+    });
+  }
+
+  // Toxoplasmosis cada mes mientras la IgG sea negativa
+  const toxo = toxoMensual(ctx);
+  if (toxo?.toca) {
+    lista.push({
+      id: 'toxo_mensual',
+      texto: `Toxoplasmosis (IgG e IgM): se repite cada mes con IgG negativa; la última fue el ${toxo.ultima}.`,
+      tipo: 'examen',
+      examen: 'toxoplasmosis',
+      estado: 'pendiente',
+      paraGestante: SANGRE,
     });
   }
 

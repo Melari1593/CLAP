@@ -3,6 +3,7 @@ import { intervaloIntergenesico, sumarDias } from '../clinico/calculos';
 import { valorDe } from '../datos/campo';
 import { evaluarAntitetanica } from './antitetanica';
 import type { ContextoClinico, Regla } from './motor';
+import { grupoRh } from '../clinico/grupoRh';
 
 const enDerechos = 'Abrir "Opciones y derechos".';
 
@@ -152,11 +153,34 @@ export const infecciones: Regla = {
   },
 };
 
+/** La hemoclasificación de laboratorio no coincide con el grupo o el Rh que declaró la gestante. */
+export const hemoclasificacionDistinta: Regla = {
+  id: 'hemoclasificacion_distinta',
+  evaluar(ctx) {
+    const g = grupoRh(ctx.primera, ctx.historia.examenes);
+    if (g.fuente !== 'laboratorio') return null;
+    const { grupo, rh } = g.declarado;
+    const distintoGrupo = grupo !== undefined && grupo !== g.grupo;
+    const distintoRh = rh !== undefined && rh !== g.rh;
+    if (!distintoGrupo && !distintoRh) return null;
+    const txt = (gr?: string, r?: string) => `${gr ?? '—'} ${r === '+' ? 'positivo' : r === '-' ? 'negativo' : '—'}`;
+    return {
+      titulo: 'Hemoclasificación distinta a la declarada',
+      porque: [
+        `Declarado: ${txt(grupo, rh)}. Laboratorio (${g.fecha}): ${txt(g.grupo, g.rh)}.`,
+        'La app usa el resultado del laboratorio. Informe a la gestante y corrija el dato en su carné.',
+      ],
+      severidad: distintoRh ? 2 : 1,
+      opciones: [{ etiqueta: 'Informada a la gestante' }, { etiqueta: 'Se repetirá el examen', requiereMotivo: true }],
+    };
+  },
+};
+
 export const rhNegativo: Regla = {
   id: 'rh_negativo',
   evaluar(ctx) {
     const { primera, eg, catalogo } = ctx;
-    if (valorDe(primera?.gestacionActual.rh) !== '-') return null;
+    if (grupoRh(primera, ctx.historia.examenes).rh !== '-') return null;
     const inmunizada = valorDe(primera?.gestacionActual.inmunizada);
     const coombs = ctx.ultimo('coombsIndirecto');
     const sensibilizada = inmunizada === true || coombs?.positivo === true;
@@ -342,6 +366,31 @@ export const antirrubeola: Regla = {
   },
 };
 
+/** Toxoplasmosis: IgM positiva o IgG que pasa de negativa a positiva (seroconversión). */
+export const toxoplasmosis: Regla = {
+  id: 'toxoplasmosis',
+  evaluar(ctx) {
+    const pruebas = ctx.historia.examenes
+      .filter((e) => e.tipo === 'toxoplasmosis' && e.resultado.estado === 'valor')
+      .sort((a, b) => a.fecha.localeCompare(b.fecha))
+      .map((e) => ({ fecha: e.fecha, ...(e.resultado.estado === 'valor' ? (e.resultado.valor as { igg: string | null; igm: string | null }) : { igg: null, igm: null }) }));
+    const ultima = pruebas.at(-1);
+    if (!ultima) return null;
+    const previaNegativa = pruebas.slice(0, -1).some((p) => p.igg === 'negativo');
+    const seroconversion = previaNegativa && ultima.igg === 'positivo';
+    if (ultima.igm !== 'positivo' && !seroconversion) return null;
+    return {
+      titulo: 'Posible toxoplasmosis aguda',
+      porque: [
+        seroconversion ? `Seroconversión: IgG negativa antes y positiva el ${ultima.fecha}.` : `IgM positiva para toxoplasmosis (${ultima.fecha}).`,
+        'Remitir para confirmar la infección (por ejemplo, avidez de IgG) y definir el tratamiento.',
+      ],
+      severidad: 2,
+      opciones: [{ etiqueta: 'Referida' }, { etiqueta: 'En estudio', requiereMotivo: true }],
+    };
+  },
+};
+
 export const varicela: Regla = {
   id: 'varicela',
   evaluar(ctx) {
@@ -400,5 +449,7 @@ export const REGLAS_CLAP: Regla[] = [
   violencia,
   antirrubeola,
   varicela,
+  toxoplasmosis,
+  hemoclasificacionDistinta,
   antitetanica,
 ];

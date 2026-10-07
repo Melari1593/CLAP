@@ -163,6 +163,28 @@ export const CASOS: CasoClinico[] = [
     contiene: { varicela: ['La vacuna no se aplica en el embarazo'] },
   }),
   caso({
+    id: 'CLAP-22',
+    grupo: 'CLAP',
+    descripcion: 'Toxoplasmosis: IgG negativa al ingreso y positiva un mes después (seroconversión).',
+    datos: ['Toxoplasmosis IgG negativa, luego positiva'],
+    extra: {
+      examenes: [
+        { tipo: 'toxoplasmosis', valor: { igg: 'negativo', igm: 'negativo' }, fecha: '2026-07-20' },
+        { tipo: 'toxoplasmosis', valor: { igg: 'positivo', igm: 'negativo' }, fecha: T2 },
+      ],
+    },
+    alertas: { toxoplasmosis: 'Posible toxoplasmosis aguda' },
+    contiene: { toxoplasmosis: ['Seroconversión'] },
+  }),
+  caso({
+    id: 'CLAP-23',
+    grupo: 'CLAP',
+    descripcion: 'Declara O positivo; la hemoclasificación de laboratorio es O negativo.',
+    datos: ['Declarado O positivo', 'Laboratorio O negativo'],
+    extra: { examenes: [{ tipo: 'hemoclasificacion', valor: { grupo: 'O', rh: '-' }, fecha: T2 }] },
+    alertas: { hemoclasificacion_distinta: 'Hemoclasificación distinta a la declarada', rh_negativo: 'Rh negativo' },
+  }),
+  caso({
     id: 'CLAP-12',
     grupo: 'CLAP',
     descripcion: 'Rh negativo inmunizada.',

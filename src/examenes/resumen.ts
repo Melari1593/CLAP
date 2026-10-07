@@ -3,7 +3,8 @@ import { valorDe } from '../datos/campo';
 import type { ResultadoExamen, ResultadoPorTipo, TipoExamen } from '../datos/modelo';
 
 export const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }[] = [
-  { tipo: 'hb', etiqueta: 'Hemoglobina' },
+  { tipo: 'hemoclasificacion', etiqueta: 'Hemoclasificación (grupo y Rh)' },
+  { tipo: 'hb', etiqueta: 'Hemograma (Hb y plaquetas)' },
   { tipo: 'plaquetas', etiqueta: 'Plaquetas' },
   { tipo: 'ferritina', etiqueta: 'Ferritina sérica' },
   { tipo: 'saturacionTransferrina', etiqueta: 'Saturación de transferrina' },
@@ -33,6 +34,7 @@ export function resumenExamen(e: ResultadoExamen): string {
   if (e.resultado.estado !== 'valor') return e.resultado.estado === 'no_se_hizo' ? 'No se hizo' : 'No corresponde';
   const r = e.resultado.valor as ResultadoPorTipo[TipoExamen];
   switch (e.tipo) {
+    case 'hemoclasificacion': { const v = r as ResultadoPorTipo['hemoclasificacion']; return `${v.grupo} ${v.rh === '+' ? 'positivo' : 'negativo'}`; }
     case 'hb': { const v = r as ResultadoPorTipo['hb']; return `${v.gdl.toLocaleString('es-CO')} g/dL (${v.muestra})`; }
     case 'plaquetas': return `${(r as ResultadoPorTipo['plaquetas']).x10e9L} × 10⁹/L`;
     case 'ferritina': return `${(r as ResultadoPorTipo['ferritina']).ngMl} ng/mL`;

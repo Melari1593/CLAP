@@ -11,6 +11,7 @@ const semana = (s: number) => new Date(Date.UTC(2026, 5, 1 + s * 7)).toISOString
 type Examen = { tipo: TipoExamen; valor: ResultadoPorTipo[TipoExamen]; fecha: string };
 const neg = { positivo: false };
 const examenesIniciales = (fecha: string): Examen[] => [
+  { tipo: 'hemoclasificacion', valor: { grupo: 'O', rh: '+' }, fecha },
   { tipo: 'hb', valor: { gdl: 13, muestra: 'venosa' }, fecha },
   { tipo: 'sifilisTreponemica', valor: { reactiva: false }, fecha },
   { tipo: 'vih', valor: { solicitado: true, realizado: true, resultado: 'negativo' }, fecha },
@@ -40,7 +41,7 @@ describe('Recordatorios por semana (F1)', () => {
     // ni falta de vacuna de rubéola, no se piden Chagas, malaria ni IgG de rubéola.
     const s8 = ids(semana(8), base);
     expect(exam(s8.filter((r) => r.tipo === 'examen').map((r) => r.id))).toEqual(
-      ['inicial:hb', 'inicial:sifilisTreponemica', 'inicial:vih', 'inicial:hepatitisB', 'inicial:bacteriuria', 'inicial:toxoplasmosis', 'inicial:varicelaIgG'],
+      ['inicial:hemoclasificacion', 'inicial:hb', 'inicial:sifilisTreponemica', 'inicial:vih', 'inicial:hepatitisB', 'inicial:bacteriuria', 'inicial:toxoplasmosis', 'inicial:varicelaIgG'],
     );
     expect(s8.some((r) => r.estado === 'atrasado')).toBe(false);
 

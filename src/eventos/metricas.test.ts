@@ -112,9 +112,10 @@ describe('Métricas de éxito calculadas con los eventos (G2)', () => {
 
     // El carné se usa: abrió en el primer intervalo, no en el segundo.
     expect(usoDelCarne(ev, 'whatsapp')).toEqual({ intervalos: p(1, 2), gestantes: p(1, 1) });
-    // Llegan preparadas: de 8 pendientes en la semana 12 (7 exámenes, con la IgG de varicela, y la
-    // ecografía) trajo 2 (hemograma y sífilis); de los 6 que quedaban en la semana 16, ninguno.
-    expect(llegadaPreparada(ev)).toEqual(p(2, 14));
+    // Llegan preparadas: de 9 pendientes en la semana 12 (8 exámenes, con la hemoclasificación y la
+    // IgG de varicela, y la ecografía) trajo 2 (hemograma y sífilis); de los 7 que quedaban en la
+    // semana 16, ninguno.
+    expect(llegadaPreparada(ev)).toEqual(p(2, 16));
     // Duración de los controles de seguimiento: 15 y 25 minutos.
     expect(duracionConsultas(ev)).toEqual({ consultas: 2, medianaMinutos: 20 });
     // ASA decidido el mismo día en que apareció la alerta.

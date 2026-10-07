@@ -28,6 +28,8 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 | CLAP-10 | VDRL reactivo sin tratamiento. | VDRL reactivo, sin tratamiento | **Sífilis: VDRL/RPR reactivo**<br>incluye «Sin tratamiento registrado» | ☐ Sí ☐ No | |
 | CLAP-11 | Urocultivo y estreptococo B positivos. | Urocultivo positivo; EGB positivo | **Infecciones** | ☐ Sí ☐ No | |
 | CLAP-21 | IgG para varicela zóster negativa: susceptible. | IgG varicela negativa | **Susceptible a varicela**<br>incluye «La vacuna no se aplica en el embarazo» | ☐ Sí ☐ No | |
+| CLAP-22 | Toxoplasmosis: IgG negativa al ingreso y positiva un mes después (seroconversión). | Toxoplasmosis IgG negativa, luego positiva | **Posible toxoplasmosis aguda**<br>incluye «Seroconversión» | ☐ Sí ☐ No | |
+| CLAP-23 | Declara O positivo; la hemoclasificación de laboratorio es O negativo. | Declarado O positivo; Laboratorio O negativo | **Hemoclasificación distinta a la declarada**; **Rh negativo** | ☐ Sí ☐ No | |
 | CLAP-12 | Rh negativo inmunizada. | Rh negativo; Inmunizada | **Rh negativo sensibilizada**<br>incluye «Remitir a un nivel de mayor complejidad»<br>incluye «No aplica la inmunoglobulina anti-D» | ☐ Sí ☐ No | |
 | CLAP-13 | Fuma (cantidad desconocida) y consume alcohol. Sumar tabaquismo da 1 punto trombótico, sin alerta. | Fuma, no sabe cuánto; Alcohol | **Hábitos de riesgo** | ☐ Sí ☐ No | |
 | CLAP-14 | Violencia sexual: urgente, ruta y derechos. | Violencia SÍ; Violencia sexual SÍ | **Violencia sexual**<br>incluye «después de la semana 24» | ☐ Sí ☐ No | |

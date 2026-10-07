@@ -58,7 +58,8 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
   const positivo = (k: string, etiqueta: string) => opcion(k, etiqueta, [['si', 'Positivo'], ['no', 'Negativo']]);
 
   const campos: Record<TipoExamen, ReactNode> = {
-    hb: <>{numero('gdl', 'Hb', 'g/dL')}{opcion('muestra', 'Muestra', [['venosa', 'Venosa'], ['capilar', 'Capilar']])}</>,
+    hemoclasificacion: <>{opcion('grupo', 'Grupo', [['A', 'A'], ['B', 'B'], ['AB', 'AB'], ['O', 'O']])}{opcion('rh', 'Rh', [['+', 'Positivo'], ['-', 'Negativo']])}</>,
+    hb: <>{numero('gdl', 'Hb', 'g/dL')}{opcion('muestra', 'Muestra', [['venosa', 'Venosa'], ['capilar', 'Capilar']])}{numero('plaquetasHemograma', 'Plaquetas', '× 10⁹/L')}</>,
     plaquetas: numero('x10e9L', 'Plaquetas', '× 10⁹/L'),
     ferritina: numero('ngMl', 'Ferritina', 'ng/mL'),
     saturacionTransferrina: numero('porcentaje', 'Saturación', '%'),
@@ -82,6 +83,7 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
   const valor = (): unknown => {
     const c = (x: number | undefined) => (x === undefined ? { estado: 'vacio' } : { estado: 'valor', valor: x });
     switch (tipo) {
+      case 'hemoclasificacion': return f.grupo && f.rh ? { grupo: f.grupo, rh: f.rh } : undefined;
       case 'hb': return n('gdl') !== undefined && f.muestra ? { gdl: n('gdl'), muestra: f.muestra } : undefined;
       case 'plaquetas': return n('x10e9L') !== undefined ? { x10e9L: n('x10e9L') } : undefined;
       case 'ferritina': return n('ngMl') !== undefined ? { ngMl: n('ngMl') } : undefined;
@@ -108,6 +110,9 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
       if (adv.length && !confirm(adv[0]!.mensaje)) return;
     }
     await onRegistrar(tipo, v, fecha);
+    // El hemograma registra también las plaquetas, como resultado aparte con la misma fecha.
+    const plaquetas = n('plaquetasHemograma');
+    if (tipo === 'hb' && plaquetas !== undefined) await onRegistrar('plaquetas', { x10e9L: plaquetas }, fecha);
     setF({});
     setAviso(undefined);
   };

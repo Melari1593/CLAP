@@ -205,6 +205,8 @@ export interface GestacionActual {
   violencia: Campo<SiNo>;
   violenciaSexual: Campo<SiNo>;
   antirrubeola: Campo<'previa' | 'embarazo' | 'no' | 'no_sabe'>;
+  /** Antecedente de vacuna contra la varicela (si no la tiene, se pide la IgG). */
+  antivaricela: Campo<'previa' | 'no' | 'no_sabe'>;
   antitetanica: Campo<{ dosisPrevias: number; fechaUltima: FechaISO | null; informacionConfiable: SiNo }>;
   examenOdontologico: Campo<'normal' | 'anormal'>;
   examenMamas: Campo<'normal' | 'anormal'>;
@@ -289,6 +291,8 @@ export interface Consulta extends Meta {
 // ---------------------------------------------------------------- Exámenes
 
 export type ResultadoPorTipo = {
+  /** Hemoclasificación de laboratorio: se pide a todas, aunque haya declarado su grupo. */
+  hemoclasificacion: { grupo: 'A' | 'B' | 'AB' | 'O'; rh: '+' | '-' };
   hb: { gdl: number; muestra: 'venosa' | 'capilar' };
   plaquetas: { x10e9L: number };
   ferritina: { ngMl: number };

@@ -21,6 +21,7 @@ import { GraficaAlturaUterina } from './GraficaAlturaUterina';
 import { GraficaIMC } from './GraficaIMC';
 import { PanelLaboratorios } from './PanelLaboratorios';
 import { valorDe } from '../datos/campo';
+import { grupoRh } from '../clinico/grupoRh';
 import { borrarBorrador, guardarBorrador, leerBorrador } from './borrador';
 
 type Cita = { fecha: string; lugar: string; queLlevar: string };
@@ -40,6 +41,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
   const [primeraDelEmbarazo, setPrimeraDelEmbarazo] = useState<DatosPrimeraConsulta>();
   const [egSemanas, setEgSemanas] = useState<number>();
   const [egTexto, setEgTexto] = useState<string>();
+  const [rhNegativo, setRhNegativo] = useState(false);
   const [consultaId, setConsultaId] = useState(idInicial);
   const [cerrada, setCerrada] = useState(false);
   const [primera, setPrimera] = useState<DatosPrimeraConsulta>();
@@ -69,7 +71,9 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
           setEgSemanas(eg.semanas);
           setEgTexto(`${eg.semanas} sem + ${eg.diasResto} d`);
         }
-        setPrimeraDelEmbarazo(historia.consultas.find((c) => c.tipo === 'primera')?.primera);
+        const primera = historia.consultas.find((c) => c.tipo === 'primera')?.primera;
+        setPrimeraDelEmbarazo(primera);
+        setRhNegativo(grupoRh(primera, historia.examenes).rh === '-');
       }
       if (existente) {
         setCerrada(existente.cerrada);
@@ -156,7 +160,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
         <>
           <PanelCalculos gestante={gestante} datos={primeraDelEmbarazo} />
           <p className="suave">EG del día: {egTexto ?? 'no calculable'}</p>
-          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} clave={clave} ctx={{ egSemanas, rhNegativo: valorDe(primeraDelEmbarazo?.gestacionActual.rh) === '-' }} />
+          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} clave={clave} ctx={{ egSemanas, rhNegativo }} />
         </>
       )}
 

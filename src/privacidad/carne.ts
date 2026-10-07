@@ -9,7 +9,8 @@ import { valorDe } from '../datos/campo';
 import type { Carne, FechaISO, TipoIndicacion } from '../datos/modelo';
 import type { Historia } from '../datos/repositorio';
 import { recordatorios } from '../recordatorios/recordatorios';
-import { examenesPorTrimestre, type FilaExamen } from '../examenes/porTrimestre';
+import { examenesPorTrimestre, type GrupoTrimestre } from '../examenes/porTrimestre';
+import { grupoRh } from '../clinico/grupoRh';
 
 export const MENSAJE_CARNE_PAUSADO = 'Comunícate con tu servicio de salud.';
 
@@ -37,14 +38,17 @@ const EXAMENES_CARNE: { trimestre: 1 | 2 | 3; texto: string; incluye: (id: strin
   { trimestre: 2, texto: 'Prueba del azúcar (semanas 24 a 28)', incluye: (id) => id === 'ptog' },
   { trimestre: 3, texto: 'Exámenes de sangre del tercer trimestre (desde la semana 28)', incluye: (id) => id.startsWith('tercer:') },
   { trimestre: 3, texto: 'Muestra para estreptococo B (semanas 35 a 37)', incluye: (id) => id === 'egb' },
+  // La toxoplasmosis mensual aparece en el trimestre actual.
+  ...([1, 2, 3] as const).map((t) => ({ trimestre: t, texto: 'Examen de sangre de cada mes (toxoplasmosis)', incluye: (id: string) => id === 'toxo_mensual' })),
 ];
 const TITULO_TRIMESTRE = { 1: 'Primer trimestre', 2: 'Segundo trimestre', 3: 'Tercer trimestre' } as const;
 
-function examenesCarne(filas: FilaExamen[]): { trimestre: 1 | 2 | 3; titulo: string; examenes: ExamenCarne[] }[] {
+function examenesCarne(grupos: GrupoTrimestre[]): { trimestre: 1 | 2 | 3; titulo: string; examenes: ExamenCarne[] }[] {
   return ([1, 2, 3] as const).map((t) => ({
     trimestre: t,
     titulo: TITULO_TRIMESTRE[t],
     examenes: EXAMENES_CARNE.filter((g) => g.trimestre === t).flatMap((g): ExamenCarne[] => {
+      const filas = grupos.find((x) => x.trimestre === t)?.filas ?? [];
       const del = filas.filter((f) => g.incluye(f.id));
       if (del.length === 0) return [];
       if (del.every((f) => f.estado === 'hecho')) {
@@ -105,9 +109,10 @@ export function proyectarCarne(historia: Historia, carne: Carne, hoy: FechaISO, 
     senalesCoagulo: indicaciones.includes('tromboprofilaxis') || (trombo?.puntaje ?? 0) >= umbralCoagulo,
     tromboAntesDelParto: indicaciones.includes('tromboprofilaxis') ? catalogo.valor('trombo.suspensionAntesDelParto') ?? undefined : undefined,
     examenesPendientes: [...new Set(recordatorios(ctx).flatMap((r) => (r.paraGestante ? [r.paraGestante] : [])))],
-    examenesPorTrimestre: examenesCarne(examenesPorTrimestre(ctx).flatMap((g) => g.filas)),
-    grupo: valorDe(actual?.grupo),
-    rh: valorDe(actual?.rh),
+    examenesPorTrimestre: examenesCarne(examenesPorTrimestre(ctx)),
+    // Hemoclasificación de laboratorio si la hay; si no, lo declarado.
+    grupo: grupoRh(ctx.primera, historia.examenes).grupo,
+    rh: grupoRh(ctx.primera, historia.examenes).rh,
     vacunas: {
       antirrubeola: valorDe(actual?.antirrubeola),
       antitetanicaDosisPrevias: valorDe(actual?.antitetanica)?.dosisPrevias,

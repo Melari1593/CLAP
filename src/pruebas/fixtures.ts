@@ -129,6 +129,7 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       violencia: valor(true),
       violenciaSexual: valor(false),
       antirrubeola: valor('previa'),
+      antivaricela: valor('no'),
       antitetanica: valor({ dosisPrevias: 2, fechaUltima: '2024-03-10', informacionConfiable: true }),
       examenOdontologico: valor('normal'),
       examenMamas: valor('normal'),

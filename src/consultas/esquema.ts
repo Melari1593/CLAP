@@ -191,10 +191,11 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
       },
       {
         ruta: 'gestacionActual.grupo',
-        etiqueta: 'Grupo sanguíneo',
+        etiqueta: 'Grupo sanguíneo (declarado)',
+        ayuda: 'La hemoclasificación de laboratorio se pide a todas las gestantes y, cuando llega, reemplaza lo declarado.',
         control: { tipo: 'opciones', opciones: ops(['A', 'A'], ['B', 'B'], ['AB', 'AB'], ['O', 'O']) },
       },
-      { ruta: 'gestacionActual.rh', etiqueta: 'Rh', control: { tipo: 'opciones', opciones: ops(['+', 'Positivo'], ['-', 'Negativo']) } },
+      { ruta: 'gestacionActual.rh', etiqueta: 'Rh (declarado)', control: { tipo: 'opciones', opciones: ops(['+', 'Positivo'], ['-', 'Negativo']) } },
       {
         ruta: 'gestacionActual.inmunizada',
         etiqueta: 'Inmunizada (Rh)',
@@ -264,6 +265,12 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
         ruta: 'gestacionActual.antirrubeola',
         etiqueta: 'Antirrubéola',
         control: { tipo: 'opciones', opciones: ops(['previa', 'Previa'], ['embarazo', 'En el embarazo'], ['no', 'No'], ['no_sabe', 'No sabe']) },
+      },
+      {
+        ruta: 'gestacionActual.antivaricela',
+        etiqueta: 'Vacuna contra la varicela',
+        ayuda: 'Sin antecedente de vacuna se pide la IgG para varicela zóster.',
+        control: { tipo: 'opciones', opciones: ops(['previa', 'Previa'], ['no', 'No'], ['no_sabe', 'No sabe']) },
       },
       { ruta: 'gestacionActual.antitetanica', etiqueta: 'Antitetánica', control: { tipo: 'antitetanica' } },
     ],

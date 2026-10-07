@@ -18,6 +18,7 @@ import type {
   TipoIndicacion,
 } from '../datos/modelo';
 import type { Historia, NuevoRegistro, Repositorio } from '../datos/repositorio';
+import { grupoRh } from '../clinico/grupoRh';
 import { BLOQUES_PRIMERA, BLOQUES_SEGUIMIENTO, aplicarNoCorresponde, etiquetaDe } from './esquema';
 import { validarPrimeraConsulta, validarSeguimiento, type Advertencia } from './validaciones';
 import type { RegistroEventos } from '../eventos/eventos';
@@ -165,8 +166,9 @@ export class ServicioConsultas {
     opciones: { consultaId?: string; proximaCita?: Consulta['proximaCita']; confirmado?: boolean; egSemanas?: number } = {},
   ): Promise<ResultadoGuardado<Consulta>> {
     const historia = await this.repo.historia(embarazoId);
-    const rh = historia?.consultas.find((c) => c.tipo === 'primera')?.primera?.gestacionActual.rh;
-    const ajustados = aplicarNoCorresponde(BLOQUES_SEGUIMIENTO, datos, { egSemanas: opciones.egSemanas, rhNegativo: valorDe(rh) === '-' });
+    const primera = historia?.consultas.find((c) => c.tipo === 'primera')?.primera;
+    const rhNegativo = grupoRh(primera, historia?.examenes ?? []).rh === '-';
+    const ajustados = aplicarNoCorresponde(BLOQUES_SEGUIMIENTO, datos, { egSemanas: opciones.egSemanas, rhNegativo });
     const advertencias = validarSeguimiento(ajustados, this.catalogo);
     if (advertencias.length > 0 && !opciones.confirmado) return { estado: 'requiere_confirmacion', advertencias };
 

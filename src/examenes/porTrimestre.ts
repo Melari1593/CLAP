@@ -8,6 +8,24 @@ import { trimestreDeEG } from '../clinico/trimestre';
 import { valorDe } from '../datos/campo';
 import type { ResultadoExamen, ResultadoPorTipo, TipoExamen } from '../datos/modelo';
 import { etiquetaExamen, resumenExamen } from './resumen';
+import { grupoRh } from '../clinico/grupoRh';
+import { diasEntre } from '../clinico/calculos';
+
+/**
+ * Toxoplasmosis mensual: si la última prueba tiene IgG negativa (y nunca fue positiva), se repite
+ * cada `cadaDias`. Devuelve la fecha de la última y si ya toca repetirla.
+ */
+export function toxoMensual(ctx: ContextoClinico): { ultima: string; toca: boolean; cadaDias: number } | undefined {
+  const pruebas = ctx.historia.examenes
+    .filter((e) => e.tipo === 'toxoplasmosis' && e.resultado.estado === 'valor')
+    .sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const ultima = pruebas.at(-1);
+  if (!ultima || ultima.resultado.estado !== 'valor') return undefined;
+  const algunaPositiva = pruebas.some((e) => e.resultado.estado === 'valor' && (e.resultado.valor as ResultadoPorTipo['toxoplasmosis']).igg === 'positivo');
+  if (algunaPositiva || (ultima.resultado.valor as ResultadoPorTipo['toxoplasmosis']).igg !== 'negativo') return undefined;
+  const { cadaDias } = ctx.catalogo.valor('toxoplasmosis.repeticion');
+  return { ultima: ultima.fecha, toca: diasEntre(ultima.fecha, ctx.hoy) >= cadaDias, cadaDias };
+}
 
 export type EstadoExamen = 'hecho' | 'pendiente' | 'atrasado' | 'proximo';
 
@@ -42,6 +60,8 @@ export function alterado(ctx: ContextoClinico, e: ResultadoExamen): boolean {
     case 'vih': return (r as ResultadoPorTipo['vih']).resultado === 'positivo';
     case 'sifilisTreponemica': return (r as ResultadoPorTipo['sifilisTreponemica']).reactiva;
     case 'hepatitisB': return (r as ResultadoPorTipo['hepatitisB']).antigenoSuperficie === 'positivo';
+    case 'hemoclasificacion': return (r as ResultadoPorTipo['hemoclasificacion']).rh === '-';
+    case 'plaquetas': return (r as ResultadoPorTipo['plaquetas']).x10e9L < ctx.catalogo.valor('plaquetas.normalDesde');
     case 'rubeolaIgG': return !(r as ResultadoPorTipo['rubeolaIgG']).positivo; // sin inmunidad
     case 'varicelaIgG': return !(r as ResultadoPorTipo['varicelaIgG']).positivo; // sin inmunidad
     case 'toxoplasmosis': return (r as ResultadoPorTipo['toxoplasmosis']).igm === 'positivo';
@@ -100,6 +120,17 @@ export function examenesPorTrimestre(ctx: ContextoClinico): GrupoTrimestre[] {
 
   const tercer = v.examenesTercerTrimestre!;
   const g = primera?.gestacionActual;
+  const plaquetasNormal = catalogo.valor('plaquetas.normalDesde');
+
+  /** Hemograma: suma las plaquetas registradas el mismo día que la hemoglobina. */
+  const conPlaquetas = (f: FilaExamen): FilaExamen => {
+    if (!f.id.endsWith(':hb') || !f.resultado) return f;
+    const p = ordenados.find((e) => e.tipo === 'plaquetas' && e.fecha === f.resultado!.fecha && !usados.has(e.id) && e.resultado.estado === 'valor');
+    if (!p || p.resultado.estado !== 'valor') return f;
+    usados.add(p.id);
+    const x = (p.resultado.valor as ResultadoPorTipo['plaquetas']).x10e9L;
+    return { ...f, resultado: { ...f.resultado, texto: `${f.resultado.texto} · plaquetas ${x} × 10⁹/L`, alterado: f.resultado.alterado || x < plaquetasNormal } };
+  };
 
   // 1.er trimestre: exámenes de ingreso (primera consulta) y ecografía de 10+6 a 13+6.
   const ingreso = v.examenesPrimeraConsulta!;
@@ -107,26 +138,15 @@ export function examenesPorTrimestre(ctx: ContextoClinico): GrupoTrimestre[] {
     rubeolaIgG: !['previa', 'embarazo'].includes(valorDe(g?.antirrubeola) ?? ''),
     chagas: valorDe(primera?.identificacion.zonaEndemicaChagas) === true,
     malaria: valorDe(primera?.identificacion.zonaEndemicaMalaria) === true,
+    varicelaIgG: valorDe(g?.antivaricela) !== 'previa',
   };
   const tiposIngreso = (catalogo.valor('recordatorios.examenesPrimeraConsulta') as TipoExamen[]).filter((t) => aplica[t] !== false);
-  if (valorDe(g?.rh) === '-') tiposIngreso.push('coombsIndirecto');
-  // Hemoclasificación: grupo y Rh se registran en la primera consulta.
-  const grupo = valorDe(g?.grupo);
-  const rh = valorDe(g?.rh);
-  const filaHemo = fila('ingreso:hemoclasificacion', 'Hemoclasificación (grupo y Rh)', ingreso);
-  if (grupo && rh) {
-    const fechaPrimera = historia.consultas.find((c) => c.tipo === 'primera')?.fecha ?? ctx.hoy;
-    const d = ctx.egEn(fechaPrimera);
-    filaHemo.estado = 'hecho';
-    filaHemo.resultado = { fecha: fechaPrimera, semana: d !== undefined ? semanaTexto(d) : undefined, texto: `${grupo} ${rh === '+' ? 'positivo' : 'negativo'}`, alterado: rh === '-' };
-  }
-  const filas1 = [
-    filaHemo,
-    ...tiposIngreso.map((t) => {
-      const tipos: TipoExamen[] = t === 'sifilisTreponemica' ? ['sifilisTreponemica', 'vdrl'] : [t];
-      return fila(`ingreso:${t}`, etiquetaExamen(t), ingreso, buscar(tipos, 0, tercer.desdeSemana));
-    }),
-  ];
+  if (grupoRh(primera, historia.examenes).rh === '-') tiposIngreso.push('coombsIndirecto');
+  const filas1 = tiposIngreso.map((t) => {
+    const tipos: TipoExamen[] = t === 'sifilisTreponemica' ? ['sifilisTreponemica', 'vdrl'] : [t];
+    const nombre = t === 'hb' ? 'Hemograma (Hb y plaquetas)' : etiquetaExamen(t);
+    return conPlaquetas(fila(`ingreso:${t}`, nombre, ingreso, buscar(tipos, 0, tercer.desdeSemana)));
+  });
   const eco1 = v.ecografiaPrimerTrimestre!;
   const ecoGestacion = valorDe(g?.ecografia);
   const filaEco1 = fila('eco_1t', 'Ecografía de 10+6 a 13+6', eco1, buscar(['ecografia'], 0, null, esEco('primer_trimestre')));
@@ -150,11 +170,24 @@ export function examenesPorTrimestre(ctx: ContextoClinico): GrupoTrimestre[] {
 
   // 3.er trimestre: hemograma, VIH y sífilis desde la semana 28; estreptococo B de 35 a 37.
   const filas3 = [
-    fila('tercer:hb', 'Hemoglobina del tercer trimestre', tercer, buscar(['hb'], tercer.desdeSemana, null)),
+    conPlaquetas(fila('tercer:hb', 'Hemograma del tercer trimestre', tercer, buscar(['hb'], tercer.desdeSemana, null))),
     fila('tercer:vih', 'VIH del tercer trimestre', tercer, buscar(['vih'], tercer.desdeSemana, null)),
     fila('tercer:sifilis', 'Sífilis del tercer trimestre', tercer, buscar(['sifilisTreponemica', 'vdrl'], tercer.desdeSemana, null)),
     fila('egb', etiquetaExamen('egb'), v.egb!, buscar(['egb'], 0, null)),
   ];
+
+  // Toxoplasmosis cada mes mientras la IgG sea negativa: fila en el trimestre actual.
+  const toxo = toxoMensual(ctx);
+  if (toxo) {
+    const t = egHoy !== undefined ? trimestreDeEG(egHoy, catalogo) : 1;
+    const fila: FilaExamen = {
+      id: 'toxo_mensual',
+      nombre: 'Toxoplasmosis mensual (IgG negativa)',
+      momento: `cada ${toxo.cadaDias} días; la última, el ${toxo.ultima}`,
+      estado: toxo.toca ? 'pendiente' : 'proximo',
+    };
+    (t === 1 ? filas1 : t === 2 ? filas2 : filas3).push(fila);
+  }
 
   // Otros resultados, en el trimestre de su fecha (sin EG calculable: primer trimestre).
   const otros: Record<1 | 2 | 3, FilaExamen[]> = { 1: [], 2: [], 3: [] };

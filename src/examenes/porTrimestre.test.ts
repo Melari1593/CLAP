@@ -15,10 +15,12 @@ describe('Laboratorios y ecografías por trimestre', () => {
     const g = grupos(semana(12));
     expect(g.map((x) => x.titulo)).toEqual(['Primer trimestre y exámenes de ingreso', 'Segundo trimestre', 'Tercer trimestre']);
     expect(g[0]!.filas.map((f) => f.id)).toEqual(expect.arrayContaining(['ingreso:hemoclasificacion', 'ingreso:hb', 'ingreso:vih', 'ingreso:hepatitisB', 'eco_1t']));
-    // Grupo y Rh de la primera consulta de prueba: O positivo.
-    expect(fila(g, 'ingreso:hemoclasificacion')).toMatchObject({ estado: 'hecho', resultado: { texto: 'O positivo', alterado: false } });
-    const sinGrupo = grupos(semana(12), { primera: (d) => (d.gestacionActual.grupo = { estado: 'vacio' }) });
-    expect(fila(sinGrupo, 'ingreso:hemoclasificacion')?.estado).toBe('pendiente');
+    // La hemoclasificación se pide a todas aunque haya declarado su grupo (O positivo en la prueba).
+    expect(fila(g, 'ingreso:hemoclasificacion')?.estado).toBe('pendiente');
+    const conLab = grupos(semana(12), { examenes: [{ tipo: 'hemoclasificacion', valor: { grupo: 'O', rh: '-' }, fecha: semana(9) }] });
+    expect(fila(conLab, 'ingreso:hemoclasificacion')).toMatchObject({ estado: 'hecho', resultado: { texto: 'O negativo', alterado: true } });
+    // Con el Rh negativo del laboratorio se pide el Coombs indirecto.
+    expect(fila(conLab, 'ingreso:coombsIndirecto')?.estado).toBe('pendiente');
     expect(g[1]!.filas.map((f) => f.id)).toEqual(['segundo:vih', 'segundo:sifilis', 'eco_detalle', 'ptog']);
     expect(g[2]!.filas.map((f) => f.id)).toEqual(['tercer:hb', 'tercer:vih', 'tercer:sifilis', 'egb']);
   });
@@ -54,5 +56,34 @@ describe('Laboratorios y ecografías por trimestre', () => {
     expect(fila(g, 'eco_detalle')?.resultado).toMatchObject({ alterado: true });
     expect(g[1]!.otros.map((f) => f.nombre)).toEqual(['Ferritina sérica']);
     expect(g[0]!.otros).toEqual([]);
+  });
+
+  it('hemograma: suma las plaquetas del mismo día y las marca si están bajas', () => {
+    const g = grupos(semana(12), {
+      examenes: [
+        { tipo: 'hb', valor: { gdl: 12.5, muestra: 'venosa' }, fecha: semana(10) },
+        { tipo: 'plaquetas', valor: { x10e9L: 120 }, fecha: semana(10) },
+      ],
+    });
+    expect(fila(g, 'ingreso:hb')).toMatchObject({ nombre: 'Hemograma (Hb y plaquetas)', resultado: { alterado: true } });
+    expect(fila(g, 'ingreso:hb')?.resultado?.texto).toContain('plaquetas 120');
+    expect(g[0]!.otros).toEqual([]); // las plaquetas no se repiten como "otros"
+  });
+
+  it('varicela solo sin antecedente de vacuna', () => {
+    expect(fila(grupos(semana(12)), 'ingreso:varicelaIgG')).toBeDefined(); // datos de prueba: sin vacuna
+    const vacunada = grupos(semana(12), { primera: (d) => (d.gestacionActual.antivaricela = { estado: 'valor', valor: 'previa' }) });
+    expect(fila(vacunada, 'ingreso:varicelaIgG')).toBeUndefined();
+  });
+
+  it('toxoplasmosis cada mes mientras la IgG sea negativa', () => {
+    const neg = { tipo: 'toxoplasmosis' as const, valor: { igg: 'negativo' as const, igm: 'negativo' as const } };
+    const antes = grupos(semana(12), { examenes: [{ ...neg, fecha: semana(10) }] });
+    expect(fila(antes, 'toxo_mensual')?.estado).toBe('proximo'); // 14 días: aún no toca
+    const toca = grupos(semana(15), { examenes: [{ ...neg, fecha: semana(10) }] });
+    expect(fila(toca, 'toxo_mensual')?.estado).toBe('pendiente');
+    expect(toca[1]!.filas.map((f) => f.id)).toContain('toxo_mensual'); // en el trimestre actual
+    const positiva = grupos(semana(15), { examenes: [{ tipo: 'toxoplasmosis', valor: { igg: 'positivo', igm: 'negativo' }, fecha: semana(10) }] });
+    expect(fila(positiva, 'toxo_mensual')).toBeUndefined();
   });
 });
