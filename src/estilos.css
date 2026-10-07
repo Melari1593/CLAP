@@ -173,3 +173,20 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 .logo-pin { width: auto; height: 96px; align-self: center; }
 .actualizacion { margin: 4px 0; font-size: 0.9rem; background: #fff; color: var(--texto, #1f2937); padding: 4px 8px; border-radius: 4px; display: inline-block; }
 .actualizacion button { margin-left: 4px; }
+
+/* ---------- Laboratorios y ecografías por trimestre ---------- */
+.laboratorios details { border: 1px solid var(--borde); border-radius: 8px; padding: 6px 12px; margin: 8px 0; }
+.laboratorios summary { font-weight: 600; cursor: pointer; padding: 4px 0; }
+.lab-lista { list-style: none; padding: 0; margin: 4px 0; }
+.lab-fila { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 6px 0; border-top: 1px solid var(--borde); }
+.lab-fila:first-child { border-top: none; }
+.lab-nombre { flex: 1 1 260px; }
+.lab-resultado { flex: 1 1 260px; text-align: right; }
+.lab-fila.alterado .lab-resultado { font-weight: 600; color: #92400e; }
+.lab-estado { font-size: 0.85rem; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--borde); white-space: nowrap; align-self: center; }
+.lab-estado.atrasado { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+.lab-estado.pendiente { background: #fef3c7; color: #78350f; border-color: #fde68a; }
+.lab-estado.proximo { color: var(--suave); }
+.lab-otros { margin: 8px 0 0; font-size: 0.9rem; color: var(--suave); }
+@media (max-width: 560px) { .lab-resultado { text-align: left; } }
+@media print { .laboratorios { display: none; } }

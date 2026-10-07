@@ -9,6 +9,7 @@ import { PanelAlertas } from './PanelAlertas';
 import { PanelPendientes } from './PanelPendientes';
 import { GraficaAlturaUterina } from './GraficaAlturaUterina';
 import { GraficaIMC } from './GraficaIMC';
+import { PanelLaboratorios } from './PanelLaboratorios';
 
 export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; aviso?: string; ir: (p: Pantalla) => void }) {
   const { repo, servicio } = useApp();
@@ -80,6 +81,7 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
             <button type="button" onClick={() => ir({ tipo: 'derechos', gestanteId, embarazoId: activo.id })}>🔒 Opciones y derechos</button>
             <button type="button" onClick={nuevoEmbarazo}>Abrir embarazo nuevo</button>
           </div>
+          <PanelLaboratorios embarazoId={activo.id} />
           {/* Curvas al final de la pantalla */}
           <GraficaAlturaUterina embarazoId={activo.id} />
           <GraficaIMC embarazoId={activo.id} />

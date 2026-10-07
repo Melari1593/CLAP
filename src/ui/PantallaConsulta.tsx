@@ -19,6 +19,7 @@ import { CierreCarne } from './CierreCarne';
 import { PanelPendientes } from './PanelPendientes';
 import { GraficaAlturaUterina } from './GraficaAlturaUterina';
 import { GraficaIMC } from './GraficaIMC';
+import { PanelLaboratorios } from './PanelLaboratorios';
 import { valorDe } from '../datos/campo';
 import { borrarBorrador, guardarBorrador, leerBorrador } from './borrador';
 
@@ -206,9 +207,10 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
           onImprimir={() => ir({ tipo: 'impresion', gestanteId, embarazoId })}
         />
       )}
-      {/* Curvas al final de la pantalla */}
+      {/* Laboratorios por trimestre y curvas al final de la pantalla */}
       {tipo === 'seguimiento' && (
         <>
+          <PanelLaboratorios embarazoId={embarazoId} version={guardados} />
           <GraficaAlturaUterina embarazoId={embarazoId} version={guardados} />
           <GraficaIMC embarazoId={embarazoId} version={guardados} />
         </>
