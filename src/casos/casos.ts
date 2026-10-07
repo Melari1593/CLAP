@@ -244,6 +244,82 @@ export const CASOS: CasoClinico[] = [
     alertas: { rh_negativo: 'Rh negativo sensibilizada' },
   }),
 
+  caso({
+    id: 'HTA-01',
+    grupo: 'Hipertensión',
+    descripcion: 'PA 142/88 en la semana 18: hipertensión antes de la semana 20.',
+    datos: ['Control 2026-10-06 (18+1): PA 142/88, proteinuria negativa'],
+    hoy: '2026-10-06',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: [{ fecha: '2026-10-06', cambios: (s) => { s.paSistolica = valor(142); s.paDiastolica = valor(88); s.proteinuria = valor('negativa'); } }],
+    },
+    alertas: { hipertension: 'Hipertensión antes de la semana 20 (probablemente crónica)' },
+  }),
+  caso({
+    id: 'HTA-02',
+    grupo: 'Hipertensión',
+    descripcion: 'PA 140/85 en la semana 21 sin proteinuria: hipertensión gestacional.',
+    datos: ['Control 2026-10-26 (21+0): PA 140/85, proteinuria negativa'],
+    hoy: '2026-10-26',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: [{ fecha: '2026-10-26', cambios: (s) => { s.paSistolica = valor(140); s.paDiastolica = valor(85); s.proteinuria = valor('negativa'); } }],
+    },
+    alertas: { hipertension: 'Hipertensión gestacional' },
+    contiene: { hipertension: ['Repetir la toma'] },
+  }),
+  caso({
+    id: 'HTA-03',
+    grupo: 'Hipertensión',
+    descripcion: 'PA 145/92 con proteinuria 1+ en la semana 21: sospecha de preeclampsia (urgente).',
+    datos: ['Control 2026-10-26 (21+0): PA 145/92, proteinuria 1+'],
+    hoy: '2026-10-26',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: [{ fecha: '2026-10-26', cambios: (s) => { s.paSistolica = valor(145); s.paDiastolica = valor(92); s.proteinuria = valor('1+'); } }],
+    },
+    alertas: { hipertension: 'Sospecha de preeclampsia' },
+    contiene: { hipertension: ['Remitir para valoración'] },
+  }),
+  caso({
+    id: 'HTA-04',
+    grupo: 'Hipertensión',
+    descripcion: 'PA 145/92 con proteinuria en trazas: hipertensión gestacional, no sospecha de preeclampsia.',
+    datos: ['Control 2026-10-26 (21+0): PA 145/92, proteinuria trazas'],
+    hoy: '2026-10-26',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: [{ fecha: '2026-10-26', cambios: (s) => { s.paSistolica = valor(145); s.paDiastolica = valor(92); s.proteinuria = valor('trazas'); } }],
+    },
+    alertas: { hipertension: 'Hipertensión gestacional' },
+  }),
+  caso({
+    id: 'HTA-05',
+    grupo: 'Hipertensión',
+    descripcion: 'PA 162/100: rango severo (urgente).',
+    datos: ['Control 2026-10-26 (21+0): PA 162/100, proteinuria 2+'],
+    hoy: '2026-10-26',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: [{ fecha: '2026-10-26', cambios: (s) => { s.paSistolica = valor(162); s.paDiastolica = valor(100); s.proteinuria = valor('2+'); } }],
+    },
+    alertas: { hipertension: 'Hipertensión en rango severo' },
+    contiene: { hipertension: ['manejo inmediato y remisión', 'sospecha de preeclampsia con criterios de severidad'] },
+  }),
+  caso({
+    id: 'HTA-06',
+    grupo: 'Hipertensión',
+    descripcion: 'PA 135/85: sin alerta.',
+    datos: ['Control 2026-10-26 (21+0): PA 135/85'],
+    hoy: '2026-10-26',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: [{ fecha: '2026-10-26', cambios: (s) => { s.paSistolica = valor(135); s.paDiastolica = valor(85); s.proteinuria = valor('negativa'); } }],
+    },
+    alertas: {},
+  }),
+
   // ---------------- Antitetánica
   caso({
     id: 'AT-01',

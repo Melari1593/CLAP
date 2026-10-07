@@ -17,6 +17,7 @@ import {
   menorDe14,
   pesoRNPrevio,
   rhNegativo,
+  hipertension,
   sifilis,
   violencia,
 } from './reglasClap';
@@ -192,3 +193,39 @@ describe('Antitetánica según el CLAP (C3)', () => {
     expect(c.avisos().map((a) => a.id)).not.toContain('clap.antitetanicaConducta');
   });
 });
+
+describe('Hipertensión y sospecha de preeclampsia', () => {
+  const control = (fecha: string, pas: number, pad: number, proteinuria: 'negativa' | 'trazas' | '1+' | '2+' | '3+' = 'negativa') => ({
+    fecha,
+    cambios: (s: { paSistolica: unknown; paDiastolica: unknown; proteinuria: unknown }) => {
+      s.paSistolica = valor(pas);
+      s.paDiastolica = valor(pad);
+      s.proteinuria = valor(proteinuria);
+    },
+  });
+  const ev = (seguimientos: ReturnType<typeof control>[], hoy = '2026-10-26') =>
+    hipertension.evaluar(construirContexto(historiaDePrueba({ seguimientos }), hoy, cat));
+
+  it('usa la última toma: si la PA bajó, no hay alerta', () => {
+    expect(ev([control('2026-10-12', 150, 95), control('2026-10-26', 120, 80)])).toBeNull();
+    expect(ev([control('2026-10-12', 120, 80), control('2026-10-26', 150, 95)])?.titulo).toBe('Hipertensión gestacional');
+  });
+
+  it('140 sola o 90 sola bastan; 139/89 no', () => {
+    expect(ev([control('2026-10-26', 140, 80)])).not.toBeNull();
+    expect(ev([control('2026-10-26', 120, 90)])).not.toBeNull();
+    expect(ev([control('2026-10-26', 139, 89)])).toBeNull();
+  });
+
+  it('sube de nivel (para que el motor vuelva a avisar): gestacional < preeclampsia < severa', () => {
+    const n1 = ev([control('2026-10-26', 145, 92)])!.severidad!;
+    const n2 = ev([control('2026-10-26', 145, 92, '1+')])!.severidad!;
+    const n3 = ev([control('2026-10-26', 160, 95)])!.severidad!;
+    expect([n1, n2, n3]).toEqual([1, 2, 3]);
+  });
+
+  it('antes de la semana 20 la proteinuria no cambia a sospecha de preeclampsia', () => {
+    expect(ev([control('2026-10-06', 145, 92, '2+')], '2026-10-06')?.titulo).toBe('Hipertensión antes de la semana 20 (probablemente crónica)');
+  });
+});
+

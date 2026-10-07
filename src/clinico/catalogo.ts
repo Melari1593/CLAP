@@ -469,6 +469,22 @@ const BASE = {
       'Según la Ruta Materno Perinatal, aprobado por la responsable del proyecto el 2026-10-07: hemograma, prueba treponémica rápida, VIH, hepatitis B, urocultivo, toxoplasmosis; IgG de rubéola solo sin vacuna previa; Chagas y malaria solo en zona endémica. Además, grupo y Rh, tamizaje de cuello uterino y ecografía de 10+6 a 13+6. Verificar contra la versión vigente.',
   }),
 
+  'hta.umbrales': p<{
+    pas: number;
+    pad: number;
+    pasSevera: number;
+    padSevera: number;
+    semanaGestacional: number;
+    proteinuriaMinima: '1+' | '2+' | '3+';
+  }>({
+    nombre: 'Hipertensión en el embarazo y sospecha de preeclampsia',
+    valor: { pas: 140, pad: 90, pasSevera: 160, padSevera: 110, semanaGestacional: 20, proteinuriaMinima: '1+' },
+    unidad: 'mmHg / semanas / proteinuria en tira',
+    fuentes: ['GPC Colombia 2013', 'Equipo clínico'],
+    estado: 'pendiente',
+    nota:
+      'Aprobados por la responsable del proyecto el 2026-10-07 (proteinuria de 1+ o más). Pendiente de que el equipo clínico confirme los umbrales contra la GPC vigente.',
+  }),
   'rh.antiD': p<{ desdeSemana: number; hastaSemana: number | null }>({
     nombre: 'Inmunoglobulina anti-D en gestantes Rh negativo no sensibilizadas',
     valor: { desdeSemana: 28, hastaSemana: 28 },

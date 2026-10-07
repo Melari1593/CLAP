@@ -37,6 +37,17 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 | CLAP-19 | Rh negativo no sensibilizada: Coombs indirecto y anti-D en la semana 28. | Rh negativo; No inmunizada | **Rh negativo**<br>incluye «Solicitar Coombs indirecto.»<br>incluye «Aplicar inmunoglobulina anti-D en la semana 28 (2026-12-14).» | ☐ Sí ☐ No | |
 | CLAP-20 | Rh negativo con Coombs indirecto positivo: sensibilizada, remitir. | Rh negativo; Coombs indirecto positivo | **Rh negativo sensibilizada** | ☐ Sí ☐ No | |
 
+## Hipertensión
+
+| Caso | Qué se prueba | Datos | Resultado esperado | ¿Correcto? | Observaciones |
+|---|---|---|---|---|---|
+| HTA-01 | PA 142/88 en la semana 18: hipertensión antes de la semana 20. | Control 2026-10-06 (18+1): PA 142/88, proteinuria negativa; Evaluada el 2026-10-06 | **Hipertensión antes de la semana 20 (probablemente crónica)** | ☐ Sí ☐ No | |
+| HTA-02 | PA 140/85 en la semana 21 sin proteinuria: hipertensión gestacional. | Control 2026-10-26 (21+0): PA 140/85, proteinuria negativa; Evaluada el 2026-10-26 | **Hipertensión gestacional**<br>incluye «Repetir la toma» | ☐ Sí ☐ No | |
+| HTA-03 | PA 145/92 con proteinuria 1+ en la semana 21: sospecha de preeclampsia (urgente). | Control 2026-10-26 (21+0): PA 145/92, proteinuria 1+; Evaluada el 2026-10-26 | **Sospecha de preeclampsia**<br>incluye «Remitir para valoración» | ☐ Sí ☐ No | |
+| HTA-04 | PA 145/92 con proteinuria en trazas: hipertensión gestacional, no sospecha de preeclampsia. | Control 2026-10-26 (21+0): PA 145/92, proteinuria trazas; Evaluada el 2026-10-26 | **Hipertensión gestacional** | ☐ Sí ☐ No | |
+| HTA-05 | PA 162/100: rango severo (urgente). | Control 2026-10-26 (21+0): PA 162/100, proteinuria 2+; Evaluada el 2026-10-26 | **Hipertensión en rango severo**<br>incluye «manejo inmediato y remisión»<br>incluye «sospecha de preeclampsia con criterios de severidad» | ☐ Sí ☐ No | |
+| HTA-06 | PA 135/85: sin alerta. | Control 2026-10-26 (21+0): PA 135/85; Evaluada el 2026-10-26 | Sin alertas | ☐ Sí ☐ No | |
+
 ## Antitetánica
 
 | Caso | Qué se prueba | Datos | Resultado esperado | ¿Correcto? | Observaciones |

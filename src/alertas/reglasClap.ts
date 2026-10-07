@@ -2,7 +2,7 @@
 import { intervaloIntergenesico, sumarDias } from '../clinico/calculos';
 import { valorDe } from '../datos/campo';
 import { evaluarAntitetanica } from './antitetanica';
-import type { Regla } from './motor';
+import type { ContextoClinico, Regla } from './motor';
 
 const enDerechos = 'Abrir "Opciones y derechos".';
 
@@ -196,6 +196,81 @@ export const rhNegativo: Regla = {
   },
 };
 
+const NIVEL_PROTEINURIA = { negativa: 0, trazas: 1, '1+': 2, '2+': 3, '3+': 4 } as const;
+
+/** Última toma de PA registrada en los controles, con la proteinuria del mismo control. */
+function ultimaPresion(ctx: ContextoClinico) {
+  const conPA = ctx.seguimientos
+    .filter((c) => valorDe(c.seguimiento?.paSistolica) !== undefined && valorDe(c.seguimiento?.paDiastolica) !== undefined)
+    .sort((a, b) => (a.fecha + a.creadoEn).localeCompare(b.fecha + b.creadoEn));
+  const c = conPA.at(-1);
+  if (!c?.seguimiento) return undefined;
+  return {
+    fecha: c.fecha,
+    pas: valorDe(c.seguimiento.paSistolica)!,
+    pad: valorDe(c.seguimiento.paDiastolica)!,
+    proteinuria: valorDe(c.seguimiento.proteinuria),
+    egDias: ctx.egEn(c.fecha),
+  };
+}
+
+export const hipertension: Regla = {
+  id: 'hipertension',
+  evaluar(ctx) {
+    const pa = ultimaPresion(ctx);
+    if (!pa) return null;
+    const u = ctx.catalogo.valor('hta.umbrales');
+    const hipertensa = pa.pas >= u.pas || pa.pad >= u.pad;
+    if (!hipertensa) return null;
+    const severa = pa.pas >= u.pasSevera || pa.pad >= u.padSevera;
+    const proteinuria = pa.proteinuria !== undefined && NIVEL_PROTEINURIA[pa.proteinuria] >= NIVEL_PROTEINURIA[u.proteinuriaMinima];
+    const desde20 = pa.egDias === undefined ? undefined : pa.egDias >= u.semanaGestacional * 7;
+    const toma = `PA ${pa.pas}/${pa.pad} mmHg el ${pa.fecha}${pa.egDias !== undefined ? ` (semana ${Math.floor(pa.egDias / 7)}+${pa.egDias % 7})` : ''}.`;
+    const proteinuriaTexto = pa.proteinuria ? `Proteinuria ${pa.proteinuria}.` : 'Proteinuria no registrada en ese control.';
+    const urgentes = [{ etiqueta: 'Remitida' }, { etiqueta: 'Manejo iniciado' }, { etiqueta: 'Otra conducta', requiereMotivo: true }];
+
+    if (severa) {
+      return {
+        titulo: 'Hipertensión en rango severo',
+        porque: [
+          toma,
+          proteinuriaTexto,
+          `PA sistólica ≥ ${u.pasSevera} o diastólica ≥ ${u.padSevera}: manejo inmediato y remisión según la guía.`,
+          ...(proteinuria && desde20 !== false ? ['Con proteinuria: sospecha de preeclampsia con criterios de severidad.'] : []),
+          'Preguntar por dolor de cabeza fuerte, visión borrosa, dolor en la boca del estómago y disminución de movimientos fetales.',
+        ],
+        severidad: 3,
+        urgente: true,
+        opciones: urgentes,
+      };
+    }
+    if (proteinuria && desde20 !== false) {
+      return {
+        titulo: 'Sospecha de preeclampsia',
+        porque: [
+          toma,
+          proteinuriaTexto,
+          `PA ≥ ${u.pas}/${u.pad} con proteinuria de ${u.proteinuriaMinima} o más${desde20 === undefined ? ' (EG no confiable)' : ` desde la semana ${u.semanaGestacional}`}.`,
+          'Remitir para valoración según la guía. El diagnóstico lo registra el profesional en el control.',
+        ],
+        severidad: 2,
+        urgente: true,
+        opciones: urgentes,
+      };
+    }
+    return {
+      titulo: desde20 === false ? 'Hipertensión antes de la semana 20 (probablemente crónica)' : 'Hipertensión gestacional',
+      porque: [
+        toma,
+        proteinuriaTexto,
+        `PA ≥ ${u.pas}/${u.pad}. Repetir la toma con la técnica adecuada y valorar según la guía.`,
+      ],
+      severidad: 1,
+      opciones: [{ etiqueta: 'Toma repetida y valoración' }, { etiqueta: 'Referida' }, { etiqueta: 'No requiere acción', requiereMotivo: true }],
+    };
+  },
+};
+
 export const habitos: Regla = {
   id: 'habitos',
   evaluar({ primera }) {
@@ -295,6 +370,7 @@ export const REGLAS_CLAP: Regla[] = [
   sifilis,
   infecciones,
   rhNegativo,
+  hipertension,
   habitos,
   violencia,
   antirrubeola,
