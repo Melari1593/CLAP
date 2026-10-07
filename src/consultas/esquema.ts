@@ -25,6 +25,8 @@ export type TipoCampo =
 export interface ContextoFormulario {
   /** Semanas de gestación del día, si se conocen. */
   egSemanas?: number;
+  /** La gestante es Rh negativo (para la anti-D en el seguimiento). */
+  rhNegativo?: boolean;
 }
 
 export interface DefCampo<D> {
@@ -422,6 +424,13 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
     titulo: 'Adherencia y vacunas',
     campos: [
       { ruta: 'tdapAplicada', etiqueta: 'Vacuna Tdap (tosferina) aplicada hoy', ayuda: 'Desde la semana 26, en cada embarazo.', control: sino },
+      {
+        ruta: 'antiDAplicada',
+        etiqueta: 'Inmunoglobulina anti-D aplicada hoy',
+        ayuda: 'Rh negativo no sensibilizada: semana 28, y después de sangrado, trauma o procedimientos invasivos.',
+        control: sino,
+        aplica: (_d, ctx) => ctx.rhNegativo === true,
+      },
       { ruta: 'tomaCalcioDiario', etiqueta: '¿Toma el calcio todos los días?', control: sino },
       { ruta: 'tomaASADiario', etiqueta: '¿Toma la aspirina todos los días?', control: sino },
       { ruta: 'aplicaTromboprofilaxisDiario', etiqueta: '¿Se aplica la tromboprofilaxis todos los días?', control: sino },

@@ -99,6 +99,21 @@ describe('Recordatorios por semana (F1)', () => {
     expect(r).toEqual(expect.arrayContaining(['inicial:rubeolaIgG', 'inicial:chagas', 'inicial:malaria']));
   });
 
+  it('Rh negativo: Coombs indirecto en la primera consulta y anti-D desde la semana 28', () => {
+    const rhNeg = { primera: (d: Parameters<NonNullable<NonNullable<Parameters<typeof historiaDePrueba>[0]>['primera']>>[0]) => {
+      d.gestacionActual.rh = valor('-');
+      d.gestacionActual.inmunizada = valor(false);
+    } };
+    expect(ids(semana(10), rhNeg).map((r) => r.id)).toContain('inicial:coombsIndirecto');
+    expect(ids(semana(27), rhNeg).map((r) => r.id)).not.toContain('anti_d');
+    expect(ids(semana(28), rhNeg).find((r) => r.id === 'anti_d')).toMatchObject({ estado: 'pendiente', tipo: 'accion' });
+    expect(ids(semana(29), rhNeg).find((r) => r.id === 'anti_d')?.estado).toBe('atrasado');
+    const aplicada = { ...rhNeg, seguimientos: [{ fecha: semana(28), cambios: (d: { antiDAplicada: unknown }) => (d.antiDAplicada = valor(true)) }] };
+    expect(ids(semana(30), aplicada).map((r) => r.id)).not.toContain('anti_d');
+    // Rh positivo: nada de esto.
+    expect(ids(semana(28)).map((r) => r.id)).not.toContain('anti_d');
+  });
+
   it('Tdap desde la semana 26 hasta que se registre aplicada', () => {
     expect(ids(semana(25)).map((r) => r.id)).not.toContain('tdap');
     expect(ids(semana(26)).find((r) => r.id === 'tdap')).toMatchObject({ estado: 'pendiente', tipo: 'accion' });

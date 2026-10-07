@@ -27,6 +27,7 @@ const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }[] = [
   { tipo: 'hepatitisB', etiqueta: 'Hepatitis B (antígeno de superficie)' },
   { tipo: 'sifilisTreponemica', etiqueta: 'Sífilis: prueba treponémica rápida' },
   { tipo: 'rubeolaIgG', etiqueta: 'IgG para rubéola' },
+  { tipo: 'coombsIndirecto', etiqueta: 'Coombs indirecto' },
   { tipo: 'ecografia', etiqueta: 'Ecografía' },
   { tipo: 'toxoplasmosis', etiqueta: 'Toxoplasmosis' },
   { tipo: 'chagas', etiqueta: 'Chagas' },
@@ -69,6 +70,7 @@ function resumen(e: ResultadoExamen): string {
     case 'vdrl': { const v = r as ResultadoPorTipo['vdrl']; return `${v.reactivo ? 'Reactivo' : 'No reactivo'} · FTA ${sn(v.fta)} · Tto ${sn(v.tratamiento)} · Tto pareja ${sn(v.tratamientoPareja)}`; }
     case 'vih': { const v = r as ResultadoPorTipo['vih']; return `Solicitado ${sn(v.solicitado)} · Realizado ${sn(v.realizado)} · ${v.resultado.replace('_', ' ')}`; }
     case 'sifilisTreponemica': return (r as ResultadoPorTipo['sifilisTreponemica']).reactiva ? 'Reactiva' : 'No reactiva';
+    case 'coombsIndirecto': return pos((r as ResultadoPorTipo['coombsIndirecto']).positivo);
     case 'rubeolaIgG': return pos((r as ResultadoPorTipo['rubeolaIgG']).positivo);
     case 'ecografia': { const v = r as ResultadoPorTipo['ecografia']; return `${v.momento === 'primer_trimestre' ? 'De 10+6 a 13+6' : v.momento === 'detalle' ? 'De detalle' : 'Otra'} · ${v.hallazgos}`; }
     case 'hepatitisB': return `Antígeno de superficie ${(r as ResultadoPorTipo['hepatitisB']).antigenoSuperficie}`;
@@ -111,6 +113,7 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
     vih: <>{siNo('solicitado', 'Solicitado')}{siNo('realizado', 'Realizado')}{opcion('resultado', 'Resultado', [['negativo', 'Negativo'], ['positivo', 'Positivo'], ['no_realizado', 'No realizado']])}</>,
     sifilisTreponemica: opcion('reactiva', 'Resultado', [['no', 'No reactiva'], ['si', 'Reactiva']]),
     rubeolaIgG: positivo('positivo', 'Resultado'),
+    coombsIndirecto: positivo('positivo', 'Resultado'),
     ecografia: <>{opcion('momento', 'Momento', [['primer_trimestre', 'De 10+6 a 13+6'], ['detalle', 'De detalle (18–23+6)'], ['otra', 'Otra']])}{opcion('hallazgos', 'Hallazgos', [['normal', 'Normales'], ['anormal', 'Anormales']])}</>,
     hepatitisB: opcion('antigenoSuperficie', 'Antígeno de superficie', [['negativo', 'Negativo'], ['positivo', 'Positivo']]),
     toxoplasmosis: <>{opcion('igg', 'IgG', [['positivo', 'Positivo'], ['negativo', 'Negativo']])}{opcion('igm', 'IgM', [['positivo', 'Positivo'], ['negativo', 'Negativo']])}</>,

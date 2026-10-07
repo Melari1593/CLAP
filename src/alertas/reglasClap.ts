@@ -1,5 +1,5 @@
 // C2 / C3 — Alertas básicas del CLAP (campos amarillos) y antitetánica.
-import { intervaloIntergenesico } from '../clinico/calculos';
+import { intervaloIntergenesico, sumarDias } from '../clinico/calculos';
 import { valorDe } from '../datos/campo';
 import { evaluarAntitetanica } from './antitetanica';
 import type { Regla } from './motor';
@@ -154,16 +154,44 @@ export const infecciones: Regla = {
 
 export const rhNegativo: Regla = {
   id: 'rh_negativo',
-  evaluar({ primera }) {
+  evaluar(ctx) {
+    const { primera, eg, catalogo } = ctx;
     if (valorDe(primera?.gestacionActual.rh) !== '-') return null;
     const inmunizada = valorDe(primera?.gestacionActual.inmunizada);
+    const coombs = ctx.ultimo('coombsIndirecto');
+    const sensibilizada = inmunizada === true || coombs?.positivo === true;
+
+    if (sensibilizada) {
+      return {
+        titulo: 'Rh negativo sensibilizada',
+        porque: [
+          inmunizada === true ? 'Registrada como inmunizada.' : `Coombs indirecto positivo (${coombs!.fecha}).`,
+          'Remitir a un nivel de mayor complejidad para el seguimiento de la isoinmunización.',
+          'No aplica la inmunoglobulina anti-D.',
+        ],
+        severidad: 2,
+        opciones: [{ etiqueta: 'Referida' }, { etiqueta: 'Ya en seguimiento', requiereMotivo: true }],
+      };
+    }
+
+    const { desdeSemana } = catalogo.valor('rh.antiD');
+    const aplicada = ctx.seguimientos.some((c) => valorDe(c.seguimiento?.antiDAplicada) === true);
+    const porque = ['Rh negativo, no sensibilizada.'];
+    if (!coombs) porque.push('Solicitar Coombs indirecto.');
+    else porque.push(`Coombs indirecto negativo (${coombs.fecha}).`);
+    if (aplicada) {
+      porque.push('Inmunoglobulina anti-D ya aplicada en este embarazo.');
+    } else {
+      const fecha = eg.estado === 'calculada' ? ` (${sumarDias(eg.inicio, desdeSemana * 7)})` : '';
+      porque.push(`Aplicar inmunoglobulina anti-D en la semana ${desdeSemana}${fecha}.`);
+    }
+    porque.push('Aplicar también después de sangrado, trauma abdominal o procedimientos invasivos.');
+    if (inmunizada === undefined) porque.push('Falta registrar si está inmunizada.');
     return {
-      titulo: inmunizada ? 'Rh negativo, inmunizada' : 'Rh negativo',
-      porque: [
-        'Rh negativo.',
-        inmunizada === true ? 'Está inmunizada.' : inmunizada === false ? 'No inmunizada.' : 'Falta registrar si está inmunizada.',
-      ],
-      severidad: inmunizada ? 2 : 1,
+      titulo: 'Rh negativo',
+      porque,
+      severidad: 1,
+      opciones: [{ etiqueta: 'Coombs solicitado y anti-D programada' }, { etiqueta: 'Anti-D aplicada' }, { etiqueta: 'No requiere acción', requiereMotivo: true }],
     };
   },
 };

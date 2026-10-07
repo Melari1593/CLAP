@@ -246,6 +246,8 @@ export interface DatosSeguimiento {
   cambioResidencia: Campo<{ municipio: string; altitudM: number }>;
   /** Vacuna Tdap (tosferina) aplicada en este control (recordatorio desde la semana 26). */
   tdapAplicada: Campo<SiNo>;
+  /** Inmunoglobulina anti-D aplicada en este control (Rh negativo no sensibilizada). */
+  antiDAplicada: Campo<SiNo>;
   tomaCalcioDiario: Campo<SiNo>;
   tomaASADiario: Campo<SiNo>;
   aplicaTromboprofilaxisDiario: Campo<SiNo>;
@@ -276,6 +278,8 @@ export type ResultadoPorTipo = {
   hepatitisB: { antigenoSuperficie: 'positivo' | 'negativo' };
   /** Prueba treponémica rápida para sífilis (primera consulta y tercer trimestre). */
   sifilisTreponemica: { reactiva: SiNo };
+  /** Coombs indirecto (gestantes Rh negativo). */
+  coombsIndirecto: { positivo: SiNo };
   /** IgG para rubéola (si no hay evidencia de vacuna). */
   rubeolaIgG: { positivo: SiNo };
   ecografia: { momento: 'primer_trimestre' | 'detalle' | 'otra'; hallazgos: 'normal' | 'anormal' };

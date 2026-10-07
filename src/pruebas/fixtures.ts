@@ -156,6 +156,7 @@ export function seguimiento(pesoKg: number): DatosSeguimiento {
     iniciales: valor('PP'),
     cambioResidencia: noCorresponde(),
     tdapAplicada: noCorresponde(),
+    antiDAplicada: noCorresponde(),
     tomaCalcioDiario: valor(true),
     tomaASADiario: noCorresponde(),
     aplicaTromboprofilaxisDiario: noCorresponde(),

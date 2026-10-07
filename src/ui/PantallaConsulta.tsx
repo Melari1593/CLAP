@@ -130,7 +130,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
         <>
           <PanelCalculos gestante={gestante} datos={primeraDelEmbarazo} />
           <p className="suave">EG del día: {egTexto ?? 'no calculable'}</p>
-          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} ctx={{ egSemanas }} />
+          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} ctx={{ egSemanas, rhNegativo: valorDe(primeraDelEmbarazo?.gestacionActual.rh) === '-' }} />
         </>
       )}
 

@@ -469,6 +469,16 @@ const BASE = {
       'Según la Ruta Materno Perinatal, aprobado por la responsable del proyecto el 2026-10-07: hemograma, prueba treponémica rápida, VIH, hepatitis B, urocultivo, toxoplasmosis; IgG de rubéola solo sin vacuna previa; Chagas y malaria solo en zona endémica. Además, grupo y Rh, tamizaje de cuello uterino y ecografía de 10+6 a 13+6. Verificar contra la versión vigente.',
   }),
 
+  'rh.antiD': p<{ desdeSemana: number; hastaSemana: number | null }>({
+    nombre: 'Inmunoglobulina anti-D en gestantes Rh negativo no sensibilizadas',
+    valor: { desdeSemana: 28, hastaSemana: 28 },
+    unidad: 'semanas (atrasada desde la 29+0)',
+    fuentes: ['GPC Colombia 2013', 'Equipo clínico'],
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota:
+      'Semana 28 aprobada por la responsable del proyecto el 2026-10-07. También después de sangrado, trauma abdominal o procedimientos invasivos. Con Coombs indirecto positivo o inmunizada: no aplica; remitir. Verificar contra la GPC vigente.',
+  }),
   'vacunas.tdap': p<{ desdeSemana: number; hastaSemana: number | null }>({
     nombre: 'Vacuna Tdap (tosferina) en cada embarazo',
     valor: { desdeSemana: 26, hastaSemana: null },

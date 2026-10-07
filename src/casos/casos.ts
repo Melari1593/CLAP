@@ -162,7 +162,8 @@ export const CASOS: CasoClinico[] = [
       d.gestacionActual.rh = valor('-');
       d.gestacionActual.inmunizada = valor(true);
     },
-    alertas: { rh_negativo: 'Rh negativo, inmunizada' },
+    alertas: { rh_negativo: 'Rh negativo sensibilizada' },
+    contiene: { rh_negativo: ['Remitir a un nivel de mayor complejidad', 'No aplica la inmunoglobulina anti-D'] },
   }),
   caso({
     id: 'CLAP-13',
@@ -216,6 +217,31 @@ export const CASOS: CasoClinico[] = [
     datos: ['IgG rubéola negativa'],
     extra: { examenes: [{ tipo: 'rubeolaIgG', valor: { positivo: false }, fecha: T2 }] },
     alertas: { antirrubeola: 'Susceptible a rubéola' },
+  }),
+
+  caso({
+    id: 'CLAP-19',
+    grupo: 'CLAP',
+    descripcion: 'Rh negativo no sensibilizada: Coombs indirecto y anti-D en la semana 28.',
+    datos: ['Rh negativo', 'No inmunizada'],
+    cambios: (d) => {
+      d.gestacionActual.rh = valor('-');
+      d.gestacionActual.inmunizada = valor(false);
+    },
+    alertas: { rh_negativo: 'Rh negativo' },
+    contiene: { rh_negativo: ['Solicitar Coombs indirecto.', 'Aplicar inmunoglobulina anti-D en la semana 28 (2026-12-14).'] },
+  }),
+  caso({
+    id: 'CLAP-20',
+    grupo: 'CLAP',
+    descripcion: 'Rh negativo con Coombs indirecto positivo: sensibilizada, remitir.',
+    datos: ['Rh negativo', 'Coombs indirecto positivo'],
+    cambios: (d) => {
+      d.gestacionActual.rh = valor('-');
+      d.gestacionActual.inmunizada = valor(false);
+    },
+    extra: { examenes: [{ tipo: 'coombsIndirecto', valor: { positivo: true }, fecha: T2 }] },
+    alertas: { rh_negativo: 'Rh negativo sensibilizada' },
   }),
 
   // ---------------- Antitetánica

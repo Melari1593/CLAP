@@ -112,7 +112,16 @@ describe('Reglas básicas del CLAP (C2): cada una dispara y no dispara', () => {
         d.gestacionActual.inmunizada = valor(inmunizada);
       });
     expect(evaluar(rhNegativo, rh(false))).toMatchObject({ titulo: 'Rh negativo', severidad: 1 });
-    expect(evaluar(rhNegativo, rh(true))).toMatchObject({ titulo: 'Rh negativo, inmunizada', severidad: 2 });
+    expect(evaluar(rhNegativo, rh(true))).toMatchObject({ titulo: 'Rh negativo sensibilizada', severidad: 2 });
+    expect(evaluar(rhNegativo, rh(true))?.porque.join(' ')).toContain('No aplica la inmunoglobulina anti-D');
+    const noSens = evaluar(rhNegativo, rh(false))!.porque.join(' ');
+    expect(noSens).toContain('Solicitar Coombs indirecto.');
+    expect(noSens).toContain('Aplicar inmunoglobulina anti-D en la semana 28 (2026-12-14).');
+    // Coombs positivo: sensibilizada aunque no esté registrada como inmunizada.
+    expect(evaluar(rhNegativo, { ...rh(false), examenes: [{ tipo: 'coombsIndirecto', valor: { positivo: true } }] })?.titulo).toBe('Rh negativo sensibilizada');
+    // Anti-D ya aplicada en un control.
+    const aplicada = evaluar(rhNegativo, { ...rh(false), seguimientos: [{ fecha: '2026-12-14', cambios: (s) => (s.antiDAplicada = valor(true)) }] });
+    expect(aplicada?.porque.join(' ')).toContain('ya aplicada');
     expect(evaluar(rhNegativo)).toBeNull();
   });
 

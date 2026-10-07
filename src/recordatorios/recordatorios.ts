@@ -22,6 +22,7 @@ const NOMBRE_EXAMEN: Partial<Record<TipoExamen, string>> = {
   hb: 'Hemograma (hemoglobina)',
   vdrl: 'VDRL/RPR',
   sifilisTreponemica: 'Sífilis (prueba treponémica rápida)',
+  coombsIndirecto: 'Coombs indirecto (Rh negativo)',
   rubeolaIgG: 'IgG para rubéola',
   vih: 'VIH',
   hepatitisB: 'Hepatitis B (antígeno de superficie)',
@@ -38,6 +39,7 @@ const PARA_GESTANTE: Partial<Record<TipoExamen, string>> = {
   vih: SANGRE,
   hepatitisB: SANGRE,
   sifilisTreponemica: SANGRE,
+  coombsIndirecto: SANGRE,
   rubeolaIgG: SANGRE,
   toxoplasmosis: SANGRE,
   chagas: SANGRE,
@@ -88,6 +90,22 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
   for (const tipo of catalogo.valor('recordatorios.examenesPrimeraConsulta') as TipoExamen[]) {
     if (aplicaInicial[tipo] === false) continue;
     if (!hechoDesde(tipo, 0)) examen(`inicial:${tipo}`, tipo, `${NOMBRE_EXAMEN[tipo] ?? tipo} (primera consulta).`, ventanaInicial.hastaSemana);
+  }
+  // Rh negativo: Coombs indirecto y, si no está sensibilizada, anti-D desde la semana 28.
+  if (valorDe(g.rh) === '-') {
+    if (!hechoDesde('coombsIndirecto', 0)) examen('inicial:coombsIndirecto', 'coombsIndirecto', 'Coombs indirecto (Rh negativo).', ventanaInicial.hastaSemana);
+    const sensibilizada = valorDe(g.inmunizada) === true || ctx.ultimo('coombsIndirecto')?.positivo === true;
+    const antiD = catalogo.valor('rh.antiD');
+    const aplicada = ctx.seguimientos.some((c) => valorDe(c.seguimiento?.antiDAplicada) === true);
+    if (!sensibilizada && !aplicada && desde(antiD.desdeSemana)) {
+      lista.push({
+        id: 'anti_d',
+        texto: `Aplicar inmunoglobulina anti-D (semana ${antiD.desdeSemana}).`,
+        tipo: 'accion',
+        estado: estadoEn(antiD.hastaSemana),
+        paraGestante: 'Te aplicarán una inyección para proteger a tu bebé, porque tu sangre es Rh negativo.',
+      });
+    }
   }
   if (g.cervixPap.estado === 'vacio' && g.cervixInspeccion.estado === 'vacio') {
     lista.push({ id: 'cuello_uterino', texto: 'Tamizaje de cáncer de cuello uterino según el esquema vigente.', tipo: 'accion', estado: 'pendiente' });
