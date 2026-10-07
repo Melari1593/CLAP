@@ -204,8 +204,9 @@ export interface GestacionActual {
   antitetanica: Campo<{ dosisPrevias: number; fechaUltima: FechaISO | null; informacionConfiable: SiNo }>;
   examenOdontologico: Campo<'normal' | 'anormal'>;
   examenMamas: Campo<'normal' | 'anormal'>;
-  cervixInspeccion: Campo<'normal' | 'anormal'>;
+  /** Citología cervicovaginal. La inspección visual del cérvix no se registra: no se hace de rutina. */
   cervixPap: Campo<'normal' | 'anormal'>;
+  /** Solo si la citología es anormal. */
   cervixColposcopia: Campo<'normal' | 'anormal'>;
   grupo: Campo<'A' | 'B' | 'AB' | 'O'>;
   rh: Campo<'+' | '-'>;

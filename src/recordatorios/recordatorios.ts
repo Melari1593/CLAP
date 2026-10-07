@@ -107,8 +107,8 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
       });
     }
   }
-  if (g.cervixPap.estado === 'vacio' && g.cervixInspeccion.estado === 'vacio') {
-    lista.push({ id: 'cuello_uterino', texto: 'Tamizaje de cáncer de cuello uterino según el esquema vigente.', tipo: 'accion', estado: 'pendiente' });
+  if (g.cervixPap.estado === 'vacio') {
+    lista.push({ id: 'cuello_uterino', texto: 'Citología cervicovaginal según el esquema de tamizaje vigente.', tipo: 'accion', estado: 'pendiente' });
   }
   if (!valorDe(primera.gestacionActual.grupo) || !valorDe(primera.gestacionActual.rh)) {
     lista.push({ id: 'grupo_rh', texto: 'Grupo sanguíneo y Rh.', tipo: 'examen', estado: estadoEn(ventanaInicial.hastaSemana), paraGestante: SANGRE });

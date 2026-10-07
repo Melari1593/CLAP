@@ -13,7 +13,7 @@ Versión digital de la Historia Clínica Perinatal del CLAP para usar en el cont
 ## Alcance
 
 ### La v1 SÍ hace
-1. **Primera consulta completa**: identificación, antecedentes familiares, personales y obstétricos, y gestación actual según la HCP, con cálculos automáticos.
+1. **Primera consulta completa**: identificación, gestación actual, antecedentes personales, obstétricos, vacunas y familiares, riesgos (preeclampsia, calcio, trombótico) y examen odontológico, de mamas y citología, con cálculos automáticos.
 2. **Consultas de seguimiento con alertas y recordatorios**: registro de cada control, alertas automáticas y exámenes pendientes según la semana.
 3. **Carné digital de la gestante**: enviado por WhatsApp o, como opción, por correo electrónico; protegido con PIN y en lenguaje simple. Se puede imprimir siempre.
 4. **Funciona sin internet** durante la consulta y envía lo pendiente cuando vuelve la señal.
@@ -42,23 +42,25 @@ Versión digital de la Historia Clínica Perinatal del CLAP para usar en el cont
 4. Si la gestante ya tuvo un embarazo registrado, la app abre un embarazo nuevo y conserva los anteriores como antecedentes.
 
 ### 2. Primera consulta
-El profesional llena los datos en el mismo orden de la HCP, en bloques cortos:
+El profesional llena los datos en bloques cortos, en este orden:
 
-- **Identificación:** nombre, documento, fecha de nacimiento, domicilio, municipio de residencia y la **altitud de su lugar de residencia en metros sobre el nivel del mar**, que registra el profesional (vereda o barrio incluidos), teléfono, correo electrónico (opcional, solo si la gestante lo usa), etnia (autoidentificación), alfabeta, estudios y años en el mayor nivel, estado civil, si vive sola.
-- **Antecedentes familiares y personales:** listas SÍ/NO de la HCP.
-- **Antecedentes obstétricos:** gestas, partos (vaginales y cesáreas), abortos, nacidos vivos y muertos, viven, muertos en la 1.ª semana y después, peso del último RN, gemelares, fecha de fin del embarazo anterior.
-- **Embarazo planeado** y **fracaso de método anticonceptivo** (con las 6 opciones de la HCP). Si el embarazo es no planeado, la app pide registrar además si la gestante **desea continuar el embarazo** (sí / no / no ha decidido) y abre el flujo de la sección 7.
-- **Riesgo de preeclampsia:** además de los antecedentes que ya trae la HCP, la app pregunta si tiene enfermedad autoinmune (lupus, síndrome antifosfolípido), antecedente familiar de preeclampsia y alergia al ASA o a los AINE o asma que empeora con ellos. La HCP no incluye estos datos y se necesitan para la alerta de ASA (sección 4). También pregunta si el embarazo es por fertilización in vitro, que se usa en la alerta de tromboprofilaxis.
-- **Antecedentes para el calcio:** la app pregunta por hipercalcemia, hipercalciuria, hiperparatiroidismo, cálculos renales o nefrocalcinosis, enfermedad renal crónica grave, hipersensibilidad a productos con calcio y sarcoidosis. También por medicamentos que interactúan: diuréticos tiazídicos, digoxina, levotiroxina y uso frecuente de antiácidos con calcio. La HCP no trae estos datos y se necesitan para la alerta de calcio (sección 4).
-- **Riesgo trombótico:** la app pregunta por datos que la HCP tampoco trae y que se necesitan para la alerta de tromboprofilaxis (sección 4):
-  - Trombosis venosa o embolia previa y, si la hubo, si fue sin causa, asociada a hormonas, asociada a cirugía mayor o a otro factor ya resuelto.
-  - Trombofilia conocida y su tipo, con la clasificación de la RCOG: **alto riesgo** (déficit de antitrombina, de proteína C o de proteína S; homocigota para factor V Leiden o para la mutación del gen de la protrombina; doble heterocigota) o **bajo riesgo** (heterocigota para factor V Leiden o para la mutación de la protrombina; anticuerpos antifosfolípidos).
-  - Antecedente familiar de trombosis sin causa o asociada a hormonas en familiar de primer grado.
-  - Várices gruesas.
-  - Comorbilidades de alto riesgo: cáncer, insuficiencia cardíaca, lupus activo, poliartropatía inflamatoria, enfermedad inflamatoria intestinal, síndrome nefrótico, diabetes tipo 1 con nefropatía, drepanocitosis, uso actual de drogas intravenosas.
-  - Factores transitorios presentes hoy: hiperémesis, cirugía en este embarazo, síndrome de hiperestimulación ovárica, infección sistémica que requiere antibióticos intravenosos u hospitalización, inmovilidad o deshidratación.
-  - Factores de riesgo de sangrado (RCOG): sangrado activo antenatal; riesgo aumentado de hemorragia mayor (por ejemplo, placenta previa); trastorno hemorrágico (enfermedad de von Willebrand, hemofilia o coagulopatía adquirida); accidente cerebrovascular en las últimas 4 semanas; enfermedad renal grave; enfermedad hepática grave; hipertensión no controlada; trombocitopenia (plaquetas menores de 75 × 10⁹/L); alergia o trombocitopenia inducida por heparina.
-- **Gestación actual:** peso anterior, talla, FUM, confiabilidad de la EG (por FUM y por eco), tabaco activo (y, si fuma, cuántos cigarrillos al día o "no sabe", para el ajuste de la Hb) y pasivo, drogas, alcohol, violencia (SÍ/NO), antirrubéola, antitetánica, examen odontológico y de mamas, cérvix, grupo y Rh, y exámenes con su resultado.
+1. **Identificación:** nombre, documento, fecha de nacimiento, domicilio, municipio de residencia y la **altitud de su lugar de residencia en metros sobre el nivel del mar**, que registra el profesional (vereda o barrio incluidos), teléfono, correo electrónico (opcional, solo si la gestante lo usa), etnia (autoidentificación), alfabeta, estudios y años en el mayor nivel, estado civil, si vive sola.
+2. **Gestación actual:** peso anterior, talla, FUM, confiabilidad de la EG (por FUM y por eco), **embarazo planeado** y **fracaso de método anticonceptivo** (con las 6 opciones de la HCP), tabaco activo (y, si fuma, cuántos cigarrillos al día o "no sabe", para el ajuste de la Hb) y pasivo, drogas, alcohol, violencia (SÍ/NO), grupo y Rh. Si el embarazo es no planeado, la app pide registrar además si la gestante **desea continuar el embarazo** (sí / no / no ha decidido) y abre el flujo de la sección 7.
+3. **Antecedentes personales, obstétricos y vacunas:** lista SÍ/NO de antecedentes personales de la HCP; antecedentes obstétricos (gestas, partos vaginales y cesáreas, abortos, nacidos vivos y muertos, viven, muertos en la 1.ª semana y después, peso del último RN, gemelares, fecha de fin del embarazo anterior); antirrubéola y antitetánica.
+4. **Antecedentes familiares:** lista SÍ/NO de la HCP.
+5. **Riesgo de preeclampsia:** además de los antecedentes que ya trae la HCP, la app pregunta si tiene enfermedad autoinmune (lupus, síndrome antifosfolípido), antecedente familiar de preeclampsia y alergia al ASA o a los AINE o asma que empeora con ellos. La HCP no incluye estos datos y se necesitan para la alerta de ASA (sección 4). También pregunta si el embarazo es por fertilización in vitro, que se usa en la alerta de tromboprofilaxis.
+6. **Antecedentes para el calcio:** la app pregunta por hipercalcemia, hipercalciuria, hiperparatiroidismo, cálculos renales o nefrocalcinosis, enfermedad renal crónica grave, hipersensibilidad a productos con calcio y sarcoidosis. También por medicamentos que interactúan: diuréticos tiazídicos, digoxina, levotiroxina y uso frecuente de antiácidos con calcio. La HCP no trae estos datos y se necesitan para la alerta de calcio (sección 4).
+7. **Riesgo trombótico:** la app pregunta por datos que la HCP tampoco trae y que se necesitan para la alerta de tromboprofilaxis (sección 4):
+   - Trombosis venosa o embolia previa y, si la hubo, si fue sin causa, asociada a hormonas, asociada a cirugía mayor o a otro factor ya resuelto.
+   - Trombofilia conocida y su tipo, con la clasificación de la RCOG: **alto riesgo** (déficit de antitrombina, de proteína C o de proteína S; homocigota para factor V Leiden o para la mutación del gen de la protrombina; doble heterocigota) o **bajo riesgo** (heterocigota para factor V Leiden o para la mutación de la protrombina; anticuerpos antifosfolípidos).
+   - Antecedente familiar de trombosis sin causa o asociada a hormonas en familiar de primer grado.
+   - Várices gruesas.
+   - Comorbilidades de alto riesgo: cáncer, insuficiencia cardíaca, lupus activo, poliartropatía inflamatoria, enfermedad inflamatoria intestinal, síndrome nefrótico, diabetes tipo 1 con nefropatía, drepanocitosis, uso actual de drogas intravenosas.
+   - Factores transitorios presentes hoy: hiperémesis, cirugía en este embarazo, síndrome de hiperestimulación ovárica, infección sistémica que requiere antibióticos intravenosos u hospitalización, inmovilidad o deshidratación.
+   - Factores de riesgo de sangrado (RCOG): sangrado activo antenatal; riesgo aumentado de hemorragia mayor (por ejemplo, placenta previa); trastorno hemorrágico (enfermedad de von Willebrand, hemofilia o coagulopatía adquirida); accidente cerebrovascular en las últimas 4 semanas; enfermedad renal grave; enfermedad hepática grave; hipertensión no controlada; trombocitopenia (plaquetas menores de 75 × 10⁹/L); alergia o trombocitopenia inducida por heparina.
+8. **Examen odontológico, de mamas y citología:** examen odontológico, examen de mamas y citología cervicovaginal según el esquema de tamizaje vigente; colposcopia solo si la citología es anormal. La inspección visual del cérvix no se registra porque no se hace de rutina.
+
+Los exámenes de laboratorio se registran aparte, con su resultado.
 
 Mientras llena, la app calcula sola y muestra:
 - **Edad** a partir de la fecha de nacimiento.

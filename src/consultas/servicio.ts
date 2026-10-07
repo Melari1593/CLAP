@@ -188,7 +188,9 @@ export class ServicioConsultas {
   /** Lista lo que quedó vacío (con su etiqueta) para que el profesional decida si lo completa. */
   camposVaciosDe(consulta: Consulta): string[] {
     if (consulta.primera) {
-      return camposVacios(consulta.primera).map((r) => etiquetaDe(BLOQUES_PRIMERA, r));
+      // Solo campos del formulario actual: las consultas guardadas antes pueden traer campos retirados.
+      const rutas = new Set(BLOQUES_PRIMERA.flatMap((b) => b.campos.map((c) => c.ruta)));
+      return camposVacios(consulta.primera).filter((r) => rutas.has(r)).map((r) => etiquetaDe(BLOQUES_PRIMERA, r));
     }
     const vacios = consulta.seguimiento ? camposVacios(consulta.seguimiento).map((r) => etiquetaDe(BLOQUES_SEGUIMIENTO, r)) : [];
     return consulta.proximaCita.estado === 'vacio' ? [...vacios, 'Próxima cita'] : vacios;

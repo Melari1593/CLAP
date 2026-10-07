@@ -130,7 +130,6 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       antitetanica: valor({ dosisPrevias: 2, fechaUltima: '2024-03-10', informacionConfiable: true }),
       examenOdontologico: valor('normal'),
       examenMamas: valor('normal'),
-      cervixInspeccion: valor('normal'),
       cervixPap: noSeHizo(),
       cervixColposcopia: noCorresponde(),
       grupo: valor('O'),
