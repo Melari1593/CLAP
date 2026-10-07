@@ -53,7 +53,10 @@ export function CarneGestante({ datos }: { datos: DatosCarne }) {
           <h3><span aria-hidden>✅</span> Lo que debes hacer</h3>
           <ul className="carne-lista">
             {queHacer.map((q) => (
-              <li key={q.id}><span aria-hidden>{q.icono}</span> {q.texto}</li>
+              <li key={q.id}>
+                <span aria-hidden>{q.icono}</span> {q.texto}
+                {q.id === 'tromboprofilaxis' && datos.tromboAntesDelParto && <> {datos.tromboAntesDelParto}</>}
+              </li>
             ))}
           </ul>
         </section>

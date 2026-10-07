@@ -377,10 +377,11 @@ const BASE = {
   }),
   'trombo.suspensionAntesDelParto': p<string | null>({
     nombre: 'Instrucciones a la gestante para suspender la tromboprofilaxis antes del parto',
-    valor: null,
-    fuentes: ['Equipo clínico'],
+    valor:
+      'Si tienes programada la inducción del parto o una cesárea, el equipo de salud te dirá cuándo aplicarte la última inyección. Por lo general, no te la aplicas el día del procedimiento.',
+    fuentes: ['RCOG 37a + declaración de posición', 'Equipo clínico'],
     estado: 'pendiente',
-    nota: 'Las define el equipo clínico (decisión pendiente del plan).',
+    nota: 'Texto provisional (basado en la RCOG) usado por decisión de la responsable del proyecto el 2026-10-07. Lo valida el equipo clínico.',
   }),
 
   // ---------- Alertas básicas del CLAP (C2, C3) ----------

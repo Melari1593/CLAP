@@ -130,6 +130,7 @@ describe('Contenido del carné (F4)', () => {
     });
     if (datos?.estado !== 'activo') throw new Error();
     expect(datos.examenesPendientes).toContain('Exámenes de sangre del control prenatal.');
+    expect(datos.tromboAntesDelParto).toContain('no te la aplicas el día del procedimiento');
     void r;
   });
 

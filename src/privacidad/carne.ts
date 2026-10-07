@@ -26,6 +26,8 @@ export type DatosCarne =
       proximaCita?: { fecha: FechaISO; lugar: string; queLlevar: string };
       indicaciones: TipoIndicacion[];
       senalesCoagulo: boolean;
+      /** Si tiene tromboprofilaxis: qué hacer antes de un parto programado (texto del catálogo). */
+      tromboAntesDelParto?: string;
       /** Exámenes pendientes en lenguaje sencillo (sin nombrar resultados). */
       examenesPendientes: string[];
       grupo?: string;
@@ -56,6 +58,7 @@ export function proyectarCarne(historia: Historia, carne: Carne, hoy: FechaISO, 
     proximaCita: valorDe(ultima?.proximaCita),
     indicaciones,
     senalesCoagulo: indicaciones.includes('tromboprofilaxis') || (trombo?.puntaje ?? 0) >= umbralCoagulo,
+    tromboAntesDelParto: indicaciones.includes('tromboprofilaxis') ? catalogo.valor('trombo.suspensionAntesDelParto') ?? undefined : undefined,
     examenesPendientes: [...new Set(recordatorios(ctx).flatMap((r) => (r.paraGestante ? [r.paraGestante] : [])))],
     grupo: valorDe(actual?.grupo),
     rh: valorDe(actual?.rh),
