@@ -106,14 +106,24 @@ export const sifilis: Regla = {
   id: 'sifilis',
   evaluar(ctx) {
     const vdrl = ctx.ultimo('vdrl');
-    if (!vdrl?.reactivo) return null;
-    const porque = [`VDRL/RPR reactivo (${vdrl.fecha}).`];
-    if (vdrl.tratamiento !== true) porque.push('Sin tratamiento registrado.');
-    if (vdrl.tratamientoPareja !== true) porque.push('Sin tratamiento de la pareja registrado.');
+    const treponemica = ctx.ultimo('sifilisTreponemica');
+    // Cuenta el resultado más reciente de cualquiera de las dos pruebas.
+    const ultimaReactiva = [vdrl && { fecha: vdrl.fecha, reactiva: vdrl.reactivo }, treponemica && { fecha: treponemica.fecha, reactiva: treponemica.reactiva }]
+      .filter((x): x is { fecha: string; reactiva: boolean } => Boolean(x))
+      .sort((a, b) => a.fecha.localeCompare(b.fecha))
+      .at(-1);
+    if (!ultimaReactiva?.reactiva) return null;
+    const porque: string[] = [];
+    if (treponemica?.reactiva) porque.push(`Prueba treponémica rápida reactiva (${treponemica.fecha}).`);
+    if (vdrl?.reactivo) porque.push(`VDRL/RPR reactivo (${vdrl.fecha}).`);
+    const tratada = vdrl?.tratamiento === true;
+    if (!tratada) porque.push('Sin tratamiento registrado: tratar según la guía vigente.');
+    if (vdrl?.tratamientoPareja !== true) porque.push('Sin tratamiento de la pareja registrado.');
+    if (treponemica?.reactiva && !vdrl) porque.push('Solicitar VDRL/RPR para el seguimiento.');
     return {
-      titulo: 'Sífilis: VDRL/RPR reactivo',
+      titulo: vdrl?.reactivo ? 'Sífilis: VDRL/RPR reactivo' : 'Sífilis: prueba treponémica reactiva',
       porque,
-      severidad: vdrl.tratamiento === true ? 1 : 2,
+      severidad: tratada ? 1 : 2,
       opciones: [{ etiqueta: 'Tratamiento indicado' }, { etiqueta: 'Referida' }, { etiqueta: 'Ya tratada', requiereMotivo: true }],
     };
   },
@@ -200,8 +210,18 @@ export const violencia: Regla = {
 
 export const antirrubeola: Regla = {
   id: 'antirrubeola',
-  evaluar({ primera }) {
+  evaluar(ctx) {
+    const { primera } = ctx;
     const v = valorDe(primera?.gestacionActual.antirrubeola);
+    const igg = ctx.ultimo('rubeolaIgG');
+    if (igg?.positivo) return null;
+    if (igg && !igg.positivo) {
+      return {
+        titulo: 'Susceptible a rubéola',
+        porque: [`IgG para rubéola negativa (${igg.fecha}).`, 'Recordar aplicar la vacuna en el puerperio.'],
+        opciones: [{ etiqueta: 'Recordatorio para el puerperio' }, { etiqueta: 'No requiere acción', requiereMotivo: true }],
+      };
+    }
     if (v !== 'no' && v !== 'no_sabe') return null;
     return {
       titulo: 'Antirrubéola no recibida',

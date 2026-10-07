@@ -12,7 +12,7 @@ type Examen = { tipo: TipoExamen; valor: ResultadoPorTipo[TipoExamen]; fecha: st
 const neg = { positivo: false };
 const examenesIniciales = (fecha: string): Examen[] => [
   { tipo: 'hb', valor: { gdl: 13, muestra: 'venosa' }, fecha },
-  { tipo: 'vdrl', valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha },
+  { tipo: 'sifilisTreponemica', valor: { reactiva: false }, fecha },
   { tipo: 'vih', valor: { solicitado: true, realizado: true, resultado: 'negativo' }, fecha },
   { tipo: 'hepatitisB', valor: { antigenoSuperficie: 'negativo' }, fecha },
   { tipo: 'bacteriuria', valor: neg, fecha },
@@ -35,23 +35,43 @@ describe('Recordatorios por semana (F1)', () => {
     const base = { indicaciones };
     const exam = (s: string[]) => s.map((x) => x);
 
-    // Semana 8, sin exámenes: los de la primera consulta pendientes, nada atrasado.
+    // Semana 8, sin exámenes: los de la primera consulta pendientes, nada atrasado. Sin zona endémica
+    // ni falta de vacuna de rubéola, no se piden Chagas, malaria ni IgG de rubéola.
     const s8 = ids(semana(8), base);
     expect(exam(s8.filter((r) => r.tipo === 'examen').map((r) => r.id))).toEqual(
-      ['inicial:hb', 'inicial:vdrl', 'inicial:vih', 'inicial:hepatitisB', 'inicial:bacteriuria', 'inicial:toxoplasmosis', 'inicial:chagas', 'inicial:malaria'],
+      ['inicial:hb', 'inicial:sifilisTreponemica', 'inicial:vih', 'inicial:hepatitisB', 'inicial:bacteriuria', 'inicial:toxoplasmosis'],
     );
     expect(s8.some((r) => r.estado === 'atrasado')).toBe(false);
 
-    // Semana 21 sin los exámenes iniciales: atrasados; y aparecen los de después de la 20.
+    // Semana 21 sin los exámenes iniciales: atrasados.
     const s21 = ids(semana(21), base);
     expect(s21.filter((r) => r.estado === 'atrasado').map((r) => r.id)).toContain('inicial:hb');
-    expect(s21.map((r) => r.id)).toEqual(expect.arrayContaining(['tras20:hb', 'tras20:vih', 'tras20:vdrl']));
 
-    // Semana 21 con los exámenes iniciales hechos en la semana 9.
+    // Con los exámenes iniciales hechos en la semana 9: ya no aparecen.
     const conIniciales = { ...base, examenes: examenesIniciales(semana(9)) };
-    const s21b = ids(semana(21), conIniciales);
-    expect(s21b.filter((r) => r.id.startsWith('inicial:'))).toEqual([]);
-    expect(s21b.filter((r) => r.id.startsWith('tras20:')).map((r) => r.estado)).toEqual(['pendiente', 'pendiente', 'pendiente']);
+    expect(ids(semana(21), conIniciales).filter((r) => r.id.startsWith('inicial:'))).toEqual([]);
+
+    // Ecografía de 10+6 a 13+6: pendiente en la 11, atrasada en la 14, ya no se muestra en la 20.
+    expect(ids(semana(11), conIniciales).find((r) => r.id === 'eco_1t')?.estado).toBe('pendiente');
+    expect(ids(semana(14), conIniciales).find((r) => r.id === 'eco_1t')?.estado).toBe('atrasado');
+    expect(ids(semana(20), conIniciales).find((r) => r.id === 'eco_1t')).toBeUndefined();
+    const eco1t = { tipo: 'ecografia' as const, valor: { momento: 'primer_trimestre' as const, hallazgos: 'normal' as const }, fecha: semana(12) };
+    expect(ids(semana(13), { ...conIniciales, examenes: [...examenesIniciales(semana(9)), eco1t] }).find((r) => r.id === 'eco_1t')).toBeUndefined();
+
+    // Ecografía de detalle: pendiente en la 20, atrasada en la 24.
+    expect(ids(semana(20), conIniciales).find((r) => r.id === 'eco_detalle')?.estado).toBe('pendiente');
+    expect(ids(semana(24), conIniciales).find((r) => r.id === 'eco_detalle')?.estado).toBe('atrasado');
+
+    // Tercer trimestre: hemograma, VIH y sífilis desde la 28; atrasados desde la 35.
+    expect(ids(semana(27), conIniciales).some((r) => r.id.startsWith('tercer:'))).toBe(false);
+    expect(ids(semana(28), conIniciales).filter((r) => r.id.startsWith('tercer:')).map((r) => [r.id, r.estado])).toEqual([
+      ['tercer:hb', 'pendiente'],
+      ['tercer:vih', 'pendiente'],
+      ['tercer:sifilis', 'pendiente'],
+    ]);
+    expect(ids(semana(35), conIniciales).find((r) => r.id === 'tercer:vih')?.estado).toBe('atrasado');
+    const vdrl3 = { tipo: 'vdrl' as const, valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: semana(29) };
+    expect(ids(semana(30), { ...conIniciales, examenes: [...examenesIniciales(semana(9)), vdrl3] }).map((r) => r.id)).not.toContain('tercer:sifilis');
 
     // Semana 25: PTOG pendiente; semana 29 sin PTOG: atrasada; con PTOG: ya no aparece.
     expect(ids(semana(25), conIniciales).find((r) => r.id === 'ptog')?.estado).toBe('pendiente');
@@ -66,6 +86,17 @@ describe('Recordatorios por semana (F1)', () => {
     // Semana 35: estreptococo B pendiente; semana 38 sin hacerlo: atrasado.
     expect(ids(semana(35), conIniciales).find((r) => r.id === 'egb')?.estado).toBe('pendiente');
     expect(ids(semana(38), conIniciales).find((r) => r.id === 'egb')?.estado).toBe('atrasado');
+  });
+
+  it('IgG de rubéola sin vacuna previa; Chagas y malaria solo en zona endémica', () => {
+    const r = ids(semana(10), {
+      primera: (d) => {
+        d.gestacionActual.antirrubeola = valor('no_sabe');
+        d.identificacion.zonaEndemicaChagas = valor(true);
+        d.identificacion.zonaEndemicaMalaria = valor(true);
+      },
+    }).map((x) => x.id);
+    expect(r).toEqual(expect.arrayContaining(['inicial:rubeolaIgG', 'inicial:chagas', 'inicial:malaria']));
   });
 
   it('Tdap desde la semana 26 hasta que se registre aplicada', () => {

@@ -143,7 +143,7 @@ export const CASOS: CasoClinico[] = [
     datos: ['VDRL reactivo, sin tratamiento'],
     extra: { examenes: [{ tipo: 'vdrl', valor: { reactivo: true, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: T2 }] },
     alertas: { sifilis: 'Sífilis: VDRL/RPR reactivo' },
-    contiene: { sifilis: ['Sin tratamiento registrado.'] },
+    contiene: { sifilis: ['Sin tratamiento registrado'] },
   }),
   caso({
     id: 'CLAP-11',
@@ -198,6 +198,24 @@ export const CASOS: CasoClinico[] = [
     extra: { examenes: [{ tipo: 'hepatitisB', valor: { antigenoSuperficie: 'positivo' }, fecha: T2 }] },
     alertas: { infecciones: 'Infecciones' },
     contiene: { infecciones: ['Hepatitis B: antígeno de superficie positivo', 'profilaxis del recién nacido'] },
+  }),
+
+  caso({
+    id: 'CLAP-17',
+    grupo: 'CLAP',
+    descripcion: 'Prueba treponémica rápida reactiva sin VDRL: tratar y pedir VDRL/RPR.',
+    datos: ['Prueba treponémica reactiva'],
+    extra: { examenes: [{ tipo: 'sifilisTreponemica', valor: { reactiva: true }, fecha: T2 }] },
+    alertas: { sifilis: 'Sífilis: prueba treponémica reactiva' },
+    contiene: { sifilis: ['tratar según la guía vigente', 'Solicitar VDRL/RPR para el seguimiento.'] },
+  }),
+  caso({
+    id: 'CLAP-18',
+    grupo: 'CLAP',
+    descripcion: 'IgG de rubéola negativa: susceptible, vacunar en el puerperio.',
+    datos: ['IgG rubéola negativa'],
+    extra: { examenes: [{ tipo: 'rubeolaIgG', valor: { positivo: false }, fecha: T2 }] },
+    alertas: { antirrubeola: 'Susceptible a rubéola' },
   }),
 
   // ---------------- Antitetánica

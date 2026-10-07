@@ -24,6 +24,8 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       domicilio: valor('Calle 1 # 2-3'),
       municipio: valor('Bogotá'),
       altitudM: valor(2600),
+      zonaEndemicaChagas: valor(false),
+      zonaEndemicaMalaria: valor(false),
       telefono: valor('3000000000'),
       correo: noCorresponde(),
       etnia: valor('mestiza'),

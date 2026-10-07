@@ -67,6 +67,8 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
         ayuda: 'Metros sobre el nivel del mar. Se usa para ajustar la hemoglobina (OMS 2024).',
         control: num('m s. n. m.'),
       },
+      { ruta: 'identificacion.zonaEndemicaChagas', etiqueta: 'Vive en zona endémica de Chagas', control: sino },
+      { ruta: 'identificacion.zonaEndemicaMalaria', etiqueta: 'Vive en zona endémica de malaria', control: sino },
       { ruta: 'identificacion.telefono', etiqueta: 'Teléfono / WhatsApp', control: { tipo: 'texto' } },
       {
         ruta: 'identificacion.correo',

@@ -177,9 +177,9 @@ describe('Antitetánica según el CLAP (C3)', () => {
     expect(at(0, null, true, '2026-11-20').segundaDosis?.alcanza).toBe(false);
   });
 
-  it('usa un parámetro pendiente de validar y lo avisa', () => {
+  it('el esquema propuesto quedó decidido: ya no avisa como pendiente', () => {
     const c = new Catalogo();
     evaluarAntitetanica({ dosisPrevias: 0, fechaUltima: null, informacionConfiable: true }, HOY, c);
-    expect(c.avisos().map((a) => a.id)).toContain('clap.antitetanicaConducta');
+    expect(c.avisos().map((a) => a.id)).not.toContain('clap.antitetanicaConducta');
   });
 });

@@ -47,6 +47,9 @@ export interface Identificacion {
   municipio: Campo<string>;
   /** Altitud de residencia en m s. n. m., registrada por el profesional. */
   altitudM: Campo<number>;
+  /** Residencia en zona endémica: define si se piden Chagas y malaria. */
+  zonaEndemicaChagas: Campo<SiNo>;
+  zonaEndemicaMalaria: Campo<SiNo>;
   telefono: Campo<string>;
   /** Opcional: solo si la gestante lo usa (canal alterno del carné). */
   correo: Campo<string>;
@@ -271,6 +274,11 @@ export type ResultadoPorTipo = {
   vih: { solicitado: SiNo; realizado: SiNo; resultado: 'positivo' | 'negativo' | 'no_realizado'; codigo?: string };
   /** Antígeno de superficie de hepatitis B. */
   hepatitisB: { antigenoSuperficie: 'positivo' | 'negativo' };
+  /** Prueba treponémica rápida para sífilis (primera consulta y tercer trimestre). */
+  sifilisTreponemica: { reactiva: SiNo };
+  /** IgG para rubéola (si no hay evidencia de vacuna). */
+  rubeolaIgG: { positivo: SiNo };
+  ecografia: { momento: 'primer_trimestre' | 'detalle' | 'otra'; hallazgos: 'normal' | 'anormal' };
   toxoplasmosis: { igg: 'positivo' | 'negativo' | null; igm: 'positivo' | 'negativo' | null };
   chagas: { positivo: SiNo };
   malaria: { positivo: SiNo };

@@ -60,14 +60,14 @@ async function escenario() {
   ir('2026-09-03T20:00:00.000Z');
   await eventos.registrar(e1!.id, { tipo: 'carne_abierto' });
 
-  ir('2026-09-21T14:00:00.000Z'); // 16+0: trae Hb y VDRL
-  for (const tipo of ['hb', 'vdrl'] as const) {
+  ir('2026-09-21T14:00:00.000Z'); // 16+0: trae el hemograma y la prueba treponémica
+  for (const tipo of ['hb', 'sifilisTreponemica'] as const) {
     await consultas.registrarExamen({
       embarazoId: e1!.id,
       consultaId: 'x',
       fecha: '2026-09-21',
       tipo,
-      resultado: valor(tipo === 'hb' ? { gdl: 13, muestra: 'venosa' } : { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }),
+      resultado: valor(tipo === 'hb' ? { gdl: 13, muestra: 'venosa' } : { reactiva: false }),
     } as Parameters<typeof consultas.registrarExamen>[0]);
   }
   await consultas.cerrarConsulta(guardado(await consultas.guardarSeguimiento(e1!.id, seguimiento(64))), 15 * 60);
@@ -112,8 +112,9 @@ describe('Métricas de éxito calculadas con los eventos (G2)', () => {
 
     // El carné se usa: abrió en el primer intervalo, no en el segundo.
     expect(usoDelCarne(ev, 'whatsapp')).toEqual({ intervalos: p(1, 2), gestantes: p(1, 1) });
-    // Llegan preparadas: de 8 exámenes pendientes trajo 2 (Hb y VDRL); de los 6 que quedaban, 0.
-    expect(llegadaPreparada(ev)).toEqual(p(2, 14));
+    // Llegan preparadas: de 7 pendientes en la semana 12 (6 exámenes y la ecografía) trajo 2
+    // (hemograma y sífilis); de los 5 que quedaban en la semana 16, ninguno.
+    expect(llegadaPreparada(ev)).toEqual(p(2, 12));
     // Duración de los controles de seguimiento: 15 y 25 minutos.
     expect(duracionConsultas(ev)).toEqual({ consultas: 2, medianaMinutos: 20 });
     // ASA decidido el mismo día en que apareció la alerta.

@@ -32,13 +32,13 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
     expect(cat.avisos()).toEqual([]);
     trimestreDeEG(100, cat); // trimestres.limites ya está decidido
     expect(cat.avisos()).toEqual([]);
-    cat.valor('clap.edadRiesgo'); // pendiente
-    expect(cat.avisos().map((a) => a.id)).toEqual(['clap.edadRiesgo']);
+    cat.valor('ive.limite'); // pendiente
+    expect(cat.avisos().map((a) => a.id)).toEqual(['ive.limite']);
   });
 
   it('un parámetro validado por el equipo clínico deja de avisar', () => {
-    const cat = new Catalogo({ 'clap.edadRiesgo': { estado: 'decidido', revisado: '2026-11-01' } });
-    cat.valor('clap.edadRiesgo');
+    const cat = new Catalogo({ 'ive.limite': { estado: 'decidido', revisado: '2026-11-01' } });
+    cat.valor('ive.limite');
     expect(cat.avisos()).toEqual([]);
   });
 
@@ -67,9 +67,21 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
     expect(cat.valor('hierro.ferritinaSinAnemia')).not.toBe(15);
   });
 
-  it('el grupo A aprobado el 2026-10-07 quedó decidido', () => {
+  it('los parámetros aprobados el 2026-10-07 quedaron decididos', () => {
     const cat = new Catalogo();
-    for (const id of ['calculo.imcClasificacion', 'trimestres.limites', 'validacion.rangos', 'carne.minutosBloqueo', 'vacunas.tdap'] as const) {
+    for (const id of [
+      'calculo.imcClasificacion',
+      'trimestres.limites',
+      'validacion.rangos',
+      'carne.minutosBloqueo',
+      'vacunas.tdap',
+      'clap.edadRiesgo',
+      'clap.antecedentesObstetricos',
+      'clap.pesoRNPrevio',
+      'clap.antitetanicaConducta',
+      'recordatorios.ventanas',
+      'recordatorios.examenesPrimeraConsulta',
+    ] as const) {
       expect(cat.parametro(id), id).toMatchObject({ estado: 'decidido', revisado: '2026-10-07' });
     }
   });
@@ -81,7 +93,7 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
         'trombo.suspensionAntesDelParto',
         'derechos.prestadorIVE',
         'derechos.rutaViolenciaSexual',
-        'clap.edadRiesgo',
+        'ive.limite',
       ]),
     );
   });

@@ -25,13 +25,15 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 | CLAP-07 | RN previo de 4000 g. | Peso del último RN 4000 g | **Peso del RN previo** | ☐ Sí ☐ No | |
 | CLAP-08 | Embarazo no planeado y no desea continuarlo: asesoría urgente. | No planeado; No desea continuar | **Embarazo no planeado: asesoría de opciones** | ☐ Sí ☐ No | |
 | CLAP-09 | Embarazo no planeado y desea continuar: alerta no urgente. | No planeado; Desea continuar | **Embarazo no planeado** | ☐ Sí ☐ No | |
-| CLAP-10 | VDRL reactivo sin tratamiento. | VDRL reactivo, sin tratamiento | **Sífilis: VDRL/RPR reactivo**<br>incluye «Sin tratamiento registrado.» | ☐ Sí ☐ No | |
+| CLAP-10 | VDRL reactivo sin tratamiento. | VDRL reactivo, sin tratamiento | **Sífilis: VDRL/RPR reactivo**<br>incluye «Sin tratamiento registrado» | ☐ Sí ☐ No | |
 | CLAP-11 | Bacteriuria y estreptococo B positivos. | Bacteriuria positiva; EGB positivo | **Infecciones** | ☐ Sí ☐ No | |
 | CLAP-12 | Rh negativo inmunizada. | Rh negativo; Inmunizada | **Rh negativo, inmunizada** | ☐ Sí ☐ No | |
 | CLAP-13 | Fuma (cantidad desconocida) y consume alcohol. Sumar tabaquismo da 1 punto trombótico, sin alerta. | Fuma, no sabe cuánto; Alcohol | **Hábitos de riesgo** | ☐ Sí ☐ No | |
 | CLAP-14 | Violencia sexual: urgente, ruta y derechos. | Violencia SÍ; Violencia sexual SÍ | **Violencia sexual**<br>incluye «después de la semana 24» | ☐ Sí ☐ No | |
 | CLAP-15 | Antirrubéola no recibida. | Antirrubéola: no | **Antirrubéola no recibida** | ☐ Sí ☐ No | |
 | CLAP-16 | Hepatitis B con antígeno de superficie positivo. | HBsAg positivo | **Infecciones**<br>incluye «Hepatitis B: antígeno de superficie positivo»<br>incluye «profilaxis del recién nacido» | ☐ Sí ☐ No | |
+| CLAP-17 | Prueba treponémica rápida reactiva sin VDRL: tratar y pedir VDRL/RPR. | Prueba treponémica reactiva | **Sífilis: prueba treponémica reactiva**<br>incluye «tratar según la guía vigente»<br>incluye «Solicitar VDRL/RPR para el seguimiento.» | ☐ Sí ☐ No | |
+| CLAP-18 | IgG de rubéola negativa: susceptible, vacunar en el puerperio. | IgG rubéola negativa | **Susceptible a rubéola** | ☐ Sí ☐ No | |
 
 ## Antitetánica
 

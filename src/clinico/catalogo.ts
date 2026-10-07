@@ -389,32 +389,36 @@ const BASE = {
     valor: { menorDe: 15, mayorDe: 35, presuncionViolenciaMenorDe: 14 },
     unidad: 'años',
     fuentes: ['CLAP 2007'],
-    estado: 'pendiente',
-    nota: 'Revisar contra la Ruta Materno Perinatal (Resolución 3280 de 2018 y modificaciones).',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Se mantienen los valores del CLAP por decisión de la responsable del proyecto (2026-10-07).',
   }),
   'clap.antecedentesObstetricos': p<{ abortosEspontaneosConsecutivos: number; intervaloCortoMenorDeMeses: number }>({
     nombre: 'Abortos a repetición e intervalo corto',
     valor: { abortosEspontaneosConsecutivos: 3, intervaloCortoMenorDeMeses: 12 },
     fuentes: ['CLAP 2007'],
-    estado: 'pendiente',
-    nota: 'Revisar contra la Ruta Materno Perinatal.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Se mantienen los valores del CLAP por decisión de la responsable del proyecto (2026-10-07).',
   }),
   'clap.pesoRNPrevio': p<{ bajoMenorDe: number; altoDesde: number }>({
     nombre: 'Peso del RN previo',
     valor: { bajoMenorDe: 2500, altoDesde: 4000 },
     unidad: 'g',
     fuentes: ['CLAP 2007'],
-    estado: 'pendiente',
-    nota: 'Revisar contra la Ruta Materno Perinatal.',
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota: 'Se mantienen los valores del CLAP por decisión de la responsable del proyecto (2026-10-07).',
   }),
   'clap.antitetanicaConducta': p<{ vigenciaCuatroDosisAnios: number; dosisSinVacunaPrevia: number; dosisSiNoVigente: number }>({
     nombre: 'Antitetánica: vigencia con 4 dosis y dosis a aplicar en el embarazo',
     valor: { vigenciaCuatroDosisAnios: 10, dosisSinVacunaPrevia: 2, dosisSiNoVigente: 1 },
     fuentes: ['CLAP 2007'],
-    estado: 'pendiente',
+    estado: 'decidido',
+    revisado: '2026-10-07',
     nota:
       'Sin vacuna previa o con información poco confiable: 2 dosis. Con esquema no vigente: 1 refuerzo. ' +
-      'Con 4 dosis, vigente si la última fue hace menos de 10 años. A confirmar contra el manual CLAP.',
+      'Con 4 dosis, vigente si la última fue hace menos de 10 años. Esquema propuesto aprobado por la responsable del proyecto (2026-10-07).',
   }),
   'clap.antitetanica': p<{
     vigenciaDosDosisAnios: number;
@@ -437,26 +441,31 @@ const BASE = {
 
   // ---------- Recordatorios por semana (F1) ----------
   'recordatorios.ventanas': p<Record<string, { desdeSemana: number; hastaSemana: number | null }>>({
-    nombre: 'Ventanas de los exámenes y acciones por semana',
+    nombre: 'Momentos de los exámenes y acciones por semana',
     valor: {
       examenesPrimeraConsulta: { desdeSemana: 0, hastaSemana: 20 },
-      examenesDespuesDe20: { desdeSemana: 20, hastaSemana: 36 },
+      ecografiaPrimerTrimestre: { desdeSemana: 10, hastaSemana: 13 },
+      ecografiaDetalle: { desdeSemana: 18, hastaSemana: 23 },
       ptog: { desdeSemana: 24, hastaSemana: 28 },
       reevaluacionTrombotica: { desdeSemana: 28, hastaSemana: 30 },
+      examenesTercerTrimestre: { desdeSemana: 28, hastaSemana: 34 },
       egb: { desdeSemana: 35, hastaSemana: 37 },
     },
     unidad: 'semanas (inclusive: hasta la semana N+6)',
-    fuentes: ['Spec HCP Digital v1'],
-    estado: 'pendiente',
+    fuentes: ['Spec HCP Digital v1', 'Equipo clínico'],
+    estado: 'decidido',
+    revisado: '2026-10-07',
     nota:
-      'El spec fija PTOG 24–28 y EGB 35–37. Los límites para marcar "atrasado" los exámenes de la primera consulta (semana 20), los de después de la 20 (semana 36) y la reevaluación de la semana 28 (semana 30) son provisionales.',
+      'Momentos de la Ruta Materno Perinatal (Resolución 3280 de 2018) aprobados por la responsable del proyecto el 2026-10-07: ecografía de 10+6 a 13+6 y de detalle de 18 a 23+6, PTOG de 24 a 28, hemograma, VIH y sífilis del tercer trimestre desde la 28, estreptococo B de 35 a 37. Tomados sin el texto de la norma a la vista: verificar contra la versión vigente.',
   }),
   'recordatorios.examenesPrimeraConsulta': p<string[]>({
     nombre: 'Exámenes de la primera consulta',
-    valor: ['hb', 'vdrl', 'vih', 'hepatitisB', 'bacteriuria', 'toxoplasmosis', 'chagas', 'malaria'],
-    fuentes: ['Spec HCP Digital v1'],
-    estado: 'pendiente',
-    nota: 'Hepatitis B (antígeno de superficie) agregada el 2026-10-07 por decisión de la responsable del proyecto. Toxoplasmosis, Chagas y malaria según lo que exija la norma del país y la zona. Revisar el resto de la lista (sífilis treponémica rápida, rubéola, citología) contra la Ruta Materno Perinatal.',
+    valor: ['hb', 'sifilisTreponemica', 'vih', 'hepatitisB', 'bacteriuria', 'toxoplasmosis', 'rubeolaIgG', 'chagas', 'malaria'],
+    fuentes: ['Spec HCP Digital v1', 'Equipo clínico'],
+    estado: 'decidido',
+    revisado: '2026-10-07',
+    nota:
+      'Según la Ruta Materno Perinatal, aprobado por la responsable del proyecto el 2026-10-07: hemograma, prueba treponémica rápida, VIH, hepatitis B, urocultivo, toxoplasmosis; IgG de rubéola solo sin vacuna previa; Chagas y malaria solo en zona endémica. Además, grupo y Rh, tamizaje de cuello uterino y ecografía de 10+6 a 13+6. Verificar contra la versión vigente.',
   }),
 
   'vacunas.tdap': p<{ desdeSemana: number; hastaSemana: number | null }>({

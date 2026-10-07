@@ -19,8 +19,10 @@ export interface Recordatorio {
 }
 
 const NOMBRE_EXAMEN: Partial<Record<TipoExamen, string>> = {
-  hb: 'Hemoglobina',
+  hb: 'Hemograma (hemoglobina)',
   vdrl: 'VDRL/RPR',
+  sifilisTreponemica: 'Sífilis (prueba treponémica rápida)',
+  rubeolaIgG: 'IgG para rubéola',
   vih: 'VIH',
   hepatitisB: 'Hepatitis B (antígeno de superficie)',
   bacteriuria: 'Urocultivo (bacteriuria)',
@@ -35,6 +37,8 @@ const PARA_GESTANTE: Partial<Record<TipoExamen, string>> = {
   vdrl: SANGRE,
   vih: SANGRE,
   hepatitisB: SANGRE,
+  sifilisTreponemica: SANGRE,
+  rubeolaIgG: SANGRE,
   toxoplasmosis: SANGRE,
   chagas: SANGRE,
   malaria: SANGRE,
@@ -74,8 +78,19 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
 
   // Primera consulta
   const ventanaInicial = v.examenesPrimeraConsulta!;
+  const g = primera.gestacionActual;
+  const aplicaInicial: Partial<Record<TipoExamen, boolean>> = {
+    // IgG de rubéola solo si no hay evidencia de vacuna.
+    rubeolaIgG: !['previa', 'embarazo'].includes(valorDe(g.antirrubeola) ?? ''),
+    chagas: valorDe(primera.identificacion.zonaEndemicaChagas) === true,
+    malaria: valorDe(primera.identificacion.zonaEndemicaMalaria) === true,
+  };
   for (const tipo of catalogo.valor('recordatorios.examenesPrimeraConsulta') as TipoExamen[]) {
+    if (aplicaInicial[tipo] === false) continue;
     if (!hechoDesde(tipo, 0)) examen(`inicial:${tipo}`, tipo, `${NOMBRE_EXAMEN[tipo] ?? tipo} (primera consulta).`, ventanaInicial.hastaSemana);
+  }
+  if (g.cervixPap.estado === 'vacio' && g.cervixInspeccion.estado === 'vacio') {
+    lista.push({ id: 'cuello_uterino', texto: 'Tamizaje de cáncer de cuello uterino según el esquema vigente.', tipo: 'accion', estado: 'pendiente' });
   }
   if (!valorDe(primera.gestacionActual.grupo) || !valorDe(primera.gestacionActual.rh)) {
     lista.push({ id: 'grupo_rh', texto: 'Grupo sanguíneo y Rh.', tipo: 'examen', estado: estadoEn(ventanaInicial.hastaSemana), paraGestante: SANGRE });
@@ -104,11 +119,33 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
   if (alertaActiva('asa')) lista.push({ id: 'asa', texto: 'Decidir sobre el ASA (criterio de preeclampsia).', tipo: 'accion', estado: 'pendiente' });
   if (alertaActiva('calcio')) lista.push({ id: 'calcio', texto: 'Decidir sobre el carbonato de calcio (desde la semana 14).', tipo: 'accion', estado: 'pendiente' });
 
-  // Después de la semana 20
-  const tras20 = v.examenesDespuesDe20!;
-  if (desde(tras20.desdeSemana)) {
-    for (const tipo of ['hb', 'vih', 'vdrl'] as const) {
-      if (!hechoDesde(tipo, tras20.desdeSemana)) examen(`tras20:${tipo}`, tipo, `${NOMBRE_EXAMEN[tipo]} después de la semana 20.`, tras20.hastaSemana);
+  // Ecografías: de 10+6 a 13+6 y de detalle de 18 a 23+6. Se muestran hasta 6 semanas después de
+  // su ventana (como atrasadas) y luego se dejan de mostrar, porque ya no se pueden hacer a tiempo.
+  const ecoHecha = (momento: 'primer_trimestre' | 'detalle', v: { desdeSemana: number; hastaSemana: number | null }) =>
+    historia.examenes.some((e) => e.tipo === 'ecografia' && e.resultado.estado === 'valor' && e.resultado.valor.momento === momento) ||
+    (momento === 'primer_trimestre' &&
+      (() => {
+        const eco = valorDe(g.ecografia);
+        return eco !== undefined && eco.egDias >= v.desdeSemana * 7 && eco.egDias < ((v.hastaSemana ?? 0) + 1) * 7;
+      })());
+  const ecografias = [
+    { id: 'eco_1t', momento: 'primer_trimestre' as const, v: v.ecografiaPrimerTrimestre!, texto: 'Ecografía de 10+6 a 13+6 semanas.', gestante: 'Ecografía entre las semanas 10 y 13.' },
+    { id: 'eco_detalle', momento: 'detalle' as const, v: v.ecografiaDetalle!, texto: 'Ecografía de detalle (semanas 18 a 23+6).', gestante: 'Ecografía de detalle entre las semanas 18 y 23.' },
+  ];
+  for (const e of ecografias) {
+    const visible = desde(e.v.desdeSemana) && egDias !== undefined && egDias < ((e.v.hastaSemana ?? 0) + 7) * 7;
+    if (visible && !ecoHecha(e.momento, e.v)) {
+      lista.push({ id: e.id, texto: e.texto, tipo: 'examen', examen: 'ecografia', estado: estadoEn(e.v.hastaSemana), paraGestante: e.gestante });
+    }
+  }
+
+  // Tercer trimestre: hemograma, VIH y sífilis
+  const tercer = v.examenesTercerTrimestre!;
+  if (desde(tercer.desdeSemana)) {
+    if (!hechoDesde('hb', tercer.desdeSemana)) examen('tercer:hb', 'hb', 'Hemograma del tercer trimestre.', tercer.hastaSemana);
+    if (!hechoDesde('vih', tercer.desdeSemana)) examen('tercer:vih', 'vih', 'VIH del tercer trimestre.', tercer.hastaSemana);
+    if (!hechoDesde('sifilisTreponemica', tercer.desdeSemana) && !hechoDesde('vdrl', tercer.desdeSemana)) {
+      examen('tercer:sifilis', 'sifilisTreponemica', 'Sífilis del tercer trimestre (prueba treponémica o VDRL/RPR).', tercer.hastaSemana);
     }
   }
 
