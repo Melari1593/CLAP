@@ -30,8 +30,9 @@ export interface ExamenCarne {
  */
 const EXAMENES_CARNE: { trimestre: 1 | 2 | 3; texto: string; incluye: (id: string) => boolean }[] = [
   { trimestre: 1, texto: 'Exámenes de sangre de ingreso', incluye: (id) => id.startsWith('ingreso:') && id !== 'ingreso:bacteriuria' },
-  { trimestre: 1, texto: 'Examen de orina', incluye: (id) => id === 'ingreso:bacteriuria' },
+  { trimestre: 1, texto: 'Urocultivo (examen de orina)', incluye: (id) => id === 'ingreso:bacteriuria' },
   { trimestre: 1, texto: 'Ecografía entre las semanas 10 y 13', incluye: (id) => id === 'eco_1t' },
+  { trimestre: 2, texto: 'Exámenes de sangre del segundo trimestre', incluye: (id) => id.startsWith('segundo:') },
   { trimestre: 2, texto: 'Ecografía de detalle (semanas 18 a 23)', incluye: (id) => id === 'eco_detalle' },
   { trimestre: 2, texto: 'Prueba del azúcar (semanas 24 a 28)', incluye: (id) => id === 'ptog' },
   { trimestre: 3, texto: 'Exámenes de sangre del tercer trimestre (desde la semana 28)', incluye: (id) => id.startsWith('tercer:') },

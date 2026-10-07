@@ -67,6 +67,7 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
     vih: <>{siNo('solicitado', 'Solicitado')}{siNo('realizado', 'Realizado')}{opcion('resultado', 'Resultado', [['negativo', 'Negativo'], ['positivo', 'Positivo'], ['no_realizado', 'No realizado']])}</>,
     sifilisTreponemica: opcion('reactiva', 'Resultado', [['no', 'No reactiva'], ['si', 'Reactiva']]),
     rubeolaIgG: positivo('positivo', 'Resultado'),
+    varicelaIgG: positivo('positivo', 'Resultado'),
     coombsIndirecto: positivo('positivo', 'Resultado'),
     ecografia: <>{opcion('momento', 'Momento', [['primer_trimestre', 'De 10+6 a 13+6'], ['detalle', 'De detalle (18–23+6)'], ['otra', 'Otra']])}{opcion('hallazgos', 'Hallazgos', [['normal', 'Normales'], ['anormal', 'Anormales']])}</>,
     hepatitisB: opcion('antigenoSuperficie', 'Antígeno de superficie', [['negativo', 'Negativo'], ['positivo', 'Positivo']]),
@@ -91,7 +92,7 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
       case 'sifilisTreponemica': return b('reactiva') === null ? undefined : { reactiva: b('reactiva') };
       case 'ecografia': return f.momento && f.hallazgos ? { momento: f.momento, hallazgos: f.hallazgos } : undefined;
       case 'hepatitisB': return f.antigenoSuperficie ? { antigenoSuperficie: f.antigenoSuperficie } : undefined;
-      case 'toxoplasmosis': return f.igg || f.igm ? { igg: f.igg || null, igm: f.igm || null } : undefined;
+      case 'toxoplasmosis': return f.igg && f.igm ? { igg: f.igg, igm: f.igm } : undefined; // IgG e IgM
       case 'ptog': return { ayunas: c(n('ayunas')), unaHora: c(n('unaHora')), dosHoras: c(n('dosHoras')) };
       default: return b('positivo') === null ? undefined : { positivo: b('positivo') };
     }
@@ -100,7 +101,7 @@ function NuevoExamen({ onRegistrar }: { onRegistrar: (tipo: TipoExamen, valor: u
   const enviar = async (e: FormEvent) => {
     e.preventDefault();
     const v = valor();
-    if (v === undefined) return setAviso('Complete el resultado.');
+    if (v === undefined) return setAviso(tipo === 'toxoplasmosis' ? 'Registre la IgG y la IgM.' : 'Complete el resultado.');
     const gdl = n('gdl');
     if (tipo === 'hb' && gdl !== undefined) {
       const adv = validarHb(gdl, catalogo);

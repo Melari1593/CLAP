@@ -15,7 +15,7 @@ describe('Laboratorios y ecografías por trimestre', () => {
     const g = grupos(semana(12));
     expect(g.map((x) => x.titulo)).toEqual(['Primer trimestre y exámenes de ingreso', 'Segundo trimestre', 'Tercer trimestre']);
     expect(g[0]!.filas.map((f) => f.id)).toEqual(expect.arrayContaining(['ingreso:hb', 'ingreso:vih', 'ingreso:hepatitisB', 'eco_1t']));
-    expect(g[1]!.filas.map((f) => f.id)).toEqual(['eco_detalle', 'ptog']);
+    expect(g[1]!.filas.map((f) => f.id)).toEqual(['segundo:vih', 'segundo:sifilis', 'eco_detalle', 'ptog']);
     expect(g[2]!.filas.map((f) => f.id)).toEqual(['tercer:hb', 'tercer:vih', 'tercer:sifilis', 'egb']);
   });
 

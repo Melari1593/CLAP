@@ -304,7 +304,10 @@ export type ResultadoPorTipo = {
   coombsIndirecto: { positivo: SiNo };
   /** IgG para rubéola (si no hay evidencia de vacuna). */
   rubeolaIgG: { positivo: SiNo };
+  /** IgG para varicela zóster. */
+  varicelaIgG: { positivo: SiNo };
   ecografia: { momento: 'primer_trimestre' | 'detalle' | 'otra'; hallazgos: 'normal' | 'anormal' };
+  /** Toxoplasmosis: se registran IgG e IgM. */
   toxoplasmosis: { igg: 'positivo' | 'negativo' | null; igm: 'positivo' | 'negativo' | null };
   chagas: { positivo: SiNo };
   malaria: { positivo: SiNo };

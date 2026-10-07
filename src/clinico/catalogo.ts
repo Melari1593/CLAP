@@ -462,6 +462,7 @@ const BASE = {
       ecografiaDetalle: { desdeSemana: 18, hastaSemana: 23 },
       ptog: { desdeSemana: 24, hastaSemana: 28 },
       reevaluacionTrombotica: { desdeSemana: 28, hastaSemana: 30 },
+      examenesSegundoTrimestre: { desdeSemana: 14, hastaSemana: 27 },
       examenesTercerTrimestre: { desdeSemana: 28, hastaSemana: 34 },
       egb: { desdeSemana: 35, hastaSemana: 37 },
     },
@@ -470,16 +471,16 @@ const BASE = {
     estado: 'decidido',
     revisado: '2026-10-07',
     nota:
-      'Momentos de la Ruta Materno Perinatal (Resolución 3280 de 2018) aprobados por la responsable del proyecto el 2026-10-07: ecografía de 10+6 a 13+6 y de detalle de 18 a 23+6, PTOG de 24 a 28, hemograma, VIH y sífilis del tercer trimestre desde la 28, estreptococo B de 35 a 37. Tomados sin el texto de la norma a la vista: verificar contra la versión vigente.',
+      'Momentos de la Ruta Materno Perinatal (Resolución 3280 de 2018) aprobados por la responsable del proyecto el 2026-10-07: ecografía de 10+6 a 13+6 y de detalle de 18 a 23+6, PTOG de 24 a 28, VIH y sífilis en cada trimestre (segundo trimestre de 14 a 27+6, por decisión de la responsable del proyecto el 2026-10-07), hemograma, VIH y sífilis del tercer trimestre desde la 28, estreptococo B de 35 a 37. Tomados sin el texto de la norma a la vista: verificar contra la versión vigente.',
   }),
   'recordatorios.examenesPrimeraConsulta': p<string[]>({
     nombre: 'Exámenes de la primera consulta',
-    valor: ['hb', 'sifilisTreponemica', 'vih', 'hepatitisB', 'bacteriuria', 'toxoplasmosis', 'rubeolaIgG', 'chagas', 'malaria'],
+    valor: ['hb', 'sifilisTreponemica', 'vih', 'hepatitisB', 'bacteriuria', 'toxoplasmosis', 'rubeolaIgG', 'varicelaIgG', 'chagas', 'malaria'],
     fuentes: ['Spec HCP Digital v1', 'Equipo clínico'],
     estado: 'decidido',
     revisado: '2026-10-07',
     nota:
-      'Según la Ruta Materno Perinatal, aprobado por la responsable del proyecto el 2026-10-07: hemograma, prueba treponémica rápida, VIH, hepatitis B, urocultivo, toxoplasmosis; IgG de rubéola solo sin vacuna previa; Chagas y malaria solo en zona endémica. Además, grupo y Rh, tamizaje de cuello uterino y ecografía de 10+6 a 13+6. Verificar contra la versión vigente.',
+      'Según la Ruta Materno Perinatal, aprobado por la responsable del proyecto el 2026-10-07: hemograma, prueba treponémica rápida, VIH, hepatitis B, urocultivo (no solo bacteriuria), toxoplasmosis (IgG e IgM), IgG para varicela zóster; IgG de rubéola solo sin vacuna previa; Chagas y malaria solo en zona endémica. Además, grupo y Rh, tamizaje de cuello uterino y ecografía de 10+6 a 13+6. Verificar contra la versión vigente.',
   }),
 
   'hta.umbrales': p<{

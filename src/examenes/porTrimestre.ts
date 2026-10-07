@@ -43,6 +43,7 @@ export function alterado(ctx: ContextoClinico, e: ResultadoExamen): boolean {
     case 'sifilisTreponemica': return (r as ResultadoPorTipo['sifilisTreponemica']).reactiva;
     case 'hepatitisB': return (r as ResultadoPorTipo['hepatitisB']).antigenoSuperficie === 'positivo';
     case 'rubeolaIgG': return !(r as ResultadoPorTipo['rubeolaIgG']).positivo; // sin inmunidad
+    case 'varicelaIgG': return !(r as ResultadoPorTipo['varicelaIgG']).positivo; // sin inmunidad
     case 'toxoplasmosis': return (r as ResultadoPorTipo['toxoplasmosis']).igm === 'positivo';
     case 'ecografia': return (r as ResultadoPorTipo['ecografia']).hallazgos === 'anormal';
     case 'coombsIndirecto':
@@ -86,9 +87,9 @@ export function examenesPorTrimestre(ctx: ContextoClinico): GrupoTrimestre[] {
   };
 
   /** Primer resultado sin usar de alguno de los tipos, dentro de un rango de EG (en semanas). */
-  const buscar = (tipos: TipoExamen[], desde: number, hasta: number | null, filtro?: (e: ResultadoExamen) => boolean) =>
+  const buscar = (tipos: TipoExamen[], desde: number, hasta: number | null, filtro?: (e: ResultadoExamen) => boolean, reusar = false) =>
     ordenados.find((e) => {
-      if (!tipos.includes(e.tipo) || usados.has(e.id) || e.resultado.estado === 'vacio') return false;
+      if (!tipos.includes(e.tipo) || (usados.has(e.id) && !reusar) || e.resultado.estado === 'vacio') return false;
       if (filtro && !filtro(e)) return false;
       const d = ctx.egEn(e.fecha);
       if (d === undefined) return desde === 0;
@@ -122,8 +123,14 @@ export function examenesPorTrimestre(ctx: ContextoClinico): GrupoTrimestre[] {
   }
   filas1.push(filaEco1);
 
-  // 2.º trimestre: ecografía de detalle y PTOG.
+  // 2.º trimestre: VIH y sífilis (cada trimestre), ecografía de detalle y PTOG. Si la primera
+  // consulta fue en el segundo trimestre, sus pruebas cuentan también para este trimestre.
+  const segundo = v.examenesSegundoTrimestre!;
+  const delSegundo = (tipos: TipoExamen[]) =>
+    buscar(tipos, segundo.desdeSemana, tercer.desdeSemana) ?? buscar(tipos, segundo.desdeSemana, tercer.desdeSemana, undefined, true);
   const filas2 = [
+    fila('segundo:vih', 'VIH del segundo trimestre', segundo, delSegundo(['vih'])),
+    fila('segundo:sifilis', 'Sífilis del segundo trimestre', segundo, delSegundo(['sifilisTreponemica', 'vdrl'])),
     fila('eco_detalle', 'Ecografía de detalle', v.ecografiaDetalle!, buscar(['ecografia'], 0, null, esEco('detalle'))),
     fila('ptog', etiquetaExamen('ptog'), v.ptog!, buscar(['ptog'], 0, null)),
   ];

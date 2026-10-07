@@ -111,10 +111,11 @@ describe('Carné: lectura restringida (A3)', () => {
     expect(t1!.examenes).toEqual(
       expect.arrayContaining([
         { texto: 'Exámenes de sangre de ingreso', estado: 'falta' }, // solo el VIH registrado: no se dice cuál
-        { texto: 'Examen de orina', estado: 'falta' },
+        { texto: 'Urocultivo (examen de orina)', estado: 'falta' },
       ]),
     );
     expect(t2!.examenes).toEqual([
+      { texto: 'Exámenes de sangre del segundo trimestre', estado: 'falta' },
       { texto: 'Ecografía de detalle (semanas 18 a 23)', estado: 'falta' },
       { texto: 'Prueba del azúcar (semanas 24 a 28)', estado: 'mas_adelante' },
     ]);

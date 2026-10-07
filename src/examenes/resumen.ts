@@ -13,12 +13,13 @@ export const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }
   { tipo: 'hepatitisB', etiqueta: 'Hepatitis B (antígeno de superficie)' },
   { tipo: 'sifilisTreponemica', etiqueta: 'Sífilis: prueba treponémica rápida' },
   { tipo: 'rubeolaIgG', etiqueta: 'IgG para rubéola' },
+  { tipo: 'varicelaIgG', etiqueta: 'IgG para varicela zóster' },
   { tipo: 'coombsIndirecto', etiqueta: 'Coombs indirecto' },
   { tipo: 'ecografia', etiqueta: 'Ecografía' },
-  { tipo: 'toxoplasmosis', etiqueta: 'Toxoplasmosis' },
+  { tipo: 'toxoplasmosis', etiqueta: 'Toxoplasmosis (IgG e IgM)' },
   { tipo: 'chagas', etiqueta: 'Chagas' },
   { tipo: 'malaria', etiqueta: 'Malaria' },
-  { tipo: 'bacteriuria', etiqueta: 'Bacteriuria' },
+  { tipo: 'bacteriuria', etiqueta: 'Urocultivo' },
   { tipo: 'ptog', etiqueta: 'PTOG 75 g' },
   { tipo: 'egb', etiqueta: 'Estreptococo B' },
 ];
@@ -26,6 +27,7 @@ export const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }
 export const etiquetaExamen = (t: TipoExamen) => EXAMENES.find((e) => e.tipo === t)?.etiqueta ?? t;
 const sn = (b: boolean | null | undefined) => (b === null || b === undefined ? '—' : b ? 'Sí' : 'No');
 const pos = (b: boolean) => (b ? 'Positivo' : 'Negativo');
+const inmune = (b: boolean) => (b ? 'Positivo (inmune)' : 'Negativo (sin inmunidad)');
 
 export function resumenExamen(e: ResultadoExamen): string {
   if (e.resultado.estado !== 'valor') return e.resultado.estado === 'no_se_hizo' ? 'No se hizo' : 'No corresponde';
@@ -40,7 +42,8 @@ export function resumenExamen(e: ResultadoExamen): string {
     case 'vih': { const v = r as ResultadoPorTipo['vih']; return `Solicitado ${sn(v.solicitado)} · Realizado ${sn(v.realizado)} · ${v.resultado.replace('_', ' ')}`; }
     case 'sifilisTreponemica': return (r as ResultadoPorTipo['sifilisTreponemica']).reactiva ? 'Reactiva' : 'No reactiva';
     case 'coombsIndirecto': return pos((r as ResultadoPorTipo['coombsIndirecto']).positivo);
-    case 'rubeolaIgG': return pos((r as ResultadoPorTipo['rubeolaIgG']).positivo);
+    case 'rubeolaIgG': return inmune((r as ResultadoPorTipo['rubeolaIgG']).positivo);
+    case 'varicelaIgG': return inmune((r as ResultadoPorTipo['varicelaIgG']).positivo);
     case 'ecografia': { const v = r as ResultadoPorTipo['ecografia']; return `${v.momento === 'primer_trimestre' ? 'De 10+6 a 13+6' : v.momento === 'detalle' ? 'De detalle' : 'Otra'} · ${v.hallazgos}`; }
     case 'hepatitisB': return `Antígeno de superficie ${(r as ResultadoPorTipo['hepatitisB']).antigenoSuperficie}`;
     case 'toxoplasmosis': { const v = r as ResultadoPorTipo['toxoplasmosis']; return `IgG ${v.igg ?? '—'} · IgM ${v.igm ?? '—'}`; }

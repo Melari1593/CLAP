@@ -17,6 +17,7 @@ const examenesIniciales = (fecha: string): Examen[] => [
   { tipo: 'hepatitisB', valor: { antigenoSuperficie: 'negativo' }, fecha },
   { tipo: 'bacteriuria', valor: neg, fecha },
   { tipo: 'toxoplasmosis', valor: { igg: 'negativo', igm: 'negativo' }, fecha },
+  { tipo: 'varicelaIgG', valor: { positivo: true }, fecha },
   { tipo: 'chagas', valor: neg, fecha },
   { tipo: 'malaria', valor: neg, fecha },
 ];
@@ -39,7 +40,7 @@ describe('Recordatorios por semana (F1)', () => {
     // ni falta de vacuna de rubéola, no se piden Chagas, malaria ni IgG de rubéola.
     const s8 = ids(semana(8), base);
     expect(exam(s8.filter((r) => r.tipo === 'examen').map((r) => r.id))).toEqual(
-      ['inicial:hb', 'inicial:sifilisTreponemica', 'inicial:vih', 'inicial:hepatitisB', 'inicial:bacteriuria', 'inicial:toxoplasmosis'],
+      ['inicial:hb', 'inicial:sifilisTreponemica', 'inicial:vih', 'inicial:hepatitisB', 'inicial:bacteriuria', 'inicial:toxoplasmosis', 'inicial:varicelaIgG'],
     );
     expect(s8.some((r) => r.estado === 'atrasado')).toBe(false);
 
@@ -61,6 +62,19 @@ describe('Recordatorios por semana (F1)', () => {
     // Ecografía de detalle: pendiente en la 20, atrasada en la 24.
     expect(ids(semana(20), conIniciales).find((r) => r.id === 'eco_detalle')?.estado).toBe('pendiente');
     expect(ids(semana(24), conIniciales).find((r) => r.id === 'eco_detalle')?.estado).toBe('atrasado');
+
+    // Segundo trimestre: VIH y sífilis desde la 14 hasta que se registren en el trimestre.
+    expect(ids(semana(13), conIniciales).some((r) => r.id.startsWith('segundo:'))).toBe(false);
+    expect(ids(semana(14), conIniciales).filter((r) => r.id.startsWith('segundo:')).map((r) => [r.id, r.estado])).toEqual([
+      ['segundo:vih', 'pendiente'],
+      ['segundo:sifilis', 'pendiente'],
+    ]);
+    const segundoT = [
+      { tipo: 'vih' as const, valor: { solicitado: true, realizado: true, resultado: 'negativo' as const }, fecha: semana(16) },
+      { tipo: 'sifilisTreponemica' as const, valor: { reactiva: false }, fecha: semana(16) },
+    ];
+    expect(ids(semana(20), { ...conIniciales, examenes: [...examenesIniciales(semana(9)), ...segundoT] }).some((r) => r.id.startsWith('segundo:'))).toBe(false);
+    expect(ids(semana(28), conIniciales).some((r) => r.id.startsWith('segundo:'))).toBe(false); // ya rige el tercer trimestre
 
     // Tercer trimestre: hemograma, VIH y sífilis desde la 28; atrasados desde la 35.
     expect(ids(semana(27), conIniciales).some((r) => r.id.startsWith('tercer:'))).toBe(false);

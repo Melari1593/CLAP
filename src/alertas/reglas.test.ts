@@ -101,7 +101,7 @@ describe('Reglas básicas del CLAP (C2): cada una dispara y no dispara', () => {
         { tipo: 'malaria', valor: { positivo: false } },
       ],
     });
-    expect(r?.porque).toEqual(['Bacteriuria positivo (2026-08-20).', 'Estreptococo B positivo (2026-08-20).']);
+    expect(r?.porque).toEqual(['Urocultivo positivo (2026-08-20).', 'Estreptococo B positivo (2026-08-20).']);
     expect(r?.severidad).toBe(2);
     expect(evaluar(infecciones, { examenes: [{ tipo: 'chagas', valor: { positivo: false } }] })).toBeNull();
   });

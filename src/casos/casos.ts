@@ -148,10 +148,19 @@ export const CASOS: CasoClinico[] = [
   caso({
     id: 'CLAP-11',
     grupo: 'CLAP',
-    descripcion: 'Bacteriuria y estreptococo B positivos.',
-    datos: ['Bacteriuria positiva', 'EGB positivo'],
+    descripcion: 'Urocultivo y estreptococo B positivos.',
+    datos: ['Urocultivo positivo', 'EGB positivo'],
     extra: { examenes: [{ tipo: 'bacteriuria', valor: { positivo: true }, fecha: T2 }, { tipo: 'egb', valor: { positivo: true }, fecha: T2 }] },
     alertas: { infecciones: 'Infecciones' },
+  }),
+  caso({
+    id: 'CLAP-21',
+    grupo: 'CLAP',
+    descripcion: 'IgG para varicela zóster negativa: susceptible.',
+    datos: ['IgG varicela negativa'],
+    extra: { examenes: [{ tipo: 'varicelaIgG', valor: { positivo: false }, fecha: T2 }] },
+    alertas: { varicela: 'Susceptible a varicela' },
+    contiene: { varicela: ['La vacuna no se aplica en el embarazo'] },
   }),
   caso({
     id: 'CLAP-12',

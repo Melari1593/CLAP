@@ -136,7 +136,7 @@ export const infecciones: Regla = {
       [
         ['malaria', 'Malaria'],
         ['chagas', 'Chagas'],
-        ['bacteriuria', 'Bacteriuria'],
+        ['bacteriuria', 'Urocultivo'],
         ['egb', 'Estreptococo B'],
       ] as const
     ).flatMap(([tipo, nombre]) => {
@@ -342,6 +342,23 @@ export const antirrubeola: Regla = {
   },
 };
 
+export const varicela: Regla = {
+  id: 'varicela',
+  evaluar(ctx) {
+    const igg = ctx.ultimo('varicelaIgG');
+    if (!igg || igg.positivo) return null;
+    return {
+      titulo: 'Susceptible a varicela',
+      porque: [
+        `IgG para varicela zóster negativa (${igg.fecha}).`,
+        'Evitar el contacto con personas con varicela o herpes zóster; si hay exposición, consultar de inmediato (inmunoglobulina).',
+        'La vacuna no se aplica en el embarazo: recordar aplicarla en el puerperio.',
+      ],
+      opciones: [{ etiqueta: 'Recordatorio para el puerperio' }, { etiqueta: 'No requiere acción', requiereMotivo: true }],
+    };
+  },
+};
+
 export const antitetanica: Regla = {
   id: 'antitetanica',
   evaluar({ primera, hoy, catalogo, eg }) {
@@ -382,5 +399,6 @@ export const REGLAS_CLAP: Regla[] = [
   habitos,
   violencia,
   antirrubeola,
+  varicela,
   antitetanica,
 ];

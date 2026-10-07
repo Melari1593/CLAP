@@ -26,7 +26,8 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 | CLAP-08 | Embarazo no planeado y no desea continuarlo: asesoría urgente. | No planeado; No desea continuar | **Embarazo no planeado: asesoría de opciones** | ☐ Sí ☐ No | |
 | CLAP-09 | Embarazo no planeado y desea continuar: alerta no urgente. | No planeado; Desea continuar | **Embarazo no planeado** | ☐ Sí ☐ No | |
 | CLAP-10 | VDRL reactivo sin tratamiento. | VDRL reactivo, sin tratamiento | **Sífilis: VDRL/RPR reactivo**<br>incluye «Sin tratamiento registrado» | ☐ Sí ☐ No | |
-| CLAP-11 | Bacteriuria y estreptococo B positivos. | Bacteriuria positiva; EGB positivo | **Infecciones** | ☐ Sí ☐ No | |
+| CLAP-11 | Urocultivo y estreptococo B positivos. | Urocultivo positivo; EGB positivo | **Infecciones** | ☐ Sí ☐ No | |
+| CLAP-21 | IgG para varicela zóster negativa: susceptible. | IgG varicela negativa | **Susceptible a varicela**<br>incluye «La vacuna no se aplica en el embarazo» | ☐ Sí ☐ No | |
 | CLAP-12 | Rh negativo inmunizada. | Rh negativo; Inmunizada | **Rh negativo sensibilizada**<br>incluye «Remitir a un nivel de mayor complejidad»<br>incluye «No aplica la inmunoglobulina anti-D» | ☐ Sí ☐ No | |
 | CLAP-13 | Fuma (cantidad desconocida) y consume alcohol. Sumar tabaquismo da 1 punto trombótico, sin alerta. | Fuma, no sabe cuánto; Alcohol | **Hábitos de riesgo** | ☐ Sí ☐ No | |
 | CLAP-14 | Violencia sexual: urgente, ruta y derechos. | Violencia SÍ; Violencia sexual SÍ | **Violencia sexual**<br>incluye «después de la semana 24» | ☐ Sí ☐ No | |

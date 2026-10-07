@@ -24,10 +24,11 @@ const NOMBRE_EXAMEN: Partial<Record<TipoExamen, string>> = {
   sifilisTreponemica: 'Sífilis (prueba treponémica rápida)',
   coombsIndirecto: 'Coombs indirecto (Rh negativo)',
   rubeolaIgG: 'IgG para rubéola',
+  varicelaIgG: 'IgG para varicela zóster',
   vih: 'VIH',
   hepatitisB: 'Hepatitis B (antígeno de superficie)',
-  bacteriuria: 'Urocultivo (bacteriuria)',
-  toxoplasmosis: 'Toxoplasmosis',
+  bacteriuria: 'Urocultivo',
+  toxoplasmosis: 'Toxoplasmosis (IgG e IgM)',
   chagas: 'Chagas',
   malaria: 'Malaria',
 };
@@ -41,11 +42,12 @@ const PARA_GESTANTE: Partial<Record<TipoExamen, string>> = {
   sifilisTreponemica: SANGRE,
   coombsIndirecto: SANGRE,
   rubeolaIgG: SANGRE,
+  varicelaIgG: SANGRE,
   toxoplasmosis: SANGRE,
   chagas: SANGRE,
   malaria: SANGRE,
   ferritina: SANGRE,
-  bacteriuria: 'Examen de orina.',
+  bacteriuria: 'Urocultivo (examen de orina).',
   ptog: 'Entre las semanas 24 y 28 te harán la prueba del azúcar. Ve en ayunas: te toman sangre, te dan una bebida dulce y te vuelven a tomar sangre a la hora y a las 2 horas.',
   egb: 'Entre las semanas 35 y 37 te tomarán una muestra para buscar una bacteria (estreptococo B).',
 };
@@ -154,6 +156,22 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
     const visible = desde(e.v.desdeSemana) && egDias !== undefined && egDias < ((e.v.hastaSemana ?? 0) + 7) * 7;
     if (visible && !ecoHecha(e.momento, e.v)) {
       lista.push({ id: e.id, texto: e.texto, tipo: 'examen', examen: 'ecografia', estado: estadoEn(e.v.hastaSemana), paraGestante: e.gestante });
+    }
+  }
+
+  // Segundo trimestre: VIH y sífilis (se repiten en cada trimestre)
+  const segundo = v.examenesSegundoTrimestre!;
+  const tercerDesde = v.examenesTercerTrimestre!.desdeSemana;
+  const hechoEntre = (tipos: TipoExamen[], desdeS: number, hastaS: number) =>
+    historia.examenes.some((e) => {
+      if (!tipos.includes(e.tipo) || e.resultado.estado !== 'valor') return false;
+      const d = ctx.egEn(e.fecha);
+      return d !== undefined && d >= desdeS * 7 && d < hastaS * 7;
+    });
+  if (desde(segundo.desdeSemana) && !desde(tercerDesde)) {
+    if (!hechoEntre(['vih'], segundo.desdeSemana, tercerDesde)) examen('segundo:vih', 'vih', 'VIH del segundo trimestre.', segundo.hastaSemana);
+    if (!hechoEntre(['sifilisTreponemica', 'vdrl'], segundo.desdeSemana, tercerDesde)) {
+      examen('segundo:sifilis', 'sifilisTreponemica', 'Sífilis del segundo trimestre (prueba treponémica o VDRL/RPR).', segundo.hastaSemana);
     }
   }
 
