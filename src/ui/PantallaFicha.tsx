@@ -8,6 +8,7 @@ import { PanelCalculos } from './PanelCalculos';
 import { PanelAlertas } from './PanelAlertas';
 import { PanelPendientes } from './PanelPendientes';
 import { GraficaAlturaUterina } from './GraficaAlturaUterina';
+import { GraficaIMC } from './GraficaIMC';
 
 export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; aviso?: string; ir: (p: Pantalla) => void }) {
   const { repo, servicio } = useApp();
@@ -50,6 +51,7 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
           <PanelAlertas embarazoId={activo.id} abrirDerechos={() => ir({ tipo: 'derechos', gestanteId, embarazoId: activo.id })} />
           <PanelPendientes embarazoId={activo.id} />
           <GraficaAlturaUterina embarazoId={activo.id} />
+          <GraficaIMC embarazoId={activo.id} />
           <h3>Consultas de este embarazo</h3>
           <ul className="consultas">
             {historia.consultas.length === 0 && <li>Aún no hay consultas.</li>}

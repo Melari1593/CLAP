@@ -1,7 +1,8 @@
 // Altura uterina de cada control sobre la banda de los percentiles 10 y 90 del CLAP.
 // Los puntos fuera de la banda se distinguen por color y por forma (triángulo), y la tabla
 // debajo da los mismos datos sin depender del color.
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useEscala } from './useEscala';
 import { construirContexto } from '../alertas/motor';
 import { percentilesAU } from '../alertas/crecimiento';
 import { coma } from '../alertas/anemia';
@@ -39,17 +40,7 @@ export function GraficaAlturaUterina({ embarazoId, version = 0 }: { embarazoId: 
   const [puntos, setPuntos] = useState<Punto[]>();
   const [curva, setCurva] = useState<{ s: number; p10: number; p90: number }[]>([]);
   const [activo, setActivo] = useState<number>();
-  // La gráfica se escala al ancho disponible; el texto se agranda en pantallas angostas para seguir legible.
-  const contenedor = useRef<HTMLDivElement>(null);
-  const [escala, setEscala] = useState(1);
-  useEffect(() => {
-    const el = contenedor.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const obs = new ResizeObserver(([e]) => setEscala(Math.min(2, Math.max(1, ANCHO / (e?.contentRect.width || ANCHO)))));
-    obs.observe(el);
-    return () => obs.disconnect();
-    // El contenedor existe solo cuando ya hay datos: se observa a partir de ese momento.
-  }, [puntos === undefined]);
+  const { ref: contenedor, escala } = useEscala(ANCHO);
 
   useEffect(() => {
     void (async () => {
