@@ -54,3 +54,22 @@ describe('Examen físico', () => {
     expect(hipertension.evaluar(construirContexto(h, '2026-07-20', cat))?.titulo).toBe('Hipertensión en rango severo');
   });
 });
+
+describe('Alertas por signos vitales', () => {
+  it('fiebre con 38 °C o más; saturación baja por debajo de 92 %', async () => {
+    const { fiebre, saturacionBaja } = await import('../alertas/signosVitales');
+    const ctxCon = (temp: number, sat: number) =>
+      construirContexto(
+        historiaDePrueba({ seguimientos: [{ fecha: '2026-08-20', cambios: (d) => { d.temperaturaC = valor(temp); d.saturacionPct = valor(sat); } }] }),
+        '2026-08-20',
+        cat,
+      );
+    expect(fiebre.evaluar(ctxCon(37.9, 97))).toBeNull();
+    expect(fiebre.evaluar(ctxCon(38, 97))).toMatchObject({ titulo: 'Fiebre', urgente: true });
+    expect(saturacionBaja.evaluar(ctxCon(36.5, 92))).toBeNull();
+    expect(saturacionBaja.evaluar(ctxCon(36.5, 91))).toMatchObject({ titulo: 'Saturación de oxígeno baja', severidad: 3 });
+    // También con los signos de la primera consulta.
+    const h = historiaDePrueba({ primera: (d) => (d.examenFisico.temperaturaC = valor(38.5)) });
+    expect(fiebre.evaluar(construirContexto(h, '2026-07-20', cat))?.porque[0]).toContain('38,5 °C');
+  });
+});
