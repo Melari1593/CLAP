@@ -122,6 +122,38 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
     </div>
   );
 
+  // 5. Laboratorios y ecografías: registrar, corregir o anular resultados.
+  const laboratorios = (
+    <SeccionLaboratorios embarazoId={embarazoId} consultaId={consultaId ?? null} version={guardados} alCambiar={() => setGuardados((n) => n + 1)} enBloque />
+  );
+
+  // 6. Plan y órdenes: después del diagnóstico y el plan, indicaciones, próxima cita, fórmula,
+  // paraclínicos y, al final, la firma del profesional.
+  const planYOrdenes = (
+    <>
+      {tipo === 'seguimiento' &&
+        (consultaId ? (
+          <SeccionesSeguimiento embarazoId={embarazoId} alCambiar={() => setGuardados((n) => n + 1)} />
+        ) : (
+          <p className="suave">Guarde el control para registrar indicaciones y factores transitorios.</p>
+        ))}
+      <h4>📅 Próxima cita</h4>
+      <div className="compuesto">
+        <label>Fecha <input type="date" value={cita.fecha} onChange={(e) => setCita({ ...cita, fecha: e.target.value })} /></label>
+        <label>Lugar <input value={cita.lugar} onChange={(e) => setCita({ ...cita, lugar: e.target.value })} /></label>
+        <label>Qué llevar <input value={cita.queLlevar} onChange={(e) => setCita({ ...cita, queLlevar: e.target.value })} /></label>
+      </div>
+      <SeccionOrdenes embarazoId={embarazoId} ordenes={ordenes} onCambio={setOrdenes} soloLectura={cerrada} version={guardados} />
+      <FirmaProfesional firma={firma} onFirma={setFirma} cierre={cerrada ? cierre : undefined} />
+      {cerrada && consultaId && (ordenes.medicamentos.length > 0 || ordenes.paraclinicos.length > 0) && (
+        <button type="button" className="primario" onClick={() => ir({ tipo: 'ordenes', gestanteId, embarazoId, consultaId })}>
+          🖨️ Imprimir fórmula y órdenes
+        </button>
+      )}
+    </>
+  );
+  const extras = { examenFisico: curvas, laboratorios, diagnostico: planYOrdenes };
+
   // Edad de la gestante (persona responsable si es menor de 18 años).
   const fechaNacimiento = valorDe(gestante.fechaNacimiento);
   const edadGestante = fechaNacimiento ? edad(fechaNacimiento, hoy()) : undefined;
@@ -154,8 +186,8 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
 
   const pedirCierre = async () => {
     const incompletas = ordenesIncompletas(ordenes);
-    if (incompletas.length > 0) return setMensaje(`Complete la fórmula antes de cerrar: ${incompletas.join('; ')}.`);
-    if (!firma) return setMensaje('Firme en el recuadro "Firma del profesional de salud" antes de cerrar la consulta.');
+    if (incompletas.length > 0) return setMensaje(`Complete la fórmula (sección "Plan y órdenes") antes de cerrar: ${incompletas.join('; ')}.`);
+    if (!firma) return setMensaje('Firme al final de la sección "Plan y órdenes" antes de cerrar la consulta.');
     const consulta = await guardar();
     if (consulta) setVacios(servicio.camposVaciosDe(consulta));
   };
@@ -180,35 +212,15 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       {tipo === 'primera' ? (
         <>
           <PanelCalculos gestante={gestante} datos={primera} />
-          <Formulario bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} extras={{ examenFisico: curvas }} ctx={{ edad: edadGestante }} />
+          <Formulario bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} extras={extras} ctx={{ edad: edadGestante }} />
         </>
       ) : (
         <>
           <PanelCalculos gestante={gestante} datos={primeraDelEmbarazo} />
           <p className="suave">EG del día: {egTexto ?? 'no calculable'}</p>
-          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} clave={clave} extras={{ examenFisico: curvas }} ctx={{ egSemanas, rhNegativo }} />
+          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} clave={clave} extras={extras} ctx={{ egSemanas, rhNegativo }} />
         </>
       )}
-
-      {tipo === 'seguimiento' &&
-        (consultaId ? (
-          <SeccionesSeguimiento embarazoId={embarazoId} alCambiar={() => setGuardados((n) => n + 1)} />
-        ) : (
-          <p className="suave">Guarde el control para registrar indicaciones y factores transitorios.</p>
-        ))}
-
-      <SeccionLaboratorios embarazoId={embarazoId} consultaId={consultaId ?? null} version={guardados} alCambiar={() => setGuardados((n) => n + 1)} />
-
-      <fieldset>
-        <legend>Próxima cita</legend>
-        <div className="compuesto">
-          <label>Fecha <input type="date" value={cita.fecha} onChange={(e) => setCita({ ...cita, fecha: e.target.value })} /></label>
-          <label>Lugar <input value={cita.lugar} onChange={(e) => setCita({ ...cita, lugar: e.target.value })} /></label>
-          <label>Qué llevar <input value={cita.queLlevar} onChange={(e) => setCita({ ...cita, queLlevar: e.target.value })} /></label>
-        </div>
-      </fieldset>
-
-      <SeccionOrdenes embarazoId={embarazoId} ordenes={ordenes} onCambio={setOrdenes} soloLectura={cerrada} version={guardados} />
 
       {advertencias && (
         <div className="dialogo" role="alertdialog" aria-label="Confirmar valores">
@@ -240,12 +252,6 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
           correo={valorDe((tipo === 'primera' ? primera : primeraDelEmbarazo)?.identificacion.correo)}
           onImprimir={() => ir({ tipo: 'impresion', gestanteId, embarazoId })}
         />
-      )}
-      <FirmaProfesional firma={firma} onFirma={setFirma} cierre={cerrada ? cierre : undefined} />
-      {cerrada && consultaId && (ordenes.medicamentos.length > 0 || ordenes.paraclinicos.length > 0) && (
-        <button type="button" className="primario" onClick={() => ir({ tipo: 'ordenes', gestanteId, embarazoId, consultaId })}>
-          🖨️ Imprimir fórmula y órdenes
-        </button>
       )}
       <div className="navegacion fija">
         <button type="button" onClick={() => void guardar()}>Guardar</button>

@@ -562,9 +562,11 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
       },
     ],
   },
+  // Sin campos propios: el bloque muestra la sección de resultados (SeccionLaboratorios).
+  { id: 'laboratorios', titulo: 'Laboratorios y ecografías', campos: [] },
   {
     id: 'diagnostico',
-    titulo: 'Diagnóstico y plan',
+    titulo: 'Plan y órdenes',
     campos: camposDiagnosticoPlan<P>('diagnosticoPlan.'),
   },
 ];
@@ -645,9 +647,10 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
     titulo: 'Anticoncepción después del parto',
     campos: camposAnticoncepcion<S>(''),
   },
+  { id: 'laboratorios', titulo: 'Laboratorios y ecografías', campos: [] },
   {
     id: 'diagnostico',
-    titulo: 'Diagnóstico y plan',
+    titulo: 'Plan y órdenes',
     campos: camposDiagnosticoPlan<S>('diagnosticoPlan.'),
   },
 ];

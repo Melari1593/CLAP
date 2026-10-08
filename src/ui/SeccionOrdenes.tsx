@@ -45,10 +45,9 @@ export function SeccionOrdenes({ embarazoId, ordenes, onCambio, soloLectura, ver
   );
 
   return (
-    <fieldset className="ordenes">
-      <legend>💊 Fórmula médica y órdenes de paraclínicos</legend>
+    <div className="ordenes">
+      <h4>💊 Fórmula médica</h4>
 
-      <h4>Medicamentos</h4>
       {ordenes.medicamentos.length === 0 && <p className="suave">Sin medicamentos formulados en esta consulta.</p>}
       {ordenes.medicamentos.map((m, i) => {
         const faltan = faltantesMedicamento(m);
@@ -102,7 +101,7 @@ export function SeccionOrdenes({ embarazoId, ordenes, onCambio, soloLectura, ver
         </div>
       )}
 
-      <h4>Paraclínicos (laboratorios e imágenes)</h4>
+      <h4>🧪 Orden de paraclínicos (laboratorios e imágenes)</h4>
       {ordenes.paraclinicos.length === 0 && <p className="suave">Sin paraclínicos ordenados en esta consulta.</p>}
       <ul className="lista">
         {ordenes.paraclinicos.map((p, i) => (
@@ -155,6 +154,6 @@ export function SeccionOrdenes({ embarazoId, ordenes, onCambio, soloLectura, ver
           </div>
         </>
       )}
-    </fieldset>
+    </div>
   );
 }

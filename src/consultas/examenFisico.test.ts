@@ -37,8 +37,16 @@ describe('Examen físico', () => {
     const s = { ...seguimiento(60), paSistolica: valor(120), paDiastolica: valor(80) };
     const pam = BLOQUES_SEGUIMIENTO.find((b) => b.id === 'examenFisico')!.campos.find((c) => c.control.tipo === 'calculado')!;
     expect(pam.control.tipo === 'calculado' && pam.control.calcular(s)).toBe('93 mmHg');
-    // En la primera consulta, el examen físico va justo antes de "Diagnóstico y plan".
-    expect(BLOQUES_PRIMERA.slice(-2).map((b) => b.id)).toEqual(['examenFisico', 'diagnostico']);
+    // Al final: examen físico, laboratorios y ecografías, y plan y órdenes (con la firma).
+    expect(BLOQUES_PRIMERA.slice(-3).map((b) => b.id)).toEqual(['examenFisico', 'laboratorios', 'diagnostico']);
+    expect(BLOQUES_SEGUIMIENTO.map((b) => b.titulo)).toEqual([
+      'Control',
+      'Examen físico',
+      'Adherencia y vacunas',
+      'Anticoncepción después del parto',
+      'Laboratorios y ecografías',
+      'Plan y órdenes',
+    ]);
   });
 
   it('pide confirmar signos vitales fuera de rango, sin bloquear', () => {

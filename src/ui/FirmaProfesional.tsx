@@ -31,8 +31,8 @@ export function FirmaProfesional({ firma, onFirma, cierre }: {
   const registro = cierre ? cierre.registroProfesional : repo.usuario.registroProfesional;
 
   return (
-    <fieldset className="firma">
-      <legend>✍️ Firma del profesional de salud</legend>
+    <div className="firma">
+      <h4>✍️ Firma del profesional de salud</h4>
       {cierre ? (
         <>
           {cierre.firma ? <img src={cierre.firma} alt={`Firma de ${cierre.profesional}`} className="firma-imagen" /> : <p className="suave">Cerrada sin firma manuscrita.</p>}
@@ -97,6 +97,6 @@ export function FirmaProfesional({ firma, onFirma, cierre }: {
           )}
         </>
       )}
-    </fieldset>
+    </div>
   );
 }

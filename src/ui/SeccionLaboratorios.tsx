@@ -1,6 +1,6 @@
 // Laboratorios y ecografías: registrar, corregir o anular resultados, y verlos por trimestre.
 // Se usa en su propia pantalla (desde la ficha) y dentro de la primera consulta y de los controles.
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { ResultadoExamen, TipoExamen } from '../datos/modelo';
 import type { Historia } from '../datos/repositorio';
 import { construirContexto } from '../alertas/motor';
@@ -13,12 +13,14 @@ import { useApp } from './contexto';
 
 const conValor = (valor: unknown) => ({ estado: 'valor', valor }) as ResultadoExamen['resultado'];
 
-export function SeccionLaboratorios({ embarazoId, consultaId, alCambiar, version = 0 }: {
+export function SeccionLaboratorios({ embarazoId, consultaId, alCambiar, version = 0, enBloque }: {
   embarazoId: string;
   /** Consulta en la que se registra; null desde la pantalla de laboratorios. */
   consultaId: string | null;
   alCambiar?: () => void;
   version?: number;
+  /** Dentro de un bloque del formulario, que ya tiene su título. */
+  enBloque?: boolean;
 }) {
   const { repo, servicio, hoy, catalogo } = useApp();
   const [historia, setHistoria] = useState<Historia>();
@@ -55,8 +57,7 @@ export function SeccionLaboratorios({ embarazoId, consultaId, alCambiar, version
   const ctx = historia ? construirContexto(historia, hoy(), catalogo) : undefined;
 
   return (
-    <fieldset className="seccion-laboratorios">
-      <legend>🧪 Laboratorios y ecografías</legend>
+    <Marco enBloque={enBloque}>
       <FormExamen onRegistrar={registrar} />
       {mensaje && <p className="aviso" role="status">{mensaje}</p>}
 
@@ -90,6 +91,16 @@ export function SeccionLaboratorios({ embarazoId, consultaId, alCambiar, version
         )}
       </ul>
       <PanelLaboratorios embarazoId={embarazoId} version={version + cambios} />
+    </Marco>
+  );
+}
+
+function Marco({ enBloque, children }: { enBloque?: boolean; children: ReactNode }) {
+  if (enBloque) return <div className="seccion-laboratorios">{children}</div>;
+  return (
+    <fieldset className="seccion-laboratorios">
+      <legend>🧪 Laboratorios y ecografías</legend>
+      {children}
     </fieldset>
   );
 }
