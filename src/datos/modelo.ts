@@ -284,6 +284,8 @@ export interface ExamenGeneral {
 
 /** Signos vitales, examen obstétrico y examen general de la primera consulta. */
 export interface ExamenFisicoPrimera {
+  /** Peso de hoy (para el IMC por edad gestacional). */
+  pesoKg: Campo<number>;
   paSistolica: Campo<number>;
   paDiastolica: Campo<number>;
   fcLpm: Campo<number>;
@@ -426,10 +428,16 @@ export type TipoExamen = keyof ResultadoPorTipo;
 export type ResultadoExamen = {
   [K in TipoExamen]: Meta & {
     embarazoId: string;
-    consultaId: string;
+    /** Consulta en la que se registró; null si se registró desde la sección de laboratorios. */
+    consultaId: string | null;
     fecha: FechaISO;
     tipo: K;
     resultado: Campo<ResultadoPorTipo[K]>;
+    /**
+     * Registrado por error: no se borra (la historia clínica no se borra), se anula con el motivo.
+     * Los anulados no cuentan para las alertas, los pendientes ni el carné.
+     */
+    anulado?: { fechaHora: FechaHoraISO; motivo: string };
   };
 }[TipoExamen];
 

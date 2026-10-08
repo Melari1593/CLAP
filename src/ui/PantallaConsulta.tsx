@@ -19,7 +19,7 @@ import { CierreCarne } from './CierreCarne';
 import { PanelPendientes } from './PanelPendientes';
 import { GraficaAlturaUterina } from './GraficaAlturaUterina';
 import { GraficaIMC } from './GraficaIMC';
-import { PanelLaboratorios } from './PanelLaboratorios';
+import { SeccionLaboratorios } from './SeccionLaboratorios';
 import { valorDe } from '../datos/campo';
 import { grupoRh } from '../clinico/grupoRh';
 import { edad } from '../clinico/calculos';
@@ -179,10 +179,12 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
 
       {tipo === 'seguimiento' &&
         (consultaId ? (
-          <SeccionesSeguimiento embarazoId={embarazoId} consultaId={consultaId} alCambiar={() => setGuardados((n) => n + 1)} />
+          <SeccionesSeguimiento embarazoId={embarazoId} alCambiar={() => setGuardados((n) => n + 1)} />
         ) : (
-          <p className="suave">Guarde el control para registrar exámenes, indicaciones y factores transitorios.</p>
+          <p className="suave">Guarde el control para registrar indicaciones y factores transitorios.</p>
         ))}
+
+      <SeccionLaboratorios embarazoId={embarazoId} consultaId={consultaId ?? null} version={guardados} alCambiar={() => setGuardados((n) => n + 1)} />
 
       <fieldset>
         <legend>Próxima cita</legend>
@@ -224,8 +226,6 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
           onImprimir={() => ir({ tipo: 'impresion', gestanteId, embarazoId })}
         />
       )}
-      {/* Laboratorios por trimestre al final de la pantalla; las curvas van en el examen físico. */}
-      {tipo === 'seguimiento' && <PanelLaboratorios embarazoId={embarazoId} version={guardados} />}
       <div className="navegacion fija">
         <button type="button" onClick={() => void guardar()}>Guardar</button>
         {!cerrada && <button type="button" className="primario" onClick={() => void pedirCierre()}>Cerrar consulta</button>}

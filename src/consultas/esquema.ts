@@ -540,6 +540,7 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
     id: 'examenFisico',
     titulo: 'Examen físico',
     campos: [
+      { ruta: 'examenFisico.pesoKg', etiqueta: 'Peso de hoy', ayuda: 'Para el IMC por edad gestacional (curva de Atalah).', control: num('kg', true) },
       ...camposSignosVitales<P>('examenFisico.'),
       { ruta: 'examenFisico.alturaUterinaCm', etiqueta: 'Altura uterina', control: num('cm') },
       { ruta: 'examenFisico.fcfLpm', etiqueta: 'Frecuencia cardíaca fetal (FCF)', control: num('lpm') },

@@ -6,6 +6,7 @@ import { MotorAlertas } from './alertas/motor';
 import { REGLAS } from './alertas/reglas';
 import { ServicioDerechos } from './derechos/servicio';
 import { PantallaDerechos } from './ui/PantallaDerechos';
+import { PantallaLaboratorios } from './ui/PantallaLaboratorios';
 import { ServicioCarne } from './carne/servicio';
 import { ServicioConsentimientos } from './consentimiento/servicio';
 import { PantallaImpresion } from './ui/PantallaImpresion';
@@ -107,6 +108,7 @@ export function App() {
         {(pantalla.tipo === 'primera' || pantalla.tipo === 'seguimiento') && (
           <PantallaConsulta key={`${pantalla.tipo}-${pantalla.consultaId ?? 'nueva'}`} {...pantalla} ir={ir} />
         )}
+        {pantalla.tipo === 'laboratorios' && <PantallaLaboratorios gestanteId={pantalla.gestanteId} embarazoId={pantalla.embarazoId} ir={ir} />}
         {pantalla.tipo === 'derechos' && <PantallaDerechos gestanteId={pantalla.gestanteId} embarazoId={pantalla.embarazoId} ir={ir} />}
         {pantalla.tipo === 'impresion' && (
           <PantallaImpresion embarazoId={pantalla.embarazoId} volver={() => ir({ tipo: 'ficha', gestanteId: pantalla.gestanteId })} />

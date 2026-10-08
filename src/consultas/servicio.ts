@@ -211,6 +211,25 @@ export class ServicioConsultas {
     return examen;
   }
 
+  /** Corrige el resultado o la fecha de un examen ya registrado (el cambio queda en la bitácora). */
+  async corregirExamen(id: string, cambios: Pick<ResultadoExamen, 'fecha' | 'resultado'>): Promise<ResultadoExamen> {
+    const previo = await this.repo.leer('examenes', id);
+    if (!previo) throw new Error('Resultado no encontrado.');
+    const examen = await this.repo.guardar('examenes', { ...previo, fecha: cambios.fecha, resultado: cambios.resultado } as ResultadoExamen);
+    await this.avisar({ tipo: 'examen', embarazoId: examen.embarazoId, examen: examen.tipo });
+    return examen;
+  }
+
+  /** Anula un resultado registrado por error. No se borra: queda en la historia con el motivo. */
+  async anularExamen(id: string, motivo: string): Promise<ResultadoExamen> {
+    if (!motivo.trim()) throw new Error('Escriba el motivo de la anulación.');
+    const previo = await this.repo.leer('examenes', id);
+    if (!previo) throw new Error('Resultado no encontrado.');
+    const examen = await this.repo.guardar('examenes', { ...previo, anulado: { fechaHora: new Date().toISOString(), motivo: motivo.trim() } });
+    await this.avisar({ tipo: 'examen', embarazoId: examen.embarazoId, examen: examen.tipo });
+    return examen;
+  }
+
   /** Una indicación por tipo y embarazo: marcarla de nuevo actualiza la existente. */
   async marcarIndicacion(
     embarazoId: string,

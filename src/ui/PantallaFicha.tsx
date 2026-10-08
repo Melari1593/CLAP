@@ -7,9 +7,7 @@ import { useApp, type Pantalla } from './contexto';
 import { PanelCalculos } from './PanelCalculos';
 import { PanelAlertas } from './PanelAlertas';
 import { PanelPendientes } from './PanelPendientes';
-import { GraficaAlturaUterina } from './GraficaAlturaUterina';
-import { GraficaIMC } from './GraficaIMC';
-import { PanelLaboratorios } from './PanelLaboratorios';
+import { PanelAntecedentes } from './PanelAntecedentes';
 import { PanelConsentimientos } from './PanelConsentimientos';
 
 export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; aviso?: string; ir: (p: Pantalla) => void }) {
@@ -52,6 +50,7 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
           <PanelCalculos gestante={gestante} datos={primera?.primera} />
           <PanelAlertas embarazoId={activo.id} abrirDerechos={() => ir({ tipo: 'derechos', gestanteId, embarazoId: activo.id })} />
           <PanelPendientes embarazoId={activo.id} />
+          <PanelAntecedentes datos={primera?.primera} onEditar={primera ? () => ir({ tipo: 'primera', gestanteId, embarazoId: activo.id, consultaId: primera.id }) : undefined} />
           <h3>Consultas de este embarazo</h3>
           <ul className="consultas">
             {historia.consultas.length === 0 && <li>Aún no hay consultas.</li>}
@@ -84,15 +83,12 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
                 Nuevo control de seguimiento
               </button>
             )}
+            <button type="button" onClick={() => ir({ tipo: 'laboratorios', gestanteId, embarazoId: activo.id })}>🧪 Laboratorios y ecografías</button>
             {historia.carne && <button type="button" onClick={() => ir({ tipo: 'impresion', gestanteId, embarazoId: activo.id })}>Reimprimir carné</button>}
             <button type="button" onClick={() => ir({ tipo: 'derechos', gestanteId, embarazoId: activo.id })}>🔒 Opciones y derechos</button>
             <button type="button" onClick={nuevoEmbarazo}>Abrir embarazo nuevo</button>
           </div>
           <PanelConsentimientos embarazoId={activo.id} tipos={['datos_carne', 'procedimiento']} />
-          <PanelLaboratorios embarazoId={activo.id} />
-          {/* Curvas al final de la pantalla */}
-          <GraficaAlturaUterina embarazoId={activo.id} />
-          <GraficaIMC embarazoId={activo.id} />
         </>
       ) : (
         <>

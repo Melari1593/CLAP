@@ -167,7 +167,7 @@ export class Repositorio {
     const [gestante, consultas, examenes, indicaciones, alertas, factores, derechos, carnes, consentimientos] = await Promise.all([
       this.leer('gestantes', embarazo.gestanteId),
       this.bd.consultas.where(porEmbarazo).sortBy('fecha'),
-      this.bd.examenes.where(porEmbarazo).sortBy('fecha'),
+      this.bd.examenes.where(porEmbarazo).sortBy('fecha').then((l) => l.filter((e) => !e.anulado)),
       this.bd.indicaciones.where(porEmbarazo).toArray(),
       this.bd.alertas.where(porEmbarazo).toArray(),
       this.bd.factores.where(porEmbarazo).sortBy('inicio'),

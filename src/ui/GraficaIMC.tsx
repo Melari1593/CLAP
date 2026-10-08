@@ -71,8 +71,10 @@ export function GraficaIMC({ embarazoId, version = 0 }: { embarazoId: string; ve
       setTalla(t);
       const lista: Punto[] = [];
       if (t) {
-        for (const c of ctx.seguimientos) {
-          const peso = valorDe(c.seguimiento?.pesoKg);
+        // El peso de hoy de la primera consulta y el de cada control.
+        const conPeso = [...historia.consultas.filter((c) => c.tipo === 'primera'), ...ctx.seguimientos];
+        for (const c of conPeso) {
+          const peso = valorDe(c.seguimiento?.pesoKg ?? c.primera?.examenFisico?.pesoKg);
           const egDias = ctx.egEn(c.fecha);
           if (peso === undefined || egDias === undefined) continue;
           const valor = imc(peso, t, catalogo).valor;

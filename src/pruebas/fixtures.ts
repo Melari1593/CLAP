@@ -163,6 +163,8 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
     anamnesis: anamnesisDePrueba(),
     diagnosticoPlan: diagnosticoDePrueba(),
     examenFisico: {
+      // Sin peso de hoy: las pruebas de estado nutricional usan el de los controles.
+      pesoKg: noSeHizo(),
       paSistolica: valor(110),
       paDiastolica: valor(70),
       fcLpm: valor(80),
