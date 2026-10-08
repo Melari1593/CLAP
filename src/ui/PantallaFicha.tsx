@@ -63,6 +63,12 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
                 >
                   <strong>{c.fecha}</strong> · {c.tipo === 'primera' ? 'Primera consulta' : 'Control'}
                   {!c.cerrada && <span className="etiqueta-estado"> abierta</span>}
+                  {c.cierre && (
+                    <small className="suave">
+                      {' '}· cerrada por {c.cierre.profesional}
+                      {c.cierre.registroProfesional && ` (${c.cierre.registroProfesional})`} el {new Date(c.cierre.fechaHora).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}
+                    </small>
+                  )}
                 </button>
               </li>
             ))}

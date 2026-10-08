@@ -22,6 +22,7 @@ import { GraficaIMC } from './GraficaIMC';
 import { PanelLaboratorios } from './PanelLaboratorios';
 import { valorDe } from '../datos/campo';
 import { grupoRh } from '../clinico/grupoRh';
+import { edad } from '../clinico/calculos';
 import { borrarBorrador, guardarBorrador, leerBorrador } from './borrador';
 
 type Cita = { fecha: string; lugar: string; queLlevar: string };
@@ -36,7 +37,7 @@ interface Props {
 }
 
 export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idInicial, ir }: Props) {
-  const { repo, servicio } = useApp();
+  const { repo, servicio, hoy } = useApp();
   const [gestante, setGestante] = useState<Gestante>();
   const [primeraDelEmbarazo, setPrimeraDelEmbarazo] = useState<DatosPrimeraConsulta>();
   const [egSemanas, setEgSemanas] = useState<number>();
@@ -112,6 +113,10 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
     </div>
   );
 
+  // Edad de la gestante (persona responsable si es menor de 18 años).
+  const fechaNacimiento = valorDe(gestante.fechaNacimiento);
+  const edadGestante = fechaNacimiento ? edad(fechaNacimiento, hoy()) : undefined;
+
   const proximaCita: Consulta['proximaCita'] = cita.fecha ? { estado: 'valor', valor: cita } : { estado: 'vacio' };
 
   const guardar = async (confirmado = false): Promise<Consulta | undefined> => {
@@ -162,7 +167,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       {tipo === 'primera' ? (
         <>
           <PanelCalculos gestante={gestante} datos={primera} />
-          <Formulario bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} extras={{ examenFisico: curvas }} />
+          <Formulario bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} extras={{ examenFisico: curvas }} ctx={{ edad: edadGestante }} />
         </>
       ) : (
         <>

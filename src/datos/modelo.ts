@@ -59,6 +59,18 @@ export interface Identificacion {
   aniosMayorNivel: Campo<number>;
   estadoCivil: Campo<'casada' | 'union_estable' | 'soltera' | 'otro'>;
   viveSola: Campo<SiNo>;
+  /** Resolución 1995 de 1999, art. 9: ocupación, aseguradora y tipo de vinculación. */
+  ocupacion: Campo<string>;
+  aseguradora: Campo<string>;
+  regimen: Campo<'contributivo' | 'subsidiado' | 'especial' | 'excepcion' | 'no_afiliada'>;
+  /** Acompañante en la consulta. */
+  acompananteNombre: Campo<string>;
+  acompananteParentesco: Campo<string>;
+  acompananteTelefono: Campo<string>;
+  /** Persona responsable (gestantes menores de 18 años). */
+  responsableNombre: Campo<string>;
+  responsableParentesco: Campo<string>;
+  responsableTelefono: Campo<string>;
 }
 
 export interface AntecedentesFamiliares {
@@ -84,6 +96,18 @@ export interface AntecedentesPersonales {
   cardiopatia: Campo<SiNo>;
   nefropatia: Campo<SiNo>;
   violencia: Campo<SiNo>;
+  quirurgicos: Campo<string>;
+  alergias: Campo<SiNo>;
+  alergiasCuales: Campo<string>;
+  medicamentosActuales: Campo<string>;
+  transfusiones: Campo<SiNo>;
+  /** Antecedentes ginecológicos. */
+  menarquiaEdad: Campo<number>;
+  ciclos: Campo<'regulares' | 'irregulares'>;
+  /** Privado, nunca en el carné. */
+  inicioVidaSexualEdad: Campo<number>;
+  /** Privado, nunca en el carné. */
+  itsPrevias: Campo<SiNo>;
 }
 
 export interface AntecedentesObstetricos {
@@ -219,6 +243,25 @@ export interface GestacionActual {
   inmunizada: Campo<SiNo>;
 }
 
+/** Anamnesis de cada consulta (Resolución 1995 de 1999). */
+export interface Anamnesis {
+  motivoConsulta: Campo<string>;
+  enfermedadActual: Campo<string>;
+  revisionSistemas: Campo<string>;
+}
+
+export interface DiagnosticoCie10 {
+  codigo: string;
+  descripcion: string;
+}
+
+/** Cierre clínico de cada consulta: diagnósticos con CIE-10, análisis y plan de manejo. */
+export interface DiagnosticoPlan {
+  diagnosticos: Campo<DiagnosticoCie10[]>;
+  analisis: Campo<string>;
+  plan: Campo<string>;
+}
+
 /** Examen físico general por sistemas (texto libre; "No se hizo" si no se examinó). */
 export interface ExamenGeneral {
   aspectoGeneral: Campo<string>;
@@ -255,12 +298,16 @@ export interface DatosPrimeraConsulta {
   antecedentesCalcio: AntecedentesCalcio;
   riesgoTrombotico: RiesgoTrombotico;
   gestacionActual: GestacionActual;
+  anamnesis: Anamnesis;
   examenFisico: ExamenFisicoPrimera;
+  diagnosticoPlan: DiagnosticoPlan;
 }
 
 // ---------------------------------------------------------------- Seguimiento
 
 export interface DatosSeguimiento {
+  anamnesis: Anamnesis;
+  diagnosticoPlan: DiagnosticoPlan;
   pesoKg: Campo<number>;
   paSistolica: Campo<number>;
   paDiastolica: Campo<number>;
@@ -318,6 +365,8 @@ export interface Consulta extends Meta {
   cerrada: boolean;
   primera?: DatosPrimeraConsulta;
   seguimiento?: DatosSeguimiento;
+  /** Quién cerró la consulta: nombre, registro profesional, fecha y hora (Resolución 1995 de 1999). */
+  cierre?: { profesional: string; registroProfesional: string | null; fechaHora: FechaHoraISO };
 }
 
 // ---------------------------------------------------------------- Exámenes
@@ -530,6 +579,8 @@ export type Rol = 'profesional_autorizado' | 'administrativo';
 export interface Usuario {
   id: string;
   nombre: string;
+  /** Registro profesional (ReTHUS o tarjeta profesional). */
+  registroProfesional?: string;
   institucionId: string;
   roles: Rol[];
 }

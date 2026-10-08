@@ -3,6 +3,8 @@ import { useState, type ReactNode } from 'react';
 import { valorDe, type Campo } from '../datos/campo';
 import type { DefCampo } from '../consultas/esquema';
 import { correoValido } from '../consultas/validaciones';
+import { CIE10_FRECUENTES } from '../clinico/cie10';
+import type { DiagnosticoCie10 } from '../datos/modelo';
 
 type Cambio = (campo: Campo<unknown>) => void;
 const vacio: Campo<unknown> = { estado: 'vacio' };
@@ -183,7 +185,56 @@ function ControlValor<D>({ def, campo, onCambio }: { def: DefCampo<D>; campo: Ca
       );
     case 'residencia':
       return <Residencia valor={v as { municipio: string; altitudM: number } | undefined} onCambio={poner} />;
+    case 'cie10':
+      return <Diagnosticos valor={(v as DiagnosticoCie10[] | undefined) ?? []} onCambio={(l) => poner(l.length ? l : undefined)} />;
+    case 'calculado':
+      return null;
   }
+}
+
+/** Diagnósticos con código CIE-10: sugiere los frecuentes al escribir el código o la descripción. */
+function Diagnosticos({ valor, onCambio }: { valor: DiagnosticoCie10[]; onCambio: (l: DiagnosticoCie10[]) => void }) {
+  const [texto, setTexto] = useState('');
+  const agregar = () => {
+    const t = texto.trim();
+    if (!t) return;
+    const conocido = CIE10_FRECUENTES.find((d) => `${d.codigo} · ${d.descripcion}` === t || d.codigo.toLowerCase() === t.toLowerCase());
+    const [codigo, ...resto] = t.split(/\s*[·\-–]\s*|\s+/);
+    const nuevo = conocido ?? { codigo: (codigo ?? '').toUpperCase(), descripcion: resto.join(' ') };
+    if (!valor.some((d) => d.codigo === nuevo.codigo)) onCambio([...valor, nuevo]);
+    setTexto('');
+  };
+  return (
+    <div className="diagnosticos">
+      {valor.length > 0 && (
+        <ul>
+          {valor.map((d) => (
+            <li key={d.codigo}>
+              <strong>{d.codigo}</strong> {d.descripcion}{' '}
+              <button type="button" className="enlace" onClick={() => onCambio(valor.filter((x) => x.codigo !== d.codigo))}>Quitar</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <input
+        list="cie10-frecuentes"
+        aria-label="Agregar diagnóstico (código CIE-10 y descripción)"
+        placeholder="Código o descripción, por ejemplo Z34.8"
+        value={texto}
+        onChange={(e) => setTexto(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            agregar();
+          }
+        }}
+      />
+      <datalist id="cie10-frecuentes">
+        {CIE10_FRECUENTES.map((d) => <option key={d.codigo} value={`${d.codigo} · ${d.descripcion}`} />)}
+      </datalist>
+      <button type="button" onClick={agregar}>Agregar</button>
+    </div>
+  );
 }
 
 export function FilaCampo<D>({ def, campo, onCambio, automatico }: {

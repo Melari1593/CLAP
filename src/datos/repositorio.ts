@@ -60,6 +60,11 @@ export class Repositorio {
     private readonly ahora: () => Date = () => new Date(),
   ) {}
 
+  /** Profesional de la sesión (para firmar el cierre de la consulta). */
+  get usuario(): Usuario {
+    return this.sesion.usuario;
+  }
+
   get usuarioId(): string {
     return this.sesion.usuario.id;
   }

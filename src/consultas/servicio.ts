@@ -253,7 +253,10 @@ export class ServicioConsultas {
   async cerrarConsulta(consultaId: string, duracionSegundos?: number): Promise<{ consulta: Consulta; vacios: string[] }> {
     const consulta = await this.repo.leer('consultas', consultaId);
     if (!consulta) throw new Error('Consulta no encontrada');
-    const cerrada = await this.repo.guardar('consultas', { ...consulta, cerrada: true });
+    // Firma del cierre: nombre y registro profesional, fecha y hora (Resolución 1995 de 1999).
+    const { nombre, registroProfesional } = this.repo.usuario;
+    const cierre = consulta.cierre ?? { profesional: nombre, registroProfesional: registroProfesional ?? null, fechaHora: new Date().toISOString() };
+    const cerrada = await this.repo.guardar('consultas', { ...consulta, cerrada: true, cierre });
     if (this.eventos && !consulta.cerrada) {
       const historia = await this.repo.historia(consulta.embarazoId);
       if (historia) {

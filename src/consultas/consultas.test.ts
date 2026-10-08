@@ -156,6 +156,22 @@ describe('Primera consulta y seguimiento (B2, B4)', () => {
     const { consulta, vacios } = await s.cerrarConsulta(r.registro.id);
     expect(consulta.cerrada).toBe(true);
     expect(vacios).toEqual(['Otra condición médica grave']);
+    // Firma del cierre: nombre del profesional de la sesión, registro, fecha y hora.
+    expect(consulta.cierre).toMatchObject({ profesional: expect.any(String), fechaHora: expect.any(String) });
+  });
+
+  it('la historia tiene los datos de la Resolución 1995 de 1999: identificación, anamnesis, antecedentes, diagnóstico CIE-10 y plan', async () => {
+    const { BLOQUES_PRIMERA, BLOQUES_SEGUIMIENTO } = await import('./esquema');
+    const etiquetas = (b: typeof BLOQUES_PRIMERA | typeof BLOQUES_SEGUIMIENTO) => b.flatMap((x) => x.campos.map((c) => c.etiqueta as string));
+    expect(etiquetas(BLOQUES_PRIMERA)).toEqual(
+      expect.arrayContaining([
+        'Ocupación', 'Aseguradora (EPS)', 'Régimen de afiliación', 'Acompañante: nombre', 'Persona responsable: nombre',
+        'Motivo de consulta', 'Enfermedad actual', 'Revisión por sistemas',
+        'Antecedentes quirúrgicos', 'Alergias', 'Medicamentos que toma actualmente', 'Transfusiones previas', 'Menarquia (edad)',
+        'Diagnósticos (CIE-10)', 'Análisis', 'Plan de manejo',
+      ]),
+    );
+    expect(etiquetas(BLOQUES_SEGUIMIENTO)).toEqual(expect.arrayContaining(['Motivo de consulta', 'Enfermedad actual', 'Revisión por sistemas', 'Diagnósticos (CIE-10)', 'Plan de manejo']));
   });
 
   it('calcula la EG del día desde la primera consulta', async () => {

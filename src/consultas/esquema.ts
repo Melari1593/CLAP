@@ -22,13 +22,17 @@ export type TipoCampo =
   | { tipo: 'cigarrillos' }
   | { tipo: 'residencia' }
   /** Valor calculado a partir de otros campos: se muestra, no se guarda. */
-  | { tipo: 'calculado'; calcular: (datos: unknown) => string | undefined };
+  | { tipo: 'calculado'; calcular: (datos: unknown) => string | undefined }
+  /** Lista de diagnósticos con código CIE-10. */
+  | { tipo: 'cie10' };
 
 export interface ContextoFormulario {
   /** Semanas de gestación del día, si se conocen. */
   egSemanas?: number;
   /** La gestante es Rh negativo (para la anti-D en el seguimiento). */
   rhNegativo?: boolean;
+  /** Edad de la gestante (persona responsable si es menor de 18 años). */
+  edad?: number;
 }
 
 export interface DefCampo<D> {
@@ -88,6 +92,29 @@ function camposSignosVitales<D>(prefijo: string): DefCampo<D>[] {
     { ruta: `${prefijo}frRpm`, etiqueta: 'Frecuencia respiratoria', control: num('rpm') },
     { ruta: `${prefijo}temperaturaC`, etiqueta: 'Temperatura', control: num('°C', true) },
     { ruta: `${prefijo}saturacionPct`, etiqueta: 'Saturación de oxígeno', control: num('%') },
+  ];
+}
+
+/** Anamnesis: motivo de consulta, enfermedad actual y revisión por sistemas. */
+function camposAnamnesis<D>(prefijo: string): DefCampo<D>[] {
+  return [
+    { ruta: `${prefijo}motivoConsulta`, etiqueta: 'Motivo de consulta', ayuda: 'Con las palabras de la gestante.', control: { tipo: 'texto', largo: true } },
+    { ruta: `${prefijo}enfermedadActual`, etiqueta: 'Enfermedad actual', ayuda: 'Inicio, evolución y síntomas, en orden cronológico.', control: { tipo: 'texto', largo: true } },
+    {
+      ruta: `${prefijo}revisionSistemas`,
+      etiqueta: 'Revisión por sistemas',
+      ayuda: 'Lo positivo con detalle; lo negativo en conjunto (por ejemplo, "resto sin hallazgos").',
+      control: { tipo: 'texto', largo: true },
+    },
+  ];
+}
+
+/** Diagnósticos con CIE-10, análisis y plan de manejo. */
+function camposDiagnosticoPlan<D>(prefijo: string): DefCampo<D>[] {
+  return [
+    { ruta: `${prefijo}diagnosticos`, etiqueta: 'Diagnósticos (CIE-10)', control: { tipo: 'cie10' } },
+    { ruta: `${prefijo}analisis`, etiqueta: 'Análisis', control: { tipo: 'texto', largo: true } },
+    { ruta: `${prefijo}plan`, etiqueta: 'Plan de manejo', ayuda: 'Conducta, órdenes, educación y signos de alarma explicados.', control: { tipo: 'texto', largo: true } },
   ];
 }
 
@@ -185,7 +212,38 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
         control: { tipo: 'opciones', opciones: ops(['casada', 'Casada'], ['union_estable', 'Unión estable'], ['soltera', 'Soltera'], ['otro', 'Otro']) },
       },
       { ruta: 'identificacion.viveSola', etiqueta: 'Vive sola', control: sino },
+      { ruta: 'identificacion.ocupacion', etiqueta: 'Ocupación', control: { tipo: 'texto' } },
+      { ruta: 'identificacion.aseguradora', etiqueta: 'Aseguradora (EPS)', control: { tipo: 'texto' } },
+      {
+        ruta: 'identificacion.regimen',
+        etiqueta: 'Régimen de afiliación',
+        control: {
+          tipo: 'opciones',
+          opciones: ops(['contributivo', 'Contributivo'], ['subsidiado', 'Subsidiado'], ['especial', 'Especial'], ['excepcion', 'De excepción'], ['no_afiliada', 'No afiliada']),
+        },
+      },
+      { ruta: 'identificacion.acompananteNombre', etiqueta: 'Acompañante: nombre', ayuda: 'Si viene sola, marque "No corresponde".', control: { tipo: 'texto' } },
+      { ruta: 'identificacion.acompananteParentesco', etiqueta: 'Acompañante: parentesco', control: { tipo: 'texto' } },
+      { ruta: 'identificacion.acompananteTelefono', etiqueta: 'Acompañante: teléfono', control: { tipo: 'texto' } },
+      ...(
+        [
+          ['responsableNombre', 'Persona responsable: nombre'],
+          ['responsableParentesco', 'Persona responsable: parentesco'],
+          ['responsableTelefono', 'Persona responsable: teléfono'],
+        ] as [string, string][]
+      ).map(([r, e]): DefCampo<P> => ({
+        ruta: `identificacion.${r}`,
+        etiqueta: e,
+        ayuda: 'Para gestantes menores de 18 años.',
+        control: { tipo: 'texto' },
+        aplica: (_d, ctx) => ctx.edad === undefined || ctx.edad < 18,
+      })),
     ],
+  },
+  {
+    id: 'anamnesis',
+    titulo: 'Motivo de consulta, enfermedad actual y revisión por sistemas',
+    campos: camposAnamnesis<P>('anamnesis.'),
   },
   {
     id: 'gestacion',
@@ -278,6 +336,20 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
         ] as [string, string][]
       ).map(([r, e]) => siNo([`antecedentesPersonales.${r}`, e])),
       { ruta: 'antecedentesPersonales.violencia', etiqueta: 'Violencia', privado: true, control: sino },
+      { ruta: 'antecedentesPersonales.quirurgicos', etiqueta: 'Antecedentes quirúrgicos', ayuda: 'Cirugías y año. Si no tiene, escriba "Ninguno".', control: { tipo: 'texto', largo: true } },
+      { ruta: 'antecedentesPersonales.alergias', etiqueta: 'Alergias', control: sino },
+      {
+        ruta: 'antecedentesPersonales.alergiasCuales',
+        etiqueta: '¿A qué es alérgica?',
+        control: { tipo: 'texto' },
+        aplica: (d) => es(d.antecedentesPersonales.alergias, true),
+      },
+      { ruta: 'antecedentesPersonales.medicamentosActuales', etiqueta: 'Medicamentos que toma actualmente', control: { tipo: 'texto', largo: true } },
+      { ruta: 'antecedentesPersonales.transfusiones', etiqueta: 'Transfusiones previas', control: sino },
+      { ruta: 'antecedentesPersonales.menarquiaEdad', etiqueta: 'Menarquia (edad)', control: num('años') },
+      { ruta: 'antecedentesPersonales.ciclos', etiqueta: 'Ciclos menstruales', control: { tipo: 'opciones', opciones: ops(['regulares', 'Regulares'], ['irregulares', 'Irregulares']) } },
+      { ruta: 'antecedentesPersonales.inicioVidaSexualEdad', etiqueta: 'Inicio de vida sexual (edad)', privado: true, control: num('años') },
+      { ruta: 'antecedentesPersonales.itsPrevias', etiqueta: 'Infecciones de transmisión sexual previas', privado: true, control: sino },
       { ruta: 'antecedentesObstetricos.gestas', etiqueta: 'Gestas previas', control: num() },
       { ruta: 'antecedentesObstetricos.partosVaginales', etiqueta: 'Partos vaginales', control: num() },
       { ruta: 'antecedentesObstetricos.cesareas', etiqueta: 'Cesáreas', control: num() },
@@ -476,6 +548,11 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
       },
     ],
   },
+  {
+    id: 'diagnostico',
+    titulo: 'Diagnóstico y plan',
+    campos: camposDiagnosticoPlan<P>('diagnosticoPlan.'),
+  },
 ];
 
 type S = DatosSeguimiento;
@@ -485,6 +562,7 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
     id: 'control',
     titulo: 'Control',
     campos: [
+      ...camposAnamnesis<S>('anamnesis.'),
       {
         ruta: 'proteinuria',
         etiqueta: 'Proteinuria',
@@ -546,6 +624,11 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
     id: 'anticoncepcion',
     titulo: 'Anticoncepción después del parto',
     campos: camposAnticoncepcion<S>(''),
+  },
+  {
+    id: 'diagnostico',
+    titulo: 'Diagnóstico y plan',
+    campos: camposDiagnosticoPlan<S>('diagnosticoPlan.'),
   },
 ];
 

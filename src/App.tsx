@@ -28,6 +28,7 @@ import { CONFIGURACION_DEMO } from './institucion/configuracion';
 const USUARIO_DEMO: Usuario = {
   id: 'demo-profesional',
   nombre: 'Profesional de demostración',
+  registroProfesional: 'RP-0000, ficticio',
   institucionId: 'demo-ips',
   roles: ['profesional_autorizado'],
 };

@@ -1,5 +1,7 @@
 import { noCorresponde, noSeHizo, vacio, valor } from '../datos/campo';
 import type {
+  Anamnesis,
+  DiagnosticoPlan,
   ExamenGeneral, DatosPrimeraConsulta, DatosSeguimiento, Usuario } from '../datos/modelo';
 
 export const PROFESIONAL: Usuario = {
@@ -35,6 +37,15 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       aniosMayorNivel: valor(5),
       estadoCivil: valor('union_estable'),
       viveSola: valor(false),
+      ocupacion: valor('Comerciante'),
+      aseguradora: valor('EPS de prueba'),
+      regimen: valor('subsidiado'),
+      acompananteNombre: noCorresponde(),
+      acompananteParentesco: noCorresponde(),
+      acompananteTelefono: noCorresponde(),
+      responsableNombre: noCorresponde(),
+      responsableParentesco: noCorresponde(),
+      responsableTelefono: noCorresponde(),
     },
     antecedentesFamiliares: {
       tbc: valor(false),
@@ -57,6 +68,15 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       cardiopatia: valor(false),
       nefropatia: valor(false),
       violencia: valor(true),
+      quirurgicos: valor('Ninguno'),
+      alergias: valor(false),
+      alergiasCuales: noCorresponde(),
+      medicamentosActuales: valor('Ninguno'),
+      transfusiones: valor(false),
+      menarquiaEdad: valor(12),
+      ciclos: valor('regulares'),
+      inicioVidaSexualEdad: valor(17),
+      itsPrevias: valor(false),
     },
     antecedentesObstetricos: {
       gestas: valor(0),
@@ -140,6 +160,8 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       rh: valor('+'),
       inmunizada: noCorresponde(),
     },
+    anamnesis: anamnesisDePrueba(),
+    diagnosticoPlan: diagnosticoDePrueba(),
     examenFisico: {
       paSistolica: valor(110),
       paDiastolica: valor(70),
@@ -168,8 +190,26 @@ export function examenGeneralNormal(): ExamenGeneral {
   };
 }
 
+export function anamnesisDePrueba(): Anamnesis {
+  return {
+    motivoConsulta: valor('Control prenatal'),
+    enfermedadActual: valor('Asintomática'),
+    revisionSistemas: valor('Sin hallazgos'),
+  };
+}
+
+export function diagnosticoDePrueba(): DiagnosticoPlan {
+  return {
+    diagnosticos: valor([{ codigo: 'Z34.8', descripcion: 'Supervisión de otros embarazos normales' }]),
+    analisis: valor('Embarazo de curso normal'),
+    plan: valor('Continuar control prenatal'),
+  };
+}
+
 export function seguimiento(pesoKg: number): DatosSeguimiento {
   return {
+    anamnesis: anamnesisDePrueba(),
+    diagnosticoPlan: diagnosticoDePrueba(),
     pesoKg: valor(pesoKg),
     paSistolica: valor(110),
     paDiastolica: valor(70),
