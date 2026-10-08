@@ -165,13 +165,14 @@ export const CASOS: CasoClinico[] = [
   caso({
     id: 'CLAP-26',
     grupo: 'CLAP',
-    descripcion: 'Temperatura de 38,4 °C y saturación de 90 % en la primera consulta.',
-    datos: ['Temperatura 38,4 °C', 'Saturación 90 %'],
+    descripcion: 'Temperatura de 38,4 °C, saturación de 90 % y frecuencia cardíaca de 112 en la primera consulta.',
+    datos: ['Temperatura 38,4 °C', 'Saturación 90 %', 'FC 112 lpm'],
     cambios: (d) => {
       d.examenFisico.temperaturaC = valor(38.4);
       d.examenFisico.saturacionPct = valor(90);
+      d.examenFisico.fcLpm = valor(112);
     },
-    alertas: { fiebre: 'Fiebre', saturacion_baja: 'Saturación de oxígeno baja' },
+    alertas: { fiebre: 'Fiebre', saturacion_baja: 'Saturación de oxígeno baja', taquicardia_materna: 'Taquicardia materna' },
   }),
   caso({
     id: 'CLAP-22',

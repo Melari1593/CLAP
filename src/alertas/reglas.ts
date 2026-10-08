@@ -6,8 +6,8 @@ import { calcio } from './calcio';
 import { tromboprofilaxis } from './trombo';
 import { ptog } from './ptog';
 import { toxoplasmosis } from './toxoplasmosis';
-import { fiebre, saturacionBaja } from './signosVitales';
+import { fiebre, saturacionBaja, taquicardiaMaterna } from './signosVitales';
 import { alturaUterina, estadoNutricional, frecuenciaCardiacaFetal, movimientosFetales } from './crecimiento';
 
 /** Todas las reglas que evalúa el motor. */
-export const REGLAS: Regla[] = [...REGLAS_CLAP, anemia, deficitHierro, asa, calcio, tromboprofilaxis, ptog, toxoplasmosis, fiebre, saturacionBaja, movimientosFetales, frecuenciaCardiacaFetal, alturaUterina, estadoNutricional];
+export const REGLAS: Regla[] = [...REGLAS_CLAP, anemia, deficitHierro, asa, calcio, tromboprofilaxis, ptog, toxoplasmosis, fiebre, saturacionBaja, taquicardiaMaterna, movimientosFetales, frecuenciaCardiacaFetal, alturaUterina, estadoNutricional];

@@ -73,3 +73,13 @@ describe('Alertas por signos vitales', () => {
     expect(fiebre.evaluar(construirContexto(h, '2026-07-20', cat))?.porque[0]).toContain('38,5 °C');
   });
 });
+
+describe('Taquicardia materna', () => {
+  it('alerta con frecuencia cardíaca mayor de 100', async () => {
+    const { taquicardiaMaterna } = await import('../alertas/signosVitales');
+    const ctxCon = (fc: number) =>
+      construirContexto(historiaDePrueba({ seguimientos: [{ fecha: '2026-08-20', cambios: (d) => (d.fcLpm = valor(fc)) }] }), '2026-08-20', cat);
+    expect(taquicardiaMaterna.evaluar(ctxCon(100))).toBeNull();
+    expect(taquicardiaMaterna.evaluar(ctxCon(101))).toMatchObject({ titulo: 'Taquicardia materna', severidad: 2 });
+  });
+});

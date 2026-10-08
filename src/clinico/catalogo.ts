@@ -642,14 +642,14 @@ const BASE = {
     revisado: '2026-10-07',
     nota: 'Entregados por la responsable del proyecto el 2026-10-07.',
   }),
-  'signosVitales.alertas': p<{ fiebreDesdeC: number; saturacionMenorDe: number }>({
+  'signosVitales.alertas': p<{ fiebreDesdeC: number; saturacionMenorDe: number; taquicardiaMayorDe: number }>({
     nombre: 'Alertas por signos vitales',
-    valor: { fiebreDesdeC: 38, saturacionMenorDe: 92 },
+    valor: { fiebreDesdeC: 38, saturacionMenorDe: 92, taquicardiaMayorDe: 100 },
     unidad: '°C / %',
     fuentes: ['Equipo clínico'],
     estado: 'decidido',
     revisado: '2026-10-08',
-    nota: 'Fiebre con temperatura de 38 °C o más y saturación baja por debajo de 92 %, por decisión de la responsable del proyecto el 2026-10-08.',
+    nota: 'Fiebre con temperatura de 38 °C o más, saturación baja por debajo de 92 % y taquicardia materna con frecuencia cardíaca mayor de 100 lpm, por decisión de la responsable del proyecto el 2026-10-08.',
   }),
   'plaquetas.normalDesde': p<number>({
     nombre: 'Recuento de plaquetas normal (hemograma)',

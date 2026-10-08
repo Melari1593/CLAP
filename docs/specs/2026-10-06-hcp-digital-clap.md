@@ -105,6 +105,7 @@ Cuando un dato cumple una condición amarilla del CLAP, la app la muestra destac
 | Rh negativo | Rh negativo, y si está inmunizada |
 | Hábitos | Tabaco activo, drogas o alcohol en cualquier trimestre |
 | Fiebre | Temperatura de 38 °C o más en el último registro (primera consulta o control): buscar el foco y evaluar el bienestar fetal |
+| Taquicardia materna | Frecuencia cardíaca mayor de 100 lpm en el último registro: repetir en reposo, buscar la causa y remitir si persiste |
 | Saturación de oxígeno baja | Saturación menor de 92 % en el último registro: confirmar la medición y remitir de urgencia |
 | Violencia | SÍ en el embarazo actual. Si es violencia sexual, activa la ruta de atención a víctimas de violencia sexual (Leyes 1146 de 2007 y 1719 de 2014) y el flujo de la sección 7. Si no es sexual, enlaza con la ruta de atención a mujeres víctimas de violencia (Ley 1257 de 2008): valoración del riesgo, SIVIGILA, medidas de protección y de atención |
 | Antitetánica | Esquema no vigente |

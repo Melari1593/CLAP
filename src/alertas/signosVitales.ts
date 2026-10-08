@@ -1,9 +1,10 @@
-// Alertas por signos vitales del último registro (primera consulta o control): fiebre y saturación baja.
+// Alertas por signos vitales del último registro (primera consulta o control): fiebre, saturación baja y
+// taquicardia materna.
 import { valorDe } from '../datos/campo';
 import { coma } from './anemia';
 import type { ContextoClinico, Regla } from './motor';
 
-type Signo = 'temperaturaC' | 'saturacionPct';
+type Signo = 'temperaturaC' | 'saturacionPct' | 'fcLpm';
 
 /** Último valor registrado del signo vital, en los controles o en el examen físico de la primera consulta. */
 export function ultimoSigno(ctx: ContextoClinico, signo: Signo) {
@@ -50,6 +51,25 @@ export const saturacionBaja: Regla = {
       severidad: 3,
       urgente: true,
       opciones: [{ etiqueta: 'Remitida' }, { etiqueta: 'Medición repetida: normal', requiereMotivo: true }],
+    };
+  },
+};
+
+export const taquicardiaMaterna: Regla = {
+  id: 'taquicardia_materna',
+  evaluar(ctx) {
+    const fc = ultimoSigno(ctx, 'fcLpm');
+    const { taquicardiaMayorDe } = ctx.catalogo.valor('signosVitales.alertas');
+    if (!fc || fc.valor <= taquicardiaMayorDe) return null;
+    return {
+      titulo: 'Taquicardia materna',
+      porque: [
+        `Frecuencia cardíaca ${fc.valor} lpm el ${fc.fecha} (mayor de ${taquicardiaMayorDe}).`,
+        'Repetir en reposo. Buscar la causa: fiebre o infección, sangrado o anemia, deshidratación, dolor, ansiedad, enfermedad tiroidea o cardíaca, tromboembolia.',
+        'Si persiste o se acompaña de otros signos de alarma, remitir.',
+      ],
+      severidad: 2,
+      opciones: [{ etiqueta: 'Valorada' }, { etiqueta: 'Remitida' }, { etiqueta: 'Medición repetida: normal', requiereMotivo: true }],
     };
   },
 };
