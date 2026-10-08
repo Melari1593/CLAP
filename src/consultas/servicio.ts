@@ -16,6 +16,7 @@ import type {
   TipoDocumento,
   TipoFactorTransitorio,
   TipoIndicacion,
+  Ordenes,
 } from '../datos/modelo';
 import type { Historia, NuevoRegistro, Repositorio } from '../datos/repositorio';
 import { grupoRh } from '../clinico/grupoRh';
@@ -25,6 +26,7 @@ import type { RegistroEventos } from '../eventos/eventos';
 import { construirContexto } from '../alertas/motor';
 import { evaluarTrombo } from '../alertas/trombo';
 import { recordatorios } from '../recordatorios/recordatorios';
+import { ordenesIncompletas } from './ordenes';
 
 // ------------------------------------------------------------------ Cambios clínicos
 
@@ -138,7 +140,7 @@ export class ServicioConsultas {
   async guardarPrimeraConsulta(
     embarazoId: string,
     datos: DatosPrimeraConsulta,
-    opciones: { consultaId?: string; proximaCita?: Consulta['proximaCita']; confirmado?: boolean } = {},
+    opciones: { consultaId?: string; proximaCita?: Consulta['proximaCita']; confirmado?: boolean; ordenes?: Ordenes } = {},
   ): Promise<ResultadoGuardado<Consulta>> {
     const hoy = this.hoy();
     const ajustados = aplicarNoCorresponde(BLOQUES_PRIMERA, datos, {});
@@ -154,6 +156,7 @@ export class ServicioConsultas {
       profesionalId: this.repo.usuarioId,
       proximaCita: opciones.proximaCita ?? previa?.proximaCita ?? { estado: 'vacio' },
       cerrada: previa?.cerrada ?? false,
+      ordenes: opciones.ordenes ?? previa?.ordenes,
       primera: ajustados,
     });
     await this.avisar({ tipo: 'consulta', embarazoId, consultaId: consulta.id });
@@ -163,7 +166,7 @@ export class ServicioConsultas {
   async guardarSeguimiento(
     embarazoId: string,
     datos: DatosSeguimiento,
-    opciones: { consultaId?: string; proximaCita?: Consulta['proximaCita']; confirmado?: boolean; egSemanas?: number } = {},
+    opciones: { consultaId?: string; proximaCita?: Consulta['proximaCita']; confirmado?: boolean; egSemanas?: number; ordenes?: Ordenes } = {},
   ): Promise<ResultadoGuardado<Consulta>> {
     const historia = await this.repo.historia(embarazoId);
     const primera = historia?.consultas.find((c) => c.tipo === 'primera')?.primera;
@@ -181,6 +184,7 @@ export class ServicioConsultas {
       profesionalId: this.repo.usuarioId,
       proximaCita: opciones.proximaCita ?? previa?.proximaCita ?? { estado: 'vacio' },
       cerrada: previa?.cerrada ?? false,
+      ordenes: opciones.ordenes ?? previa?.ordenes,
       seguimiento: ajustados,
     });
     await this.avisar({ tipo: 'consulta', embarazoId, consultaId: consulta.id });
@@ -269,12 +273,14 @@ export class ServicioConsultas {
 
   /** Cierra la consulta. Devuelve los campos vacíos para mostrarlos antes del carné. */
   /** `duracionSegundos`: desde que se abrió la consulta hasta el cierre (métrica de G2). */
-  async cerrarConsulta(consultaId: string, duracionSegundos?: number): Promise<{ consulta: Consulta; vacios: string[] }> {
+  async cerrarConsulta(consultaId: string, duracionSegundos?: number, firma?: string): Promise<{ consulta: Consulta; vacios: string[] }> {
     const consulta = await this.repo.leer('consultas', consultaId);
     if (!consulta) throw new Error('Consulta no encontrada');
+    const incompletas = ordenesIncompletas(consulta.ordenes);
+    if (incompletas.length > 0) throw new Error(`Complete la fórmula antes de cerrar: ${incompletas.join('; ')}.`);
     // Firma del cierre: nombre y registro profesional, fecha y hora (Resolución 1995 de 1999).
     const { nombre, registroProfesional } = this.repo.usuario;
-    const cierre = consulta.cierre ?? { profesional: nombre, registroProfesional: registroProfesional ?? null, fechaHora: new Date().toISOString() };
+    const cierre = consulta.cierre ?? { profesional: nombre, registroProfesional: registroProfesional ?? null, fechaHora: new Date().toISOString(), firma };
     const cerrada = await this.repo.guardar('consultas', { ...consulta, cerrada: true, cierre });
     if (this.eventos && !consulta.cerrada) {
       const historia = await this.repo.historia(consulta.embarazoId);

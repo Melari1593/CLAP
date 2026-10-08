@@ -201,3 +201,18 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 .diagnosticos ul { list-style: none; padding: 0; margin: 0 0 6px; }
 .diagnosticos li { padding: 2px 0; }
 .diagnosticos input { min-width: 16em; }
+
+/* ---------- Fórmula médica, órdenes y firma ---------- */
+.ordenes .orden .compuesto label { display: flex; flex-direction: column; gap: 2px; min-width: 140px; flex: 1 1 140px; }
+.ordenes .orden .compuesto label.ancho { flex-basis: 100%; }
+.ordenes .orden.incompleta { border-color: #f59e0b; }
+.ordenes .lista input { margin-left: 8px; max-width: 100%; }
+.firma-lienzo { width: 100%; max-width: 600px; aspect-ratio: 10 / 3; height: auto; border: 1px dashed #9ca3af; border-radius: 6px; background: #fff; touch-action: none; display: block; }
+.firma-imagen { max-width: 300px; width: 100%; height: auto; display: block; }
+.ordenes-impresion .hoja { border: 1px solid var(--borde); border-radius: 8px; padding: 16px; margin: 16px 0; background: #fff; }
+.ordenes-impresion .orden-encabezado h2 { margin: 4px 0; }
+.ordenes-impresion ol li { margin: 8px 0; }
+.ordenes-impresion .orden-firma { margin-top: 24px; border-top: 1px solid #9ca3af; padding-top: 8px; }
+@media print {
+  .ordenes-impresion .hoja { border: none; padding: 0; margin: 0; break-after: page; }
+}

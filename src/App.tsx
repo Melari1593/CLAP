@@ -7,6 +7,7 @@ import { REGLAS } from './alertas/reglas';
 import { ServicioDerechos } from './derechos/servicio';
 import { PantallaDerechos } from './ui/PantallaDerechos';
 import { PantallaLaboratorios } from './ui/PantallaLaboratorios';
+import { PantallaOrdenes } from './ui/PantallaOrdenes';
 import { ServicioCarne } from './carne/servicio';
 import { ServicioConsentimientos } from './consentimiento/servicio';
 import { PantallaImpresion } from './ui/PantallaImpresion';
@@ -63,7 +64,7 @@ export function App() {
     const derechos = new ServicioDerechos(repo, motor, catalogo, hoy, undefined, eventos, CONFIGURACION_DEMO);
     const carnes = new ServicioCarne(bd, repo, catalogo, hoy, undefined, eventos);
     const consentimientos = new ServicioConsentimientos(repo);
-    return { bd, repo, catalogo, hoy, servicio, motor, derechos, carnes, consentimientos };
+    return { bd, repo, catalogo, hoy, servicio, motor, derechos, carnes, consentimientos, institucion: CONFIGURACION_DEMO };
   }, []);
   // La pantalla actual sobrevive a una recarga de la página en esta pestaña.
   const [pantalla, setPantalla] = useState<Pantalla>(() => leerBorrador<Pantalla>('pantalla') ?? { tipo: 'buscar' });
@@ -108,6 +109,7 @@ export function App() {
         {(pantalla.tipo === 'primera' || pantalla.tipo === 'seguimiento') && (
           <PantallaConsulta key={`${pantalla.tipo}-${pantalla.consultaId ?? 'nueva'}`} {...pantalla} ir={ir} />
         )}
+        {pantalla.tipo === 'ordenes' && <PantallaOrdenes gestanteId={pantalla.gestanteId} embarazoId={pantalla.embarazoId} consultaId={pantalla.consultaId} ir={ir} />}
         {pantalla.tipo === 'laboratorios' && <PantallaLaboratorios gestanteId={pantalla.gestanteId} embarazoId={pantalla.embarazoId} ir={ir} />}
         {pantalla.tipo === 'derechos' && <PantallaDerechos gestanteId={pantalla.gestanteId} embarazoId={pantalla.embarazoId} ir={ir} />}
         {pantalla.tipo === 'impresion' && (

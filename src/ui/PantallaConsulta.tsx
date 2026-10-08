@@ -1,6 +1,6 @@
 // B2 / B4 — Primera consulta y control de seguimiento.
 import { useEffect, useRef, useState } from 'react';
-import type { Consulta, DatosPrimeraConsulta, DatosSeguimiento, Gestante } from '../datos/modelo';
+import type { Consulta, DatosPrimeraConsulta, DatosSeguimiento, Gestante, Ordenes } from '../datos/modelo';
 import {
   BLOQUES_PRIMERA,
   BLOQUES_SEGUIMIENTO,
@@ -20,13 +20,16 @@ import { PanelPendientes } from './PanelPendientes';
 import { GraficaAlturaUterina } from './GraficaAlturaUterina';
 import { GraficaIMC } from './GraficaIMC';
 import { SeccionLaboratorios } from './SeccionLaboratorios';
+import { SeccionOrdenes } from './SeccionOrdenes';
+import { FirmaProfesional } from './FirmaProfesional';
+import { ordenesIncompletas, ordenesVacias } from '../consultas/ordenes';
 import { valorDe } from '../datos/campo';
 import { grupoRh } from '../clinico/grupoRh';
 import { edad } from '../clinico/calculos';
 import { borrarBorrador, guardarBorrador, leerBorrador } from './borrador';
 
 type Cita = { fecha: string; lugar: string; queLlevar: string };
-type Borrador = { primera?: DatosPrimeraConsulta; seguimiento?: DatosSeguimiento; cita: Cita; consultaId?: string };
+type Borrador = { primera?: DatosPrimeraConsulta; seguimiento?: DatosSeguimiento; cita: Cita; consultaId?: string; ordenes?: Ordenes };
 
 interface Props {
   tipo: 'primera' | 'seguimiento';
@@ -48,6 +51,9 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
   const [primera, setPrimera] = useState<DatosPrimeraConsulta>();
   const [seguimiento, setSeguimiento] = useState<DatosSeguimiento>();
   const [cita, setCita] = useState<Cita>({ fecha: '', lugar: '', queLlevar: '' });
+  const [ordenes, setOrdenes] = useState<Ordenes>(ordenesVacias());
+  const [firma, setFirma] = useState<string>();
+  const [cierre, setCierre] = useState<Consulta['cierre']>();
   const [advertencias, setAdvertencias] = useState<Advertencia[]>();
   /** Advertencias que el profesional ya confirmó: no se vuelven a preguntar. */
   const [confirmadas, setConfirmadas] = useState<Set<string>>(new Set());
@@ -78,6 +84,8 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       }
       if (existente) {
         setCerrada(existente.cerrada);
+        setCierre(existente.cierre);
+        if (existente.ordenes) setOrdenes(existente.ordenes);
         if (existente.proximaCita.estado === 'valor') setCita(existente.proximaCita.valor);
       }
       const b = borrador.current;
@@ -85,6 +93,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       else setSeguimiento(b?.seguimiento ?? existente?.seguimiento ?? seguimientoVacio());
       if (b) {
         setCita(b.cita);
+        if (b.ordenes) setOrdenes(b.ordenes);
         if (b.consultaId) setConsultaId(b.consultaId);
         setMensaje('Se recuperó lo que estaba llenando antes de que se recargara la página. Guarde para no perderlo.');
       }
@@ -93,8 +102,8 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
 
   // Copia de trabajo para recuperar lo escrito si la página se recarga; se borra al salir de la pantalla.
   useEffect(() => {
-    if (primera || seguimiento) guardarBorrador(clave, { primera, seguimiento, cita, consultaId } satisfies Borrador);
-  }, [clave, primera, seguimiento, cita, consultaId]);
+    if (primera || seguimiento) guardarBorrador(clave, { primera, seguimiento, cita, consultaId, ordenes } satisfies Borrador);
+  }, [clave, primera, seguimiento, cita, consultaId, ordenes]);
   useEffect(
     () => () => {
       borrarBorrador(clave);
@@ -121,7 +130,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
 
   const guardar = async (confirmado = false): Promise<Consulta | undefined> => {
     const intentar = (conf: boolean): Promise<ResultadoGuardado<Consulta>> => {
-      const opciones = { consultaId, proximaCita, confirmado: conf };
+      const opciones = { consultaId, proximaCita, confirmado: conf, ordenes };
       return tipo === 'primera'
         ? servicio.guardarPrimeraConsulta(embarazoId, primera!, opciones)
         : servicio.guardarSeguimiento(embarazoId, seguimiento!, { ...opciones, egSemanas });
@@ -144,14 +153,18 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
   };
 
   const pedirCierre = async () => {
+    const incompletas = ordenesIncompletas(ordenes);
+    if (incompletas.length > 0) return setMensaje(`Complete la fórmula antes de cerrar: ${incompletas.join('; ')}.`);
+    if (!firma) return setMensaje('Firme en el recuadro "Firma del profesional de salud" antes de cerrar la consulta.');
     const consulta = await guardar();
     if (consulta) setVacios(servicio.camposVaciosDe(consulta));
   };
 
   const cerrar = async () => {
     if (!consultaId) return;
-    await servicio.cerrarConsulta(consultaId, idInicial ? undefined : Math.round((Date.now() - inicio.current.getTime()) / 1000));
+    const { consulta } = await servicio.cerrarConsulta(consultaId, idInicial ? undefined : Math.round((Date.now() - inicio.current.getTime()) / 1000), firma);
     setCerrada(true);
+    setCierre(consulta.cierre);
     setVacios(undefined);
     setMensaje('Consulta cerrada.');
   };
@@ -195,6 +208,8 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
         </div>
       </fieldset>
 
+      <SeccionOrdenes embarazoId={embarazoId} ordenes={ordenes} onCambio={setOrdenes} soloLectura={cerrada} version={guardados} />
+
       {advertencias && (
         <div className="dialogo" role="alertdialog" aria-label="Confirmar valores">
           <h3>Revise estos datos antes de guardar</h3>
@@ -225,6 +240,12 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
           correo={valorDe((tipo === 'primera' ? primera : primeraDelEmbarazo)?.identificacion.correo)}
           onImprimir={() => ir({ tipo: 'impresion', gestanteId, embarazoId })}
         />
+      )}
+      <FirmaProfesional firma={firma} onFirma={setFirma} cierre={cerrada ? cierre : undefined} />
+      {cerrada && consultaId && (ordenes.medicamentos.length > 0 || ordenes.paraclinicos.length > 0) && (
+        <button type="button" className="primario" onClick={() => ir({ tipo: 'ordenes', gestanteId, embarazoId, consultaId })}>
+          🖨️ Imprimir fórmula y órdenes
+        </button>
       )}
       <div className="navegacion fija">
         <button type="button" onClick={() => void guardar()}>Guardar</button>

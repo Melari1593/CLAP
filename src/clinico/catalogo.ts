@@ -91,6 +91,17 @@ export interface MedicamentoCodificado {
   atc: string;
 }
 
+/** Plantilla para llenar una línea de la fórmula médica. */
+export interface PlantillaMedicamento {
+  principio: string;
+  atc: string;
+  presentacion: string;
+  dosis: string;
+  via: string;
+  frecuencia: string;
+  indicaciones?: string;
+}
+
 const BASE = {
   // ---------- Cálculos (B3) ----------
   'calculo.fppDias': p<number>({
@@ -915,6 +926,26 @@ const BASE = {
     estado: 'pendiente',
     revisado: '2026-10-08',
     nota: 'El ATC identifica el principio activo. El CUM (INVIMA) depende del producto que se dispensa y se registra al dispensar. Por confirmar con el equipo clínico qué hierro y qué heparina se usan.',
+  }),
+
+  // ---------- Fórmula médica ----------
+  'ordenes.medicamentos': p<PlantillaMedicamento[]>({
+    nombre: 'Medicamentos frecuentes del control prenatal (plantillas de la fórmula)',
+    valor: [
+      { principio: 'Sulfato ferroso', atc: 'B03AA07', presentacion: 'Tableta 300 mg (60 mg de hierro elemental)', dosis: '1 tableta', via: 'Oral', frecuencia: 'Cada 24 horas', indicaciones: '2 horas antes o después de las comidas, no con leche, separado 1 hora del calcio.' },
+      { principio: 'Ácido fólico', atc: 'B03BB01', presentacion: 'Tableta 1 mg', dosis: '1 tableta', via: 'Oral', frecuencia: 'Cada 24 horas' },
+      { principio: 'Carbonato de calcio', atc: 'A12AA04', presentacion: 'Tableta 600 mg', dosis: '2 tabletas (1.200 mg)', via: 'Oral', frecuencia: 'Cada 24 horas', indicaciones: 'Separado 1 hora del hierro; no con leche.' },
+      { principio: 'Ácido acetilsalicílico', atc: 'B01AC06', presentacion: 'Tableta 100 mg', dosis: '1 tableta', via: 'Oral', frecuencia: 'Cada 24 horas, en la noche', indicaciones: 'Desde la semana 12 hasta la semana 36.' },
+      { principio: 'Enoxaparina', atc: 'B01AB05', presentacion: 'Jeringa prellenada 40 mg / 0,4 mL', dosis: 'Según el peso (ver tromboprofilaxis)', via: 'Subcutánea', frecuencia: 'Cada 24 horas' },
+      { principio: 'Espiramicina', atc: 'J01FA02', presentacion: 'Tableta 3.000.000 UI', dosis: '1 tableta', via: 'Oral', frecuencia: 'Cada 8 horas', indicaciones: 'Hasta el parto.' },
+      { principio: 'Sulfadiazina', atc: 'J01EC02', presentacion: 'Tableta 500 mg', dosis: '', via: 'Oral', frecuencia: '' },
+      { principio: 'Pirimetamina', atc: 'P01BD01', presentacion: 'Tableta 25 mg', dosis: '', via: 'Oral', frecuencia: '' },
+      { principio: 'Ácido folínico (folinato cálcico)', atc: 'V03AF03', presentacion: 'Tableta 15 mg', dosis: '', via: 'Oral', frecuencia: '' },
+    ],
+    fuentes: ['OMS (ATC)', 'Equipo clínico'],
+    estado: 'pendiente',
+    revisado: '2026-10-08',
+    nota: 'Plantillas editables: el profesional ajusta dosis, frecuencia, duración y cantidad en cada fórmula. Por confirmar con el equipo clínico las presentaciones disponibles; la dosis del tratamiento pleno de toxoplasmosis se toma del esquema del catálogo.',
   }),
 
   // ---------- Carné (F3, F4) ----------

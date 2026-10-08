@@ -366,6 +366,36 @@ export type MetodoAnticonceptivoPosparto =
   | 'ninguno'
   | 'no_ha_decidido';
 
+/** Fórmula médica (Decreto 2200 de 2005): denominación común, concentración y forma, dosis, vía, frecuencia, duración y cantidad. */
+export interface OrdenMedicamento {
+  id: string;
+  principio: string;
+  atc: string | null;
+  /** Concentración y forma farmacéutica, por ejemplo "Tableta 100 mg". */
+  presentacion: string;
+  dosis: string;
+  via: string;
+  frecuencia: string;
+  duracion: string;
+  /** Cantidad total a dispensar (se imprime también en letras). */
+  cantidad: number | null;
+  indicaciones?: string;
+}
+
+/** Orden de laboratorio o imagen, con su código CUPS si se conoce. */
+export interface OrdenParaclinico {
+  id: string;
+  nombre: string;
+  examen: TipoExamen | null;
+  cups: string | null;
+  justificacion?: string;
+}
+
+export interface Ordenes {
+  medicamentos: OrdenMedicamento[];
+  paraclinicos: OrdenParaclinico[];
+}
+
 export interface Consulta extends Meta {
   embarazoId: string;
   tipo: 'primera' | 'seguimiento';
@@ -375,8 +405,13 @@ export interface Consulta extends Meta {
   cerrada: boolean;
   primera?: DatosPrimeraConsulta;
   seguimiento?: DatosSeguimiento;
-  /** Quién cerró la consulta: nombre, registro profesional, fecha y hora (Resolución 1995 de 1999). */
-  cierre?: { profesional: string; registroProfesional: string | null; fechaHora: FechaHoraISO };
+  /** Medicamentos y paraclínicos ordenados en esta consulta. */
+  ordenes?: Ordenes;
+  /**
+   * Quién cerró la consulta: nombre, registro profesional, fecha y hora (Resolución 1995 de 1999),
+   * con la firma manuscrita digitalizada (imagen PNG en data URL).
+   */
+  cierre?: { profesional: string; registroProfesional: string | null; fechaHora: FechaHoraISO; firma?: string };
 }
 
 // ---------------------------------------------------------------- Exámenes
