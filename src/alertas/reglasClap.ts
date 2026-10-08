@@ -223,19 +223,23 @@ export const rhNegativo: Regla = {
 const NIVEL_PROTEINURIA = { negativa: 0, trazas: 1, '1+': 2, '2+': 3, '3+': 4 } as const;
 
 /** Última toma de PA registrada en los controles, con la proteinuria del mismo control. */
+/** Última PA registrada: en los controles o en el examen físico de la primera consulta. */
 function ultimaPresion(ctx: ContextoClinico) {
-  const conPA = ctx.seguimientos
-    .filter((c) => valorDe(c.seguimiento?.paSistolica) !== undefined && valorDe(c.seguimiento?.paDiastolica) !== undefined)
-    .sort((a, b) => (a.fecha + a.creadoEn).localeCompare(b.fecha + b.creadoEn));
-  const c = conPA.at(-1);
-  if (!c?.seguimiento) return undefined;
-  return {
-    fecha: c.fecha,
-    pas: valorDe(c.seguimiento.paSistolica)!,
-    pad: valorDe(c.seguimiento.paDiastolica)!,
-    proteinuria: valorDe(c.seguimiento.proteinuria),
-    egDias: ctx.egEn(c.fecha),
-  };
+  const tomas = ctx.historia.consultas
+    .map((c) => {
+      const pas = valorDe(c.seguimiento?.paSistolica ?? c.primera?.examenFisico?.paSistolica);
+      const pad = valorDe(c.seguimiento?.paDiastolica ?? c.primera?.examenFisico?.paDiastolica);
+      return pas !== undefined && pad !== undefined
+        ? { orden: c.fecha + c.creadoEn, fecha: c.fecha, pas, pad, proteinuria: valorDe(c.seguimiento?.proteinuria), egDias: ctx.egEn(c.fecha) }
+        : undefined;
+    })
+    .filter((t) => t !== undefined)
+    .sort((a, b) => a.orden.localeCompare(b.orden));
+  const t = tomas.at(-1);
+  if (!t) return undefined;
+  const { orden: _orden, ...toma } = t;
+  void _orden;
+  return toma;
 }
 
 export const hipertension: Regla = {

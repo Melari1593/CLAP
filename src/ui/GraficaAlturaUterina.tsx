@@ -50,8 +50,9 @@ export function GraficaAlturaUterina({ embarazoId, version = 0 }: { embarazoId: 
       const tabla = catalogo.valor('au.percentiles');
       setCurva(Object.entries(tabla).map(([s, v]) => ({ s: Number(s), ...v })));
       const lista: Punto[] = [];
-      for (const c of ctx.seguimientos) {
-        const cm = valorDe(c.seguimiento?.alturaUterinaCm);
+      // Controles de seguimiento y examen físico de la primera consulta.
+      for (const c of historia.consultas) {
+        const cm = valorDe(c.seguimiento?.alturaUterinaCm ?? c.primera?.examenFisico?.alturaUterinaCm);
         const egDias = ctx.egEn(c.fecha);
         if (cm === undefined || egDias === undefined) continue;
         const p = percentilesAU(ctx, egDias);

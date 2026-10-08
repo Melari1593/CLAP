@@ -1,19 +1,27 @@
 // Altura uterina (curva del CLAP), estado nutricional (IMC para la edad gestacional, Atalah),
 // movimientos fetales y frecuencia cardíaca fetal, con el último control.
 import { imc } from '../clinico/calculos';
-import { valorDe } from '../datos/campo';
+import { valorDe, type Campo } from '../datos/campo';
 import type { Consulta, DatosSeguimiento } from '../datos/modelo';
 import { coma } from './anemia';
 import type { ContextoClinico, Regla } from './motor';
 
-/** Último control de seguimiento con un dato registrado, y su EG en días. */
-function ultimoCon<K extends keyof DatosSeguimiento>(ctx: ContextoClinico, campo: K) {
-  const con = ctx.seguimientos
-    .filter((c) => c.seguimiento && c.seguimiento[campo].estado === 'valor')
-    .sort((a, b) => (a.fecha + a.creadoEn).localeCompare(b.fecha + b.creadoEn));
-  const c: Consulta | undefined = con.at(-1);
-  if (!c?.seguimiento) return undefined;
-  return { fecha: c.fecha, valor: (c.seguimiento[campo] as { valor: unknown }).valor, egDias: ctx.egEn(c.fecha) };
+type CampoMedido = Exclude<keyof DatosSeguimiento, 'examenGeneral'>;
+
+/**
+ * Último dato registrado, con su EG en días: en los controles de seguimiento y, para los datos que
+ * también se toman en la primera consulta (altura uterina, FCF, movimientos fetales), en su examen físico.
+ */
+function ultimoCon<K extends CampoMedido>(ctx: ContextoClinico, campo: K) {
+  const medidas: { fecha: string; orden: string; campo: Campo<unknown> }[] = ctx.seguimientos
+    .filter((c) => c.seguimiento)
+    .map((c: Consulta) => ({ fecha: c.fecha, orden: c.fecha + c.creadoEn, campo: c.seguimiento![campo] as Campo<unknown> }));
+  const primera = ctx.historia.consultas.find((c) => c.tipo === 'primera');
+  const enPrimera = (primera?.primera?.examenFisico as Record<string, unknown> | undefined)?.[campo] as Campo<unknown> | undefined;
+  if (primera && enPrimera) medidas.push({ fecha: primera.fecha, orden: primera.fecha + primera.creadoEn, campo: enPrimera });
+  const m = medidas.filter((x) => x.campo?.estado === 'valor').sort((a, b) => a.orden.localeCompare(b.orden)).at(-1);
+  if (!m || m.campo.estado !== 'valor') return undefined;
+  return { fecha: m.fecha, valor: m.campo.valor, egDias: ctx.egEn(m.fecha) };
 }
 
 const semanaTexto = (dias: number) => `${Math.floor(dias / 7)}+${dias % 7}`;

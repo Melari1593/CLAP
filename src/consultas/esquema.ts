@@ -20,7 +20,9 @@ export type TipoCampo =
   | { tipo: 'ecografia' }
   | { tipo: 'antitetanica' }
   | { tipo: 'cigarrillos' }
-  | { tipo: 'residencia' };
+  | { tipo: 'residencia' }
+  /** Valor calculado a partir de otros campos: se muestra, no se guarda. */
+  | { tipo: 'calculado'; calcular: (datos: unknown) => string | undefined };
 
 export interface ContextoFormulario {
   /** Semanas de gestación del día, si se conocen. */
@@ -55,6 +57,55 @@ const siNo = (c: [string, string]): DefCampo<DatosPrimeraConsulta> => ({ ruta: c
 const es = <T>(campo: unknown, valor: T) => (campo as Campo<T> | undefined)?.estado === 'valor' && valorDe(campo as Campo<T>) === valor;
 
 type P = DatosPrimeraConsulta;
+
+/** Presión arterial media: (sistólica + 2 × diastólica) / 3. */
+export function presionArterialMedia(pas: number | undefined, pad: number | undefined): number | undefined {
+  if (pas === undefined || pad === undefined) return undefined;
+  return Math.round((pas + 2 * pad) / 3);
+}
+
+/** Signos vitales con la PAM calculada. `prefijo` es la ruta del objeto que los contiene ('' o 'examenFisico.'). */
+function camposSignosVitales<D>(prefijo: string): DefCampo<D>[] {
+  return [
+    { ruta: `${prefijo}paSistolica`, etiqueta: 'PA sistólica', control: num('mmHg') },
+    { ruta: `${prefijo}paDiastolica`, etiqueta: 'PA diastólica', control: num('mmHg') },
+    {
+      ruta: `${prefijo}pam`,
+      etiqueta: 'Presión arterial media (PAM)',
+      ayuda: 'Se calcula sola: (sistólica + 2 × diastólica) / 3.',
+      control: {
+        tipo: 'calculado',
+        calcular: (d) => {
+          const pam = presionArterialMedia(
+            valorDe(obtener(d, `${prefijo}paSistolica`) as Campo<number> | undefined),
+            valorDe(obtener(d, `${prefijo}paDiastolica`) as Campo<number> | undefined),
+          );
+          return pam === undefined ? undefined : `${pam} mmHg`;
+        },
+      },
+    },
+    { ruta: `${prefijo}fcLpm`, etiqueta: 'Frecuencia cardíaca', control: num('lpm') },
+    { ruta: `${prefijo}frRpm`, etiqueta: 'Frecuencia respiratoria', control: num('rpm') },
+    { ruta: `${prefijo}temperaturaC`, etiqueta: 'Temperatura', control: num('°C', true) },
+    { ruta: `${prefijo}saturacionPct`, etiqueta: 'Saturación de oxígeno', control: num('%') },
+  ];
+}
+
+/** Examen físico general por sistemas, en texto libre. */
+function camposExamenGeneral<D>(prefijo: string): DefCampo<D>[] {
+  return (
+    [
+      ['aspectoGeneral', 'Aspecto general'],
+      ['cabezaCuello', 'Cabeza y cuello'],
+      ['cardiopulmonar', 'Cardiopulmonar'],
+      ['abdomen', 'Abdomen'],
+      ['extremidades', 'Extremidades (edemas, várices)'],
+      ['neurologico', 'Neurológico'],
+      ['piel', 'Piel y mucosas'],
+      ['otros', 'Otros hallazgos'],
+    ] as [string, string][]
+  ).map(([r, e]) => ({ ruta: `${prefijo}${r}`, etiqueta: e, control: { tipo: 'texto', largo: true } as TipoCampo }));
+}
 
 /** Asesoría en anticoncepción para después del parto: en la primera consulta y en cada control. */
 function camposAnticoncepcion<D>(prefijo: string): DefCampo<D>[] {
@@ -401,9 +452,14 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
     ],
   },
   {
-    id: 'examenes',
-    titulo: 'Examen odontológico, de mamas y citología',
+    id: 'examenFisico',
+    titulo: 'Examen físico',
     campos: [
+      ...camposSignosVitales<P>('examenFisico.'),
+      { ruta: 'examenFisico.alturaUterinaCm', etiqueta: 'Altura uterina', control: num('cm') },
+      { ruta: 'examenFisico.fcfLpm', etiqueta: 'Frecuencia cardíaca fetal (FCF)', control: num('lpm') },
+      { ruta: 'examenFisico.movimientosFetales', etiqueta: 'Movimientos fetales verificados', control: sino },
+      ...camposExamenGeneral<P>('examenFisico.general.'),
       { ruta: 'gestacionActual.examenOdontologico', etiqueta: 'Examen odontológico', control: normalAnormal },
       { ruta: 'gestacionActual.examenMamas', etiqueta: 'Examen de mamas', control: normalAnormal },
       {
@@ -429,18 +485,6 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
     id: 'control',
     titulo: 'Control',
     campos: [
-      { ruta: 'pesoKg', etiqueta: 'Peso', control: num('kg', true) },
-      { ruta: 'paSistolica', etiqueta: 'PA sistólica', control: num('mmHg') },
-      { ruta: 'paDiastolica', etiqueta: 'PA diastólica', control: num('mmHg') },
-      { ruta: 'alturaUterinaCm', etiqueta: 'Altura uterina', control: num('cm') },
-      {
-        ruta: 'presentacion',
-        etiqueta: 'Presentación',
-        control: { tipo: 'opciones', opciones: ops(['cefalica', 'Cefálica'], ['pelviana', 'Pelviana'], ['transversa', 'Transversa']) },
-        aplica: (_d, ctx) => ctx.egSemanas === undefined || ctx.egSemanas >= 28,
-      },
-      { ruta: 'fcfLpm', etiqueta: 'FCF', control: num('lpm') },
-      { ruta: 'movimientosFetales', etiqueta: 'Movimientos fetales', control: sino },
       {
         ruta: 'proteinuria',
         etiqueta: 'Proteinuria',
@@ -461,6 +505,24 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
         ayuda: 'Solo si se mudó: la anemia se reclasifica desde este control.',
         control: { tipo: 'residencia' },
       },
+    ],
+  },
+  {
+    id: 'examenFisico',
+    titulo: 'Examen físico',
+    campos: [
+      ...camposSignosVitales<S>(''),
+      { ruta: 'pesoKg', etiqueta: 'Peso', control: num('kg', true) },
+      { ruta: 'alturaUterinaCm', etiqueta: 'Altura uterina', control: num('cm') },
+      {
+        ruta: 'presentacion',
+        etiqueta: 'Presentación',
+        control: { tipo: 'opciones', opciones: ops(['cefalica', 'Cefálica'], ['pelviana', 'Pelviana'], ['transversa', 'Transversa']) },
+        aplica: (_d, ctx) => ctx.egSemanas === undefined || ctx.egSemanas >= 28,
+      },
+      { ruta: 'fcfLpm', etiqueta: 'Frecuencia cardíaca fetal (FCF)', control: num('lpm') },
+      { ruta: 'movimientosFetales', etiqueta: 'Movimientos fetales verificados', control: sino },
+      ...camposExamenGeneral<S>('examenGeneral.'),
     ],
   },
   {
@@ -487,8 +549,9 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
   },
 ];
 
+/** Campos que se guardan (los calculados solo se muestran). */
 function camposDe<D>(bloques: Bloque<D>[]): DefCampo<D>[] {
-  return bloques.flatMap((b) => b.campos);
+  return bloques.flatMap((b) => b.campos).filter((c) => c.control.tipo !== 'calculado');
 }
 
 function vaciaDesde<D>(bloques: Bloque<D>[]): D {

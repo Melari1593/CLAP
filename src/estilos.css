@@ -194,3 +194,7 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 .carne-examen.falta strong { color: #92400e; }
 .carne-examen.mas_adelante strong { color: var(--suave); font-weight: 500; }
 .carne-trimestre .carne-lista { list-style: none; padding-left: 0; }
+
+/* ---------- Examen físico ---------- */
+.fila-campo.calculado output { font-weight: 600; font-size: 1.05rem; }
+.curvas-examen { margin-top: 12px; border-top: 1px solid var(--borde); padding-top: 8px; }

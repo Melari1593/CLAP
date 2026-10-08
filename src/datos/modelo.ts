@@ -219,6 +219,32 @@ export interface GestacionActual {
   inmunizada: Campo<SiNo>;
 }
 
+/** Examen físico general por sistemas (texto libre; "No se hizo" si no se examinó). */
+export interface ExamenGeneral {
+  aspectoGeneral: Campo<string>;
+  cabezaCuello: Campo<string>;
+  cardiopulmonar: Campo<string>;
+  abdomen: Campo<string>;
+  extremidades: Campo<string>;
+  neurologico: Campo<string>;
+  piel: Campo<string>;
+  otros: Campo<string>;
+}
+
+/** Signos vitales, examen obstétrico y examen general de la primera consulta. */
+export interface ExamenFisicoPrimera {
+  paSistolica: Campo<number>;
+  paDiastolica: Campo<number>;
+  fcLpm: Campo<number>;
+  frRpm: Campo<number>;
+  temperaturaC: Campo<number>;
+  saturacionPct: Campo<number>;
+  alturaUterinaCm: Campo<number>;
+  fcfLpm: Campo<number>;
+  movimientosFetales: Campo<SiNo>;
+  general: ExamenGeneral;
+}
+
 export interface DatosPrimeraConsulta {
   identificacion: Identificacion;
   antecedentesFamiliares: AntecedentesFamiliares;
@@ -229,6 +255,7 @@ export interface DatosPrimeraConsulta {
   antecedentesCalcio: AntecedentesCalcio;
   riesgoTrombotico: RiesgoTrombotico;
   gestacionActual: GestacionActual;
+  examenFisico: ExamenFisicoPrimera;
 }
 
 // ---------------------------------------------------------------- Seguimiento
@@ -237,6 +264,11 @@ export interface DatosSeguimiento {
   pesoKg: Campo<number>;
   paSistolica: Campo<number>;
   paDiastolica: Campo<number>;
+  fcLpm: Campo<number>;
+  frRpm: Campo<number>;
+  temperaturaC: Campo<number>;
+  saturacionPct: Campo<number>;
+  examenGeneral: ExamenGeneral;
   alturaUterinaCm: Campo<number>;
   presentacion: Campo<'cefalica' | 'pelviana' | 'transversa'>;
   fcfLpm: Campo<number>;

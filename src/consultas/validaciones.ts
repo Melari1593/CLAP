@@ -38,6 +38,8 @@ export function validarPrimeraConsulta(d: DatosPrimeraConsulta, hoy: FechaISO, c
   return [
     ...fueraDeRango(catalogo, 'pesoKg', d.gestacionActual.pesoAnteriorKg, 'gestacionActual.pesoAnteriorKg', 'El peso', 'kg'),
     ...fueraDeRango(catalogo, 'tallaCm', d.gestacionActual.tallaCm, 'gestacionActual.tallaCm', 'La talla', 'cm'),
+    ...(d.examenFisico ? validarSignosVitales(d.examenFisico, 'examenFisico.', catalogo) : []),
+    ...(d.examenFisico ? fueraDeRango(catalogo, 'fcfLpm', d.examenFisico.fcfLpm, 'examenFisico.fcfLpm', 'La FCF', 'lpm') : []),
     ...fechaFutura(valorDe(d.gestacionActual.fum), hoy, 'gestacionActual.fum', 'La FUM'),
     ...fechaFutura(eco?.fecha, hoy, 'gestacionActual.ecografia', 'La ecografía'),
     ...fechaFutura(valorDe(o.finEmbarazoAnterior), hoy, 'antecedentesObstetricos.finEmbarazoAnterior', 'El fin del embarazo anterior'),
@@ -56,15 +58,31 @@ export function validarPrimeraConsulta(d: DatosPrimeraConsulta, hoy: FechaISO, c
 }
 
 export function validarSeguimiento(d: DatosSeguimiento, catalogo: Catalogo): Advertencia[] {
-  const pas = valorDe(d.paSistolica);
-  const pad = valorDe(d.paDiastolica);
   return [
     ...fueraDeRango(catalogo, 'pesoKg', d.pesoKg, 'pesoKg', 'El peso', 'kg'),
     ...fueraDeRango(catalogo, 'paSistolica', d.paSistolica, 'paSistolica', 'La PA sistólica', 'mmHg'),
     ...fueraDeRango(catalogo, 'paDiastolica', d.paDiastolica, 'paDiastolica', 'La PA diastólica', 'mmHg'),
     ...fueraDeRango(catalogo, 'fcfLpm', d.fcfLpm, 'fcfLpm', 'La FCF', 'lpm'),
+    ...validarSignosVitales(d, '', catalogo),
+  ];
+}
+
+/** Signos vitales: rangos y diastólica menor que sistólica. `prefijo` es la ruta del objeto ('' o 'examenFisico.'). */
+function validarSignosVitales(
+  s: { paSistolica: Campo<number>; paDiastolica: Campo<number>; fcLpm: Campo<number>; frRpm: Campo<number>; temperaturaC: Campo<number>; saturacionPct: Campo<number> },
+  prefijo: string,
+  catalogo: Catalogo,
+): Advertencia[] {
+  const pas = valorDe(s.paSistolica);
+  const pad = valorDe(s.paDiastolica);
+  return [
+    ...(prefijo ? [...fueraDeRango(catalogo, 'paSistolica', s.paSistolica, `${prefijo}paSistolica`, 'La PA sistólica', 'mmHg'), ...fueraDeRango(catalogo, 'paDiastolica', s.paDiastolica, `${prefijo}paDiastolica`, 'La PA diastólica', 'mmHg')] : []),
+    ...fueraDeRango(catalogo, 'fcLpm', s.fcLpm, `${prefijo}fcLpm`, 'La frecuencia cardíaca', 'lpm'),
+    ...fueraDeRango(catalogo, 'frRpm', s.frRpm, `${prefijo}frRpm`, 'La frecuencia respiratoria', 'rpm'),
+    ...fueraDeRango(catalogo, 'temperaturaC', s.temperaturaC, `${prefijo}temperaturaC`, 'La temperatura', '°C'),
+    ...fueraDeRango(catalogo, 'saturacionPct', s.saturacionPct, `${prefijo}saturacionPct`, 'La saturación', '%'),
     ...(pas !== undefined && pad !== undefined && pad >= pas
-      ? [{ ruta: 'paDiastolica', mensaje: `La diastólica (${pad}) no es menor que la sistólica (${pas}). ¿Es correcto?` }]
+      ? [{ ruta: `${prefijo}paDiastolica`, mensaje: `La diastólica (${pad}) no es menor que la sistólica (${pas}). ¿Es correcto?` }]
       : []),
   ];
 }

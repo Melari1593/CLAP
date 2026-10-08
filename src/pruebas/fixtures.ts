@@ -1,5 +1,6 @@
 import { noCorresponde, noSeHizo, vacio, valor } from '../datos/campo';
-import type { DatosPrimeraConsulta, DatosSeguimiento, Usuario } from '../datos/modelo';
+import type {
+  ExamenGeneral, DatosPrimeraConsulta, DatosSeguimiento, Usuario } from '../datos/modelo';
 
 export const PROFESIONAL: Usuario = {
   id: 'prof-1',
@@ -139,6 +140,31 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       rh: valor('+'),
       inmunizada: noCorresponde(),
     },
+    examenFisico: {
+      paSistolica: valor(110),
+      paDiastolica: valor(70),
+      fcLpm: valor(80),
+      frRpm: valor(16),
+      temperaturaC: valor(36.5),
+      saturacionPct: valor(97),
+      alturaUterinaCm: noCorresponde(),
+      fcfLpm: noCorresponde(),
+      movimientosFetales: noCorresponde(),
+      general: examenGeneralNormal(),
+    },
+  };
+}
+
+export function examenGeneralNormal(): ExamenGeneral {
+  return {
+    aspectoGeneral: valor('Buen estado general'),
+    cabezaCuello: valor('Normal'),
+    cardiopulmonar: valor('Normal'),
+    abdomen: valor('Normal'),
+    extremidades: valor('Sin edemas'),
+    neurologico: valor('Normal'),
+    piel: valor('Normal'),
+    otros: noSeHizo(),
   };
 }
 
@@ -147,6 +173,11 @@ export function seguimiento(pesoKg: number): DatosSeguimiento {
     pesoKg: valor(pesoKg),
     paSistolica: valor(110),
     paDiastolica: valor(70),
+    fcLpm: valor(80),
+    frRpm: valor(16),
+    temperaturaC: valor(36.5),
+    saturacionPct: valor(97),
+    examenGeneral: examenGeneralNormal(),
     alturaUterinaCm: valor(20),
     presentacion: noCorresponde(),
     fcfLpm: valor(145),

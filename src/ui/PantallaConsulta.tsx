@@ -104,6 +104,14 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
 
   if (!gestante || (tipo === 'primera' ? !primera : !seguimiento)) return <p>Cargando…</p>;
 
+  // Curvas de altura uterina e IMC dentro del examen físico (se actualizan al guardar).
+  const curvas = (
+    <div className="curvas-examen">
+      <GraficaAlturaUterina embarazoId={embarazoId} version={guardados} />
+      <GraficaIMC embarazoId={embarazoId} version={guardados} />
+    </div>
+  );
+
   const proximaCita: Consulta['proximaCita'] = cita.fecha ? { estado: 'valor', valor: cita } : { estado: 'vacio' };
 
   const guardar = async (confirmado = false): Promise<Consulta | undefined> => {
@@ -154,13 +162,13 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       {tipo === 'primera' ? (
         <>
           <PanelCalculos gestante={gestante} datos={primera} />
-          <Formulario bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} />
+          <Formulario bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} extras={{ examenFisico: curvas }} />
         </>
       ) : (
         <>
           <PanelCalculos gestante={gestante} datos={primeraDelEmbarazo} />
           <p className="suave">EG del día: {egTexto ?? 'no calculable'}</p>
-          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} clave={clave} ctx={{ egSemanas, rhNegativo }} />
+          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} clave={clave} extras={{ examenFisico: curvas }} ctx={{ egSemanas, rhNegativo }} />
         </>
       )}
 
@@ -211,14 +219,8 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
           onImprimir={() => ir({ tipo: 'impresion', gestanteId, embarazoId })}
         />
       )}
-      {/* Laboratorios por trimestre y curvas al final de la pantalla */}
-      {tipo === 'seguimiento' && (
-        <>
-          <PanelLaboratorios embarazoId={embarazoId} version={guardados} />
-          <GraficaAlturaUterina embarazoId={embarazoId} version={guardados} />
-          <GraficaIMC embarazoId={embarazoId} version={guardados} />
-        </>
-      )}
+      {/* Laboratorios por trimestre al final de la pantalla; las curvas van en el examen físico. */}
+      {tipo === 'seguimiento' && <PanelLaboratorios embarazoId={embarazoId} version={guardados} />}
       <div className="navegacion fija">
         <button type="button" onClick={() => void guardar()}>Guardar</button>
         {!cerrada && <button type="button" className="primario" onClick={() => void pedirCierre()}>Cerrar consulta</button>}

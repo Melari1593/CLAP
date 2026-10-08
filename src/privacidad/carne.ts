@@ -119,8 +119,8 @@ export function proyectarCarne(historia: Historia, carne: Carne, hoy: FechaISO, 
     },
     citas: cerradas.map((c) => {
       const s = c.seguimiento;
-      const pas = valorDe(s?.paSistolica);
-      const pad = valorDe(s?.paDiastolica);
+      const pas = valorDe(s?.paSistolica ?? c.primera?.examenFisico?.paSistolica);
+      const pad = valorDe(s?.paDiastolica ?? c.primera?.examenFisico?.paDiastolica);
       return {
         fecha: c.fecha,
         pesoKg: valorDe(s?.pesoKg),
