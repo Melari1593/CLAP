@@ -93,3 +93,13 @@ describe('Taquipnea', () => {
     expect(taquipnea.evaluar(ctxCon(24))).toMatchObject({ titulo: 'Taquipnea', severidad: 2 });
   });
 });
+
+describe('Bradicardia materna', () => {
+  it('alerta con frecuencia cardíaca menor de 60', async () => {
+    const { bradicardiaMaterna } = await import('../alertas/signosVitales');
+    const ctxCon = (fc: number) =>
+      construirContexto(historiaDePrueba({ seguimientos: [{ fecha: '2026-08-20', cambios: (d) => (d.fcLpm = valor(fc)) }] }), '2026-08-20', cat);
+    expect(bradicardiaMaterna.evaluar(ctxCon(60))).toBeNull();
+    expect(bradicardiaMaterna.evaluar(ctxCon(52))).toMatchObject({ titulo: 'Bradicardia materna', severidad: 2 });
+  });
+});

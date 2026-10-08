@@ -176,6 +176,16 @@ export const CASOS: CasoClinico[] = [
     alertas: { fiebre: 'Fiebre', saturacion_baja: 'Saturación de oxígeno baja', taquicardia_materna: 'Taquicardia materna', taquipnea: 'Taquipnea' },
   }),
   caso({
+    id: 'CLAP-27',
+    grupo: 'CLAP',
+    descripcion: 'Frecuencia cardíaca materna de 52 lpm en la primera consulta.',
+    datos: ['FC 52 lpm'],
+    cambios: (d) => {
+      d.examenFisico.fcLpm = valor(52);
+    },
+    alertas: { bradicardia_materna: 'Bradicardia materna' },
+  }),
+  caso({
     id: 'CLAP-22',
     grupo: 'CLAP',
     descripcion: 'Toxoplasmosis: IgG negativa al ingreso y positiva un mes después (seroconversión).',

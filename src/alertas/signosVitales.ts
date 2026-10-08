@@ -1,5 +1,5 @@
 // Alertas por signos vitales del último registro (primera consulta o control): fiebre, saturación baja,
-// taquicardia materna y taquipnea.
+// taquicardia y bradicardia maternas, y taquipnea.
 import { valorDe } from '../datos/campo';
 import { coma } from './anemia';
 import type { ContextoClinico, Regla } from './motor';
@@ -86,6 +86,25 @@ export const taquipnea: Regla = {
         `Frecuencia respiratoria ${fr.valor} rpm el ${fr.fecha} (mayor de ${taquipneaMayorDe}).`,
         'Repetir en reposo y medir la saturación. Buscar la causa: infección respiratoria o sepsis, asma, tromboembolia pulmonar, edema pulmonar (preeclampsia, cardiopatía), anemia, ansiedad.',
         'Si persiste, con saturación baja u otros signos de alarma, remitir.',
+      ],
+      severidad: 2,
+      opciones: [{ etiqueta: 'Valorada' }, { etiqueta: 'Remitida' }, { etiqueta: 'Medición repetida: normal', requiereMotivo: true }],
+    };
+  },
+};
+
+export const bradicardiaMaterna: Regla = {
+  id: 'bradicardia_materna',
+  evaluar(ctx) {
+    const fc = ultimoSigno(ctx, 'fcLpm');
+    const { bradicardiaMenorDe } = ctx.catalogo.valor('signosVitales.alertas');
+    if (!fc || fc.valor >= bradicardiaMenorDe) return null;
+    return {
+      titulo: 'Bradicardia materna',
+      porque: [
+        `Frecuencia cardíaca ${fc.valor} lpm el ${fc.fecha} (menor de ${bradicardiaMenorDe}).`,
+        'Confirmar con pulso central o electrocardiograma. Buscar síntomas (mareo, síncope, dolor torácico, disnea) y la causa: trastorno de la conducción, hipotiroidismo, medicamentos, hipotermia.',
+        'Si es sintomática o se confirma sin causa clara, remitir.',
       ],
       severidad: 2,
       opciones: [{ etiqueta: 'Valorada' }, { etiqueta: 'Remitida' }, { etiqueta: 'Medición repetida: normal', requiereMotivo: true }],
