@@ -3,6 +3,7 @@
 import { valorDe, type Campo } from '../datos/campo';
 import type { DatosPrimeraConsulta, DatosSeguimiento } from '../datos/modelo';
 import { asignar, obtener } from './rutas';
+import type { ListaCodificada } from '../clinico/codigos';
 
 export interface Opcion {
   valor: string;
@@ -24,7 +25,9 @@ export type TipoCampo =
   /** Valor calculado a partir de otros campos: se muestra, no se guarda. */
   | { tipo: 'calculado'; calcular: (datos: unknown) => string | undefined }
   /** Lista de diagnósticos con código CIE-10. */
-  | { tipo: 'cie10' };
+  | { tipo: 'cie10' }
+  /** Nombre con su código de una tabla oficial del catálogo (DIVIPOLA, aseguradoras). */
+  | { tipo: 'codificado'; lista: ListaCodificada };
 
 export interface ContextoFormulario {
   /** Semanas de gestación del día, si se conocen. */
@@ -172,8 +175,13 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
     id: 'identificacion',
     titulo: 'Identificación',
     campos: [
-      { ruta: 'identificacion.domicilio', etiqueta: 'Domicilio', control: { tipo: 'texto' } },
-      { ruta: 'identificacion.municipio', etiqueta: 'Municipio de residencia (vereda o barrio)', control: { tipo: 'texto' } },
+      { ruta: 'identificacion.domicilio', etiqueta: 'Domicilio (dirección, barrio o vereda)', control: { tipo: 'texto' } },
+      {
+        ruta: 'identificacion.municipio',
+        etiqueta: 'Municipio de residencia',
+        ayuda: 'Con su código DIVIPOLA. Si no aparece en la lista, escriba "Nombre (código)", por ejemplo "Soacha (25754)".',
+        control: { tipo: 'codificado', lista: 'codigos.divipola' },
+      },
       {
         ruta: 'identificacion.altitudM',
         etiqueta: 'Altitud de residencia',
@@ -213,7 +221,12 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
       },
       { ruta: 'identificacion.viveSola', etiqueta: 'Vive sola', control: sino },
       { ruta: 'identificacion.ocupacion', etiqueta: 'Ocupación', control: { tipo: 'texto' } },
-      { ruta: 'identificacion.aseguradora', etiqueta: 'Aseguradora (EPS)', control: { tipo: 'texto' } },
+      {
+        ruta: 'identificacion.aseguradora',
+        etiqueta: 'Aseguradora (EPS)',
+        ayuda: 'Con su código. Si no aparece en la lista, escriba "Nombre (código)".',
+        control: { tipo: 'codificado', lista: 'codigos.aseguradoras' },
+      },
       {
         ruta: 'identificacion.regimen',
         etiqueta: 'Régimen de afiliación',

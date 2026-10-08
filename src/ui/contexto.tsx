@@ -7,6 +7,7 @@ import type { ServicioConsultas } from '../consultas/servicio';
 import type { MotorAlertas } from '../alertas/motor';
 import type { ServicioDerechos } from '../derechos/servicio';
 import type { ServicioCarne } from '../carne/servicio';
+import type { ServicioConsentimientos } from '../consentimiento/servicio';
 
 export interface Contexto {
   bd: BaseDatos;
@@ -15,6 +16,7 @@ export interface Contexto {
   motor: MotorAlertas;
   derechos: ServicioDerechos;
   carnes: ServicioCarne;
+  consentimientos: ServicioConsentimientos;
   catalogo: Catalogo;
   hoy: () => FechaISO;
 }

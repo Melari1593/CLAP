@@ -1,10 +1,12 @@
 // Controles para un Campo<T>: el valor, más "No se hizo", "No corresponde" y borrar.
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { valorDe, type Campo } from '../datos/campo';
 import type { DefCampo } from '../consultas/esquema';
 import { correoValido } from '../consultas/validaciones';
-import { CIE10_FRECUENTES } from '../clinico/cie10';
-import type { DiagnosticoCie10 } from '../datos/modelo';
+import { buscarCie10, cargarTablaCie10, CIE10_FRECUENTES, normalizarCodigo, type TablaCie10 } from '../clinico/cie10';
+import type { Codificado, DiagnosticoCie10 } from '../datos/modelo';
+import { etiquetaCodificado, interpretarCodificado, type ListaCodificada } from '../clinico/codigos';
+import { useApp } from './contexto';
 
 type Cambio = (campo: Campo<unknown>) => void;
 const vacio: Campo<unknown> = { estado: 'vacio' };
@@ -187,21 +189,70 @@ function ControlValor<D>({ def, campo, onCambio }: { def: DefCampo<D>; campo: Ca
       return <Residencia valor={v as { municipio: string; altitudM: number } | undefined} onCambio={poner} />;
     case 'cie10':
       return <Diagnosticos valor={(v as DiagnosticoCie10[] | undefined) ?? []} onCambio={(l) => poner(l.length ? l : undefined)} />;
+    case 'codificado':
+      return <CampoCodificado etiqueta={def.etiqueta} lista={c.lista} valor={v as Codificado | string | undefined} onCambio={poner} />;
     case 'calculado':
       return null;
   }
 }
 
-/** Diagnósticos con código CIE-10: sugiere los frecuentes al escribir el código o la descripción. */
+/** Nombre con código: sugiere la lista del catálogo y muestra el código que quedó, o avisa que falta. */
+function CampoCodificado({ etiqueta, lista, valor, onCambio }: {
+  etiqueta: string;
+  lista: ListaCodificada;
+  valor: Codificado | string | undefined;
+  onCambio: (v: Codificado | undefined) => void;
+}) {
+  const { catalogo } = useApp();
+  const [texto, setTexto] = useState(etiquetaCodificado(valor));
+  const actual = typeof valor === 'string' ? { nombre: valor, codigo: null } : valor;
+  const id = `lista-${lista.replace('.', '-')}`;
+  return (
+    <span>
+      <input
+        list={id}
+        aria-label={etiqueta}
+        value={texto}
+        onChange={(e) => {
+          setTexto(e.target.value);
+          onCambio(interpretarCodificado(e.target.value, lista, catalogo));
+        }}
+      />
+      <datalist id={id}>
+        {catalogo.valor(lista).map((o) => <option key={o.codigo} value={etiquetaCodificado(o)} />)}
+      </datalist>
+      {actual && (
+        <small className={actual.codigo ? 'suave' : 'error'}>
+          {' '}{actual.codigo ? `Código ${actual.codigo}` : 'Sin código: elija de la lista o escriba "Nombre (código)".'}
+        </small>
+      )}
+    </span>
+  );
+}
+
+/**
+ * Diagnósticos con código CIE-10: busca en la tabla completa por código o por palabras y solo acepta
+ * códigos que existen en ella. Sin texto, sugiere los frecuentes del control prenatal.
+ */
 function Diagnosticos({ valor, onCambio }: { valor: DiagnosticoCie10[]; onCambio: (l: DiagnosticoCie10[]) => void }) {
   const [texto, setTexto] = useState('');
+  const [tabla, setTabla] = useState<TablaCie10>();
+  const [error, setError] = useState<string>();
+  useEffect(() => {
+    void cargarTablaCie10().then(setTabla);
+  }, []);
+  const sugerencias = tabla && texto.trim().length >= 2 ? buscarCie10(tabla, texto) : CIE10_FRECUENTES;
   const agregar = () => {
     const t = texto.trim();
     if (!t) return;
-    const conocido = CIE10_FRECUENTES.find((d) => `${d.codigo} · ${d.descripcion}` === t || d.codigo.toLowerCase() === t.toLowerCase());
-    const [codigo, ...resto] = t.split(/\s*[·\-–]\s*|\s+/);
-    const nuevo = conocido ?? { codigo: (codigo ?? '').toUpperCase(), descripcion: resto.join(' ') };
-    if (!valor.some((d) => d.codigo === nuevo.codigo)) onCambio([...valor, nuevo]);
+    setError(undefined);
+    const codigo = normalizarCodigo(t.split(/\s*·\s*|\s+/)[0] ?? '');
+    const descripcion = tabla?.get(codigo) ?? CIE10_FRECUENTES.find((d) => d.codigo === codigo)?.descripcion;
+    if (!descripcion) {
+      const unica = tabla ? buscarCie10(tabla, t, 2) : [];
+      if (unica.length !== 1) return setError(tabla ? 'Elija un diagnóstico de la lista: ese código no está en la CIE-10.' : 'Cargando la tabla CIE-10…');
+      if (!valor.some((d) => d.codigo === unica[0]!.codigo)) onCambio([...valor, unica[0]!]);
+    } else if (!valor.some((d) => d.codigo === codigo)) onCambio([...valor, { codigo, descripcion }]);
     setTexto('');
   };
   return (
@@ -217,11 +268,14 @@ function Diagnosticos({ valor, onCambio }: { valor: DiagnosticoCie10[]; onCambio
         </ul>
       )}
       <input
-        list="cie10-frecuentes"
-        aria-label="Agregar diagnóstico (código CIE-10 y descripción)"
-        placeholder="Código o descripción, por ejemplo Z34.8"
+        list="cie10-sugerencias"
+        aria-label="Agregar diagnóstico (código CIE-10 o palabras)"
+        placeholder="Código o palabras, por ejemplo Z34.8 o preeclampsia"
         value={texto}
-        onChange={(e) => setTexto(e.target.value)}
+        onChange={(e) => {
+          setTexto(e.target.value);
+          setError(undefined);
+        }}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
@@ -229,10 +283,11 @@ function Diagnosticos({ valor, onCambio }: { valor: DiagnosticoCie10[]; onCambio
           }
         }}
       />
-      <datalist id="cie10-frecuentes">
-        {CIE10_FRECUENTES.map((d) => <option key={d.codigo} value={`${d.codigo} · ${d.descripcion}`} />)}
+      <datalist id="cie10-sugerencias">
+        {sugerencias.map((d) => <option key={d.codigo} value={`${d.codigo} · ${d.descripcion}`} />)}
       </datalist>
       <button type="button" onClick={agregar}>Agregar</button>
+      {error && <span className="error" role="alert"> {error}</span>}
     </div>
   );
 }

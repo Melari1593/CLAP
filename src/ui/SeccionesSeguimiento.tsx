@@ -12,6 +12,7 @@ import { validarHb } from '../consultas/validaciones';
 import { construirContexto } from '../alertas/motor';
 import { clasificarHb, explicarHb } from '../alertas/anemia';
 import type { Historia } from '../datos/repositorio';
+import { atcDe, cupsDe } from '../clinico/codigos';
 import { useApp } from './contexto';
 import { EXAMENES, etiquetaExamen, resumenExamen as resumen } from '../examenes/resumen';
 
@@ -174,7 +175,8 @@ export function SeccionesSeguimiento({ embarazoId, consultaId, alCambiar }: { em
           {examenes.length === 0 && <li className="suave">Sin resultados registrados.</li>}
           {examenes.map((e) => (
             <li key={e.id}>
-              <strong>{etiquetaExamen(e.tipo)}</strong> · {e.fecha} · {resumen(e)}
+              <strong>{etiquetaExamen(e.tipo)}</strong>
+              {cupsDe(e.tipo, catalogo) && <small className="suave"> (CUPS {cupsDe(e.tipo, catalogo)!.codigo})</small>} · {e.fecha} · {resumen(e)}
               {e.tipo === 'vih' && <span className="privado"> 🔒</span>}
               {e.tipo === 'hb' && e.resultado.estado === 'valor' && historia && (
                 <small className="bloque">{explicarHb(clasificarHb(construirContexto(historia, hoy(), catalogo), { ...e.resultado.valor, fecha: e.fecha }))}</small>
@@ -195,7 +197,10 @@ export function SeccionesSeguimiento({ embarazoId, consultaId, alCambiar }: { em
         <legend>Indicaciones</legend>
         {INDICACIONES.map(({ tipo, etiqueta }) => (
           <div key={tipo} className="fila-campo">
-            <div className="etiqueta">{etiqueta}</div>
+            <div className="etiqueta">
+              {etiqueta}
+              {atcDe(tipo, catalogo).length > 0 && <small>{atcDe(tipo, catalogo).map((m) => `${m.principio} · ATC ${m.atc}`).join(' + ')}</small>}
+            </div>
             <div className="botones">
               {(['indicado', 'no_indicado', 'ya_lo_toma'] as const).map((estado) => (
                 <button

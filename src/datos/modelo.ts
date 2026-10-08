@@ -5,6 +5,12 @@ export type FechaISO = string; // AAAA-MM-DD
 export type FechaHoraISO = string; // ISO 8601 completo
 export type SiNo = boolean;
 
+/** Dato con su código de una tabla oficial (DIVIPOLA, EPS); null si se escribió sin código. */
+export interface Codificado {
+  codigo: string | null;
+  nombre: string;
+}
+
 /** Metadatos que todo registro lleva para la bitácora y la sincronización (A3, A4). */
 export interface Meta {
   id: string;
@@ -44,7 +50,8 @@ export interface Embarazo extends Meta {
 
 export interface Identificacion {
   domicilio: Campo<string>;
-  municipio: Campo<string>;
+  /** Con código DIVIPOLA. */
+  municipio: Campo<Codificado>;
   /** Altitud de residencia en m s. n. m., registrada por el profesional. */
   altitudM: Campo<number>;
   /** Residencia en zona endémica: define si se piden Chagas y malaria. */
@@ -61,7 +68,8 @@ export interface Identificacion {
   viveSola: Campo<SiNo>;
   /** Resolución 1995 de 1999, art. 9: ocupación, aseguradora y tipo de vinculación. */
   ocupacion: Campo<string>;
-  aseguradora: Campo<string>;
+  /** Con código de la aseguradora. */
+  aseguradora: Campo<Codificado>;
   regimen: Campo<'contributivo' | 'subsidiado' | 'especial' | 'excepcion' | 'no_afiliada'>;
   /** Acompañante en la consulta. */
   acompananteNombre: Campo<string>;
@@ -531,6 +539,36 @@ export interface RegistroDerechos extends Meta {
     remisionFechaHora?: FechaHoraISO;
   };
   rutaViolencia?: { activadaFechaHora: FechaHoraISO; notificaciones: { a: string; fechaHora: FechaHoraISO }[] };
+  notas?: string;
+}
+
+// ---------------------------------------------------------------- Consentimiento informado
+
+/**
+ * Datos y envío del carné (Ley 1581 de 2012), un procedimiento, o la IVE (privado, sección 7).
+ * Resolución 3100 de 2019: aceptación libre, voluntaria y consciente, después de recibir información
+ * sobre beneficios, riesgos, alternativas e implicaciones.
+ */
+export type TipoConsentimiento = 'datos_carne' | 'procedimiento' | 'ive';
+
+export interface Consentimiento extends Meta {
+  embarazoId: string;
+  tipo: TipoConsentimiento;
+  /** Solo para los procedimientos: cuál (por ejemplo, amniocentesis). */
+  procedimiento?: string;
+  fechaHora: FechaHoraISO;
+  decision: 'acepta' | 'no_acepta';
+  /** Lo que se le explicó antes de decidir. */
+  informado: { beneficios: SiNo; riesgos: SiNo; alternativas: SiNo; implicaciones: SiNo };
+  /** Pudo hacer preguntas y se le resolvieron. */
+  preguntasResueltas: SiNo;
+  /** Quién decide: la gestante o su representante legal (nunca en la IVE: decide ella). */
+  otorga: 'gestante' | 'representante';
+  representante?: { nombre: string; parentesco: string; documento: string };
+  /** Profesional que informó, con su registro profesional. */
+  informadoPor: { nombre: string; registroProfesional: string | null };
+  /** La gestante puede retirarlo en cualquier momento. */
+  revocado?: { fechaHora: FechaHoraISO; motivo?: string };
   notas?: string;
 }
 

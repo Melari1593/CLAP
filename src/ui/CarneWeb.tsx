@@ -27,6 +27,8 @@ async function historiaPorToken(bd: BaseDatos, token: string): Promise<Historia 
     alertas: await bd.alertas.where(por).toArray(),
     factores: await bd.factores.where(por).sortBy('inicio'),
     derechos: await bd.derechos.where(por).sortBy('fechaHora'),
+    // El carné no los necesita: su pausa ya quedó en carne.estado.
+    consentimientos: [],
     carne,
   };
 }

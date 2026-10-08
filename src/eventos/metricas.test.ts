@@ -8,7 +8,7 @@ import { gestanteBase } from '../casos/casos';
 import { ServicioConsultas } from '../consultas/servicio';
 import { ServicioDerechos } from '../derechos/servicio';
 import { primeraConsultaCompleta, seguimiento } from '../pruebas/fixtures';
-import { nuevaBD, repo } from '../pruebas/util';
+import { consentirDatosCarne, nuevaBD, repo } from '../pruebas/util';
 import { RegistroEventos } from './eventos';
 import {
   alertasPorRegla,
@@ -53,6 +53,7 @@ async function escenario() {
   const c1 = guardado(await consultas.guardarPrimeraConsulta(e1!.id, p1)); // 12+0
   await motor.atender(`${e1!.id}:asa`, 'Indicado');
   await consultas.cerrarConsulta(c1, 30 * 60);
+  await consentirDatosCarne(r, e1!.id);
   await carnes.crear(e1!.id, '1234', { canal: 'whatsapp', destino: '3001234567' });
   await carnes.enviar(e1!.id);
   await carnes.registrarComprension(e1!.id, true, 3);

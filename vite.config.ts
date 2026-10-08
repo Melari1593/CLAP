@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // La tabla CIE-10 (≈1 MB, 155 kB comprimida) va en su propio archivo y se carga al buscar un diagnóstico.
+  build: { chunkSizeWarningLimit: 1100 },
   plugins: [
     react(),
     // Precarga toda la app para que la consulta funcione sin internet (A4).

@@ -15,6 +15,7 @@ import {
   avisoRuta,
 } from '../derechos/textos';
 import { useApp, type Pantalla } from './contexto';
+import { PanelConsentimientos } from './PanelConsentimientos';
 
 const aISO = (local: string) => (local ? new Date(local).toISOString() : undefined);
 const ahoraLocal = () => {
@@ -226,6 +227,8 @@ export function PantallaDerechos({ gestanteId, embarazoId, ir }: { gestanteId: s
         {mensaje && <p className="aviso" role="status">{mensaje}</p>}
         <button type="submit" className="primario">Registrar</button>
       </form>
+
+      <PanelConsentimientos embarazoId={embarazoId} tipos={['ive']} titulo="🔒 Consentimiento informado para la IVE" />
 
       <h3>Registros anteriores</h3>
       {carneDebeEstarPausado(historia.derechos) && <p className="aviso">El carné está pausado: el enlace solo muestra "Comunícate con tu servicio de salud".</p>}

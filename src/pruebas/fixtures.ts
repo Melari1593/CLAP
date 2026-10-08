@@ -25,7 +25,7 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
   return {
     identificacion: {
       domicilio: valor('Calle 1 # 2-3'),
-      municipio: valor('Bogotá'),
+      municipio: valor({ codigo: '11001', nombre: 'Bogotá, D. C.' }),
       altitudM: valor(2600),
       zonaEndemicaChagas: valor(false),
       zonaEndemicaMalaria: valor(false),
@@ -38,7 +38,7 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       estadoCivil: valor('union_estable'),
       viveSola: valor(false),
       ocupacion: valor('Comerciante'),
-      aseguradora: valor('EPS de prueba'),
+      aseguradora: valor({ codigo: null, nombre: 'EPS de prueba' }),
       regimen: valor('subsidiado'),
       acompananteNombre: noCorresponde(),
       acompananteParentesco: noCorresponde(),

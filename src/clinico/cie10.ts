@@ -1,6 +1,46 @@
-// Códigos CIE-10 frecuentes en el control prenatal, para sugerir al escribir el diagnóstico.
-// No es la tabla completa: el profesional puede escribir cualquier código y descripción.
+// CIE-10 (OMS, en español): la tabla completa se carga aparte (cie10-tabla.json, 14.215 códigos,
+// generada de github.com/verasativa/CIE-10 más O14.2, U07.1 y U07.2). Los frecuentes del control
+// prenatal se sugieren primero.
 import type { DiagnosticoCie10 } from '../datos/modelo';
+
+export type TablaCie10 = Map<string, string>;
+
+let tabla: Promise<TablaCie10> | undefined;
+
+/** Carga la tabla una sola vez (queda en la caché de la app para usarla sin internet). */
+export function cargarTablaCie10(): Promise<TablaCie10> {
+  tabla ??= import('./cie10-tabla.json').then((m) => new Map(m.default as [string, string][]));
+  return tabla;
+}
+
+const plano = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/** "z348", "Z34.8" o "z34,8" → "Z34.8". */
+export function normalizarCodigo(texto: string): string {
+  const c = texto.trim().toUpperCase().replace(/[.,\s]/g, '');
+  return c.length > 3 ? `${c.slice(0, 3)}.${c.slice(3)}` : c;
+}
+
+/** Busca por el comienzo del código o por todas las palabras de la descripción (sin tildes). */
+export function buscarCie10(t: TablaCie10, texto: string, maximo = 20): DiagnosticoCie10[] {
+  const q = texto.trim();
+  if (q.length < 2) return [];
+  const resultado: DiagnosticoCie10[] = [];
+  if (/^[a-z]\d/i.test(q)) {
+    const prefijo = normalizarCodigo(q);
+    for (const [codigo, descripcion] of t) {
+      if (codigo.startsWith(prefijo)) resultado.push({ codigo, descripcion });
+      if (resultado.length >= maximo) return resultado;
+    }
+  }
+  const palabras = plano(q).split(/\s+/).filter(Boolean);
+  for (const [codigo, descripcion] of t) {
+    const d = plano(descripcion);
+    if (palabras.every((p) => d.includes(p)) && !resultado.some((r) => r.codigo === codigo)) resultado.push({ codigo, descripcion });
+    if (resultado.length >= maximo) break;
+  }
+  return resultado;
+}
 
 export const CIE10_FRECUENTES: DiagnosticoCie10[] = [
   { codigo: 'Z34.0', descripcion: 'Supervisión de primer embarazo normal' },

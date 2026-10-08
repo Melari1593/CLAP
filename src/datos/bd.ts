@@ -3,6 +3,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import type {
   Alerta,
   Carne,
+  Consentimiento,
   Consulta,
   Embarazo,
   EntradaBitacora,
@@ -25,6 +26,7 @@ export interface TablasHistoria {
   factores: FactorTransitorio;
   derechos: RegistroDerechos;
   carnes: Carne;
+  consentimientos: Consentimiento;
 }
 
 export type NombreTabla = keyof TablasHistoria;
@@ -39,6 +41,7 @@ export const TABLAS_HISTORIA: NombreTabla[] = [
   'factores',
   'derechos',
   'carnes',
+  'consentimientos',
 ];
 
 export class BaseDatos extends Dexie {
@@ -51,6 +54,7 @@ export class BaseDatos extends Dexie {
   factores!: EntityTable<FactorTransitorio, 'id'>;
   derechos!: EntityTable<RegistroDerechos, 'id'>;
   carnes!: EntityTable<Carne, 'id'>;
+  consentimientos!: EntityTable<Consentimiento, 'id'>;
   bitacora!: EntityTable<EntradaBitacora, 'id'>;
   cola!: EntityTable<ItemCola, 'id'>;
   eventos!: EntityTable<Evento, 'id'>;
@@ -71,5 +75,6 @@ export class BaseDatos extends Dexie {
       cola: 'id, estado, creadoEn',
     });
     this.version(2).stores({ eventos: 'id, embarazoId, tipo, fechaHora, enviado' });
+    this.version(3).stores({ consentimientos: 'id, embarazoId, tipo' });
   }
 }

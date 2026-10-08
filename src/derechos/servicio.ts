@@ -4,6 +4,7 @@ import type { Catalogo } from '../clinico/catalogo';
 import { valorDe } from '../datos/campo';
 import type {
   Causal,
+  Consentimiento,
   DecisionDerechos,
   DesencadenanteDerechos,
   FechaHoraISO,
@@ -13,6 +14,7 @@ import type {
 import type { Historia, Repositorio } from '../datos/repositorio';
 import { construirContexto, type ContextoClinico, type MotorAlertas } from '../alertas/motor';
 import { CAUSALES, cita } from './textos';
+import { datosCarneRetirados } from '../consentimiento/servicio';
 import type { RegistroEventos } from '../eventos/eventos';
 import type { ConfiguracionInstitucional, ContactoRuta } from '../institucion/configuracion';
 
@@ -60,10 +62,13 @@ export function disparadores(ctx: ContextoClinico): DesencadenanteDerechos[] {
   return lista;
 }
 
-/** El carné queda pausado mientras la última decisión registrada sea "solicita IVE". */
-export function carneDebeEstarPausado(derechos: RegistroDerechos[]): boolean {
+/**
+ * El carné queda pausado mientras la última decisión registrada sea "solicita IVE", o si la gestante
+ * no aceptó o revocó el tratamiento de sus datos para el carné.
+ */
+export function carneDebeEstarPausado(derechos: RegistroDerechos[], consentimientos: Consentimiento[] = []): boolean {
   const ultimo = [...derechos].sort((a, b) => a.fechaHora.localeCompare(b.fechaHora)).at(-1);
-  return ultimo?.decision === 'solicita_ive';
+  return ultimo?.decision === 'solicita_ive' || datosCarneRetirados(consentimientos);
 }
 
 export interface NuevaDecision {
@@ -211,7 +216,7 @@ export class ServicioDerechos {
     const historia = await this.repo.historia(embarazoId);
     const carne = historia?.carne;
     if (!historia || !carne) return;
-    const estado = carneDebeEstarPausado(historia.derechos) ? 'pausado' : 'activo';
+    const estado = carneDebeEstarPausado(historia.derechos, historia.consentimientos) ? 'pausado' : 'activo';
     if (carne.estado !== estado) await this.repo.guardar('carnes', { ...carne, estado });
   }
 

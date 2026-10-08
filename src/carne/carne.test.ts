@@ -7,7 +7,7 @@ import { ServicioConsultas } from '../consultas/servicio';
 import { ServicioDerechos } from '../derechos/servicio';
 import { MENSAJE_CARNE_PAUSADO, proyectarCarne } from '../privacidad/carne';
 import { primeraConsultaCompleta, SECRETO, seguimiento } from '../pruebas/fixtures';
-import { nuevaBD, repo } from '../pruebas/util';
+import { consentirDatosCarne, nuevaBD, repo } from '../pruebas/util';
 import { derivarPin, verificarPin } from './pin';
 import { ErrorCarne, ServicioCarne } from './servicio';
 
@@ -32,6 +32,7 @@ async function preparar() {
     fechaNacimiento: valor('1998-04-12'),
   });
   const embarazoId = embarazo!.id;
+  await consentirDatosCarne(r, embarazoId);
   return { bd, r, consultas, motor, carnes, derechos, embarazoId };
 }
 

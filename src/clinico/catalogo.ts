@@ -19,8 +19,17 @@ export type Fuente =
   | 'Ley 1146 de 2007'
   | 'Ley 1257 de 2008'
   | 'Ley 1719 de 2014'
+  | 'Resolución 3100 de 2019'
+  | 'Resolución 866 de 2021'
+  | 'DANE (DIVIPOLA)'
+  | 'Supersalud (códigos de EPS)'
+  | 'CUPS (MinSalud)'
+  | 'OMS (ATC)'
   | 'Spec HCP Digital v1'
   | 'Equipo clínico';
+
+import type { Codificado } from '../datos/modelo';
+export type { Codificado };
 
 export type EstadoParametro = 'decidido' | 'pendiente';
 
@@ -74,6 +83,12 @@ export interface NormaDerechos {
   contenido: string;
   /** Fecha de la última verificación de vigencia (AAAA-MM-DD); null mientras no se verifique. */
   fechaVerificacion: string | null;
+}
+
+/** Principio activo con su código ATC. El CUM depende del producto que se dispensa. */
+export interface MedicamentoCodificado {
+  principio: string;
+  atc: string;
 }
 
 const BASE = {
@@ -773,6 +788,124 @@ const BASE = {
     estado: 'decidido',
     revisado: '2026-10-07',
     nota: 'Basado en la Ley 1257 de 2008 y aprobado por la responsable del proyecto el 2026-10-07.',
+  }),
+
+  // ---------- Códigos para la interoperabilidad (Ley 2015 de 2020, Resolución 866 de 2021) ----------
+  'codigos.divipola': p<Codificado[]>({
+    nombre: 'Municipios con código DIVIPOLA (sugeridos al escribir)',
+    valor: [
+      ['91001', 'Leticia (Amazonas)'],
+      ['05001', 'Medellín (Antioquia)'],
+      ['81001', 'Arauca (Arauca)'],
+      ['08001', 'Barranquilla (Atlántico)'],
+      ['11001', 'Bogotá, D. C.'],
+      ['13001', 'Cartagena de Indias (Bolívar)'],
+      ['15001', 'Tunja (Boyacá)'],
+      ['17001', 'Manizales (Caldas)'],
+      ['18001', 'Florencia (Caquetá)'],
+      ['85001', 'Yopal (Casanare)'],
+      ['19001', 'Popayán (Cauca)'],
+      ['20001', 'Valledupar (Cesar)'],
+      ['27001', 'Quibdó (Chocó)'],
+      ['23001', 'Montería (Córdoba)'],
+      ['94001', 'Inírida (Guainía)'],
+      ['95001', 'San José del Guaviare (Guaviare)'],
+      ['41001', 'Neiva (Huila)'],
+      ['44001', 'Riohacha (La Guajira)'],
+      ['47001', 'Santa Marta (Magdalena)'],
+      ['50001', 'Villavicencio (Meta)'],
+      ['52001', 'Pasto (Nariño)'],
+      ['54001', 'Cúcuta (Norte de Santander)'],
+      ['86001', 'Mocoa (Putumayo)'],
+      ['63001', 'Armenia (Quindío)'],
+      ['66001', 'Pereira (Risaralda)'],
+      ['88001', 'San Andrés (San Andrés y Providencia)'],
+      ['68001', 'Bucaramanga (Santander)'],
+      ['70001', 'Sincelejo (Sucre)'],
+      ['73001', 'Ibagué (Tolima)'],
+      ['76001', 'Cali (Valle del Cauca)'],
+      ['97001', 'Mitú (Vaupés)'],
+      ['99001', 'Puerto Carreño (Vichada)'],
+    ].map(([codigo, nombre]) => ({ codigo: codigo!, nombre: nombre! })),
+    fuentes: ['DANE (DIVIPOLA)', 'Resolución 866 de 2021'],
+    estado: 'pendiente',
+    revisado: '2026-10-08',
+    nota: 'Solo las capitales de departamento. Falta cargar la tabla DIVIPOLA completa del DANE (1.122 municipios); mientras tanto, otro municipio se escribe como "Nombre (código)".',
+  }),
+  'codigos.aseguradoras': p<Codificado[]>({
+    nombre: 'Aseguradoras (EPS) con su código',
+    valor: [
+      ['EPS037', 'Nueva EPS (contributivo)'],
+      ['EPSS37', 'Nueva EPS (subsidiado)'],
+      ['EPS010', 'EPS Sura'],
+      ['EPS005', 'Sanitas'],
+      ['EPS002', 'Salud Total'],
+      ['EPS008', 'Compensar'],
+      ['EPS017', 'Famisanar'],
+      ['EPS018', 'Servicio Occidental de Salud (SOS)'],
+      ['EPS001', 'Aliansalud'],
+      ['EPS012', 'Comfenalco Valle'],
+      ['EPS040', 'Savia Salud'],
+      ['ESS024', 'Coosalud'],
+      ['ESS207', 'Mutual Ser'],
+      ['ESS062', 'Asmet Salud'],
+      ['ESS118', 'Emssanar'],
+      ['EPSS34', 'Capital Salud'],
+      ['EPS025', 'Capresoca'],
+      ['CCF055', 'Cajacopi'],
+      ['CCF050', 'Comfaoriente'],
+      ['CCF102', 'Comfachocó'],
+      ['EPSI01', 'Dusakawi'],
+      ['EPSI04', 'Anas Wayuu'],
+      ['EPSI05', 'Mallamas'],
+      ['EPSI06', 'Pijaos Salud'],
+    ].map(([codigo, nombre]) => ({ codigo: codigo!, nombre: nombre! })),
+    fuentes: ['Supersalud (códigos de EPS)', 'Resolución 866 de 2021'],
+    estado: 'pendiente',
+    revisado: '2026-10-08',
+    nota: 'Códigos frecuentes, por verificar contra la tabla vigente de la Supersalud (cambian con fusiones y liquidaciones). Otra aseguradora se escribe como "Nombre (código)".',
+  }),
+  'codigos.cups': p<Partial<Record<string, Codificado>>>({
+    nombre: 'Código CUPS de cada examen',
+    valor: {
+      hemoclasificacion: { codigo: '911016', nombre: 'Hemoclasificación: grupo ABO y factor Rh' },
+      hb: { codigo: '902210', nombre: 'Hemograma IV (automatizado)' },
+      plaquetas: { codigo: '902210', nombre: 'Hemograma IV (automatizado)' },
+      ferritina: { codigo: '903016', nombre: 'Ferritina' },
+      vdrl: { codigo: '906915', nombre: 'Prueba no treponémica (VDRL) en suero' },
+      vih: { codigo: '906249', nombre: 'VIH 1 y 2, anticuerpos' },
+      hepatitisB: { codigo: '906317', nombre: 'Hepatitis B, antígeno de superficie' },
+      sifilisTreponemica: { codigo: '906039', nombre: 'Treponema pallidum, anticuerpos (prueba treponémica)' },
+      toxoplasmosis: { codigo: '906127', nombre: 'Toxoplasma gondii IgG (y 906129, IgM)' },
+      rubeolaIgG: { codigo: '906241', nombre: 'Rubéola, anticuerpos IgG' },
+      bacteriuria: { codigo: '901235', nombre: 'Urocultivo' },
+      ptog: { codigo: '903843', nombre: 'Glucosa, curva de tolerancia' },
+      ecografia: { codigo: '881431', nombre: 'Ecografía obstétrica transabdominal' },
+    },
+    fuentes: ['CUPS (MinSalud)', 'Resolución 866 de 2021'],
+    estado: 'pendiente',
+    revisado: '2026-10-08',
+    nota: 'Propuesta por verificar contra la resolución CUPS vigente. Faltan: saturación de transferrina, varicela, Coombs indirecto, PCR en líquido amniótico, Chagas, malaria y estreptococo B.',
+  }),
+  'codigos.medicamentos': p<Partial<Record<string, MedicamentoCodificado[]>>>({
+    nombre: 'Principio activo y código ATC de cada indicación',
+    valor: {
+      hierro: [{ principio: 'Sulfato ferroso', atc: 'B03AA07' }],
+      acidoFolico: [{ principio: 'Ácido fólico', atc: 'B03BB01' }],
+      calcio: [{ principio: 'Carbonato de calcio', atc: 'A12AA04' }],
+      asa: [{ principio: 'Ácido acetilsalicílico', atc: 'B01AC06' }],
+      tromboprofilaxis: [{ principio: 'Enoxaparina', atc: 'B01AB05' }],
+      espiramicina: [{ principio: 'Espiramicina', atc: 'J01FA02' }],
+      toxoTratamientoPleno: [
+        { principio: 'Sulfadiazina', atc: 'J01EC02' },
+        { principio: 'Pirimetamina', atc: 'P01BD01' },
+        { principio: 'Ácido folínico (folinato cálcico)', atc: 'V03AF03' },
+      ],
+    },
+    fuentes: ['OMS (ATC)', 'Resolución 866 de 2021'],
+    estado: 'pendiente',
+    revisado: '2026-10-08',
+    nota: 'El ATC identifica el principio activo. El CUM (INVIMA) depende del producto que se dispensa y se registra al dispensar. Por confirmar con el equipo clínico qué hierro y qué heparina se usan.',
   }),
 
   // ---------- Carné (F3, F4) ----------

@@ -19,6 +19,8 @@ export const DATOS_NUNCA_EN_CARNE = [
   // Sección 7: deseo de continuar, IVE, causales y ruta de violencia sexual.
   'primera.planificacion.deseaContinuar',
   'derechos',
+  // Consentimientos informados (incluye el de la IVE).
+  'consentimientos',
   // Bitácora: contiene los valores anteriores de todos los campos.
   'bitacora',
 ] as const;

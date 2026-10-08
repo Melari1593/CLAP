@@ -2,6 +2,7 @@ import { BaseDatos } from '../datos/bd';
 import { Repositorio } from '../datos/repositorio';
 import type { Usuario } from '../datos/modelo';
 import { PROFESIONAL } from './fixtures';
+import { ServicioConsentimientos } from '../consentimiento/servicio';
 
 export function nuevaBD() {
   return new BaseDatos(`prueba-${crypto.randomUUID()}`);
@@ -22,4 +23,15 @@ export async function gestanteConEmbarazo(r: Repositorio) {
   });
   const embarazo = await r.abrirEmbarazo(gestante.id, '2026-06-01');
   return { gestante, embarazo };
+}
+
+/** Consentimiento aceptado para el tratamiento de datos y el envío del carné. */
+export async function consentirDatosCarne(r: Repositorio, embarazoId: string) {
+  return new ServicioConsentimientos(r).registrar(embarazoId, {
+    tipo: 'datos_carne',
+    decision: 'acepta',
+    informado: { beneficios: true, riesgos: true, alternativas: true, implicaciones: true },
+    preguntasResueltas: true,
+    otorga: 'gestante',
+  });
 }

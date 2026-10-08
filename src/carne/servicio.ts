@@ -5,6 +5,7 @@ import type { CanalEnvio, Carne, FechaISO } from '../datos/modelo';
 import type { Repositorio } from '../datos/repositorio';
 import { correoValido } from '../consultas/validaciones';
 import { carneDebeEstarPausado } from '../derechos/servicio';
+import { datosCarneAutorizados } from '../consentimiento/servicio';
 import { proyectarCarne, type DatosCarne } from '../privacidad/carne';
 import { encolarEnvioCarne } from '../sync/cola';
 import { aleatorio, derivarPin, pinValido } from './pin';
@@ -46,6 +47,9 @@ export class ServicioCarne {
     const historia = await this.repo.historia(embarazoId);
     if (!historia) throw new ErrorCarne('Embarazo no encontrado.');
     if (historia.carne) throw new ErrorCarne('El carné ya existe: asigne un PIN nuevo o cambie el destino.');
+    if (!datosCarneAutorizados(historia.consentimientos)) {
+      throw new ErrorCarne('Falta el consentimiento de la gestante para el tratamiento de sus datos y el envío del carné.');
+    }
     const pinSal = aleatorio(16);
     return this.repo.guardar('carnes', {
       embarazoId,
@@ -54,7 +58,7 @@ export class ServicioCarne {
       pinHash: await derivarPin(pin, pinSal),
       canal: destino.canal,
       destino: validarDestino(destino),
-      estado: carneDebeEstarPausado(historia.derechos) ? 'pausado' : 'activo',
+      estado: carneDebeEstarPausado(historia.derechos, historia.consentimientos) ? 'pausado' : 'activo',
       intentosFallidos: 0,
     });
   }

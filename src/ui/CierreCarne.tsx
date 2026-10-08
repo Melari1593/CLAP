@@ -5,6 +5,8 @@ import type { DatosCarne } from '../privacidad/carne';
 import { ErrorCarne } from '../carne/servicio';
 import { CarneGestante } from './CarneGestante';
 import { useApp } from './contexto';
+import { PanelConsentimientos } from './PanelConsentimientos';
+import { datosCarneAutorizados } from '../consentimiento/servicio';
 
 const CANALES: { canal: CanalEnvio; etiqueta: string }[] = [
   { canal: 'whatsapp', etiqueta: 'WhatsApp' },
@@ -68,8 +70,9 @@ export function CierreCarne({ embarazoId, telefono, correo, onImprimir }: {
   correo?: string;
   onImprimir: () => void;
 }) {
-  const { carnes } = useApp();
+  const { carnes, repo } = useApp();
   const [carne, setCarne] = useState<Carne | null>();
+  const [autorizado, setAutorizado] = useState(false);
   const [vista, setVista] = useState<DatosCarne>();
   const [editando, setEditando] = useState<'pin' | 'destino'>();
   const [mensaje, setMensaje] = useState<string>();
@@ -77,6 +80,7 @@ export function CierreCarne({ embarazoId, telefono, correo, onImprimir }: {
   const cargar = async () => {
     setCarne((await carnes.carneDe(embarazoId)) ?? null);
     setVista(await carnes.vistaPrevia(embarazoId));
+    setAutorizado(datosCarneAutorizados((await repo.historia(embarazoId))?.consentimientos ?? []));
   };
   useEffect(() => {
     void cargar();
@@ -100,7 +104,12 @@ export function CierreCarne({ embarazoId, telefono, correo, onImprimir }: {
   return (
     <section className="cierre-carne">
       <h3>Carné de la gestante</h3>
-      {!carne ? (
+      {!carne && !autorizado ? (
+        <>
+          <p className="aviso">Antes de crear el carné, registre si la gestante acepta el tratamiento de sus datos y el envío del carné.</p>
+          <PanelConsentimientos embarazoId={embarazoId} tipos={['datos_carne']} titulo="Consentimiento para el carné" abierto onCambio={() => void cargar()} />
+        </>
+      ) : !carne ? (
         <FormDestino
           conPin
           inicial={{ canal: telefono ? 'whatsapp' : correo ? 'correo' : 'impreso', destino: telefono ?? correo }}
