@@ -32,6 +32,9 @@ const NOMBRE_EXAMEN: Partial<Record<TipoExamen, string>> = {
   vih: 'VIH',
   hepatitisB: 'Hepatitis B (antígeno de superficie)',
   bacteriuria: 'Urocultivo',
+  glucemia: 'Glucemia en ayunas',
+  tsh: 'TSH',
+  uroanalisis: 'Uroanálisis',
   toxoplasmosis: 'Toxoplasmosis (IgG e IgM)',
   chagas: 'Chagas',
   malaria: 'Malaria',
@@ -52,6 +55,9 @@ const PARA_GESTANTE: Partial<Record<TipoExamen, string>> = {
   chagas: SANGRE,
   malaria: SANGRE,
   ferritina: SANGRE,
+  glucemia: 'Examen de sangre en ayunas (azúcar).',
+  tsh: SANGRE,
+  uroanalisis: 'Examen de orina.',
   bacteriuria: 'Urocultivo (examen de orina).',
   ptog: 'Entre las semanas 24 y 28 te harán la prueba del azúcar. Ve en ayunas: te toman sangre, te dan una bebida dulce y te vuelven a tomar sangre a la hora y a las 2 horas.',
   egb: 'Entre las semanas 35 y 37 te tomarán una muestra para buscar una bacteria (estreptococo B).',
@@ -177,6 +183,7 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
     if (!hechoEntre(['sifilisTreponemica', 'vdrl'], segundo.desdeSemana, tercerDesde)) {
       examen('segundo:sifilis', 'sifilisTreponemica', 'Sífilis del segundo trimestre (prueba treponémica o VDRL/RPR).', segundo.hastaSemana);
     }
+    if (!hechoEntre(['uroanalisis'], segundo.desdeSemana, tercerDesde)) examen('segundo:uroanalisis', 'uroanalisis', 'Uroanálisis del segundo trimestre.', segundo.hastaSemana);
   }
 
   // Tercer trimestre: hemograma, VIH y sífilis
@@ -187,6 +194,7 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
     if (!hechoDesde('sifilisTreponemica', tercer.desdeSemana) && !hechoDesde('vdrl', tercer.desdeSemana)) {
       examen('tercer:sifilis', 'sifilisTreponemica', 'Sífilis del tercer trimestre (prueba treponémica o VDRL/RPR).', tercer.hastaSemana);
     }
+    if (!hechoDesde('uroanalisis', tercer.desdeSemana)) examen('tercer:uroanalisis', 'uroanalisis', 'Uroanálisis del tercer trimestre.', tercer.hastaSemana);
   }
 
   // PTOG 24–28

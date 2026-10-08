@@ -116,6 +116,7 @@ describe('Carné: lectura restringida (A3)', () => {
     );
     expect(t2!.examenes).toEqual([
       { texto: 'Exámenes de sangre del segundo trimestre', estado: 'falta' },
+      { texto: 'Uroanálisis (examen de orina)', estado: 'falta' },
       { texto: 'Ecografía de detalle (semanas 18 a 23)', estado: 'falta' },
       { texto: 'Prueba del azúcar (semanas 24 a 28)', estado: 'mas_adelante' },
     ]);

@@ -13,6 +13,8 @@ const neg = { positivo: false };
 const examenesIniciales = (fecha: string): Examen[] => [
   { tipo: 'hemoclasificacion', valor: { grupo: 'O', rh: '+' }, fecha },
   { tipo: 'hb', valor: { gdl: 13, muestra: 'venosa' }, fecha },
+  { tipo: 'glucemia', valor: { mgDl: 80 }, fecha },
+  { tipo: 'tsh', valor: { mUIL: 1.8 }, fecha },
   { tipo: 'sifilisTreponemica', valor: { reactiva: false }, fecha },
   { tipo: 'vih', valor: { solicitado: true, realizado: true, resultado: 'negativo' }, fecha },
   { tipo: 'hepatitisB', valor: { antigenoSuperficie: 'negativo' }, fecha },
@@ -41,7 +43,7 @@ describe('Recordatorios por semana (F1)', () => {
     // ni falta de vacuna de rubéola, no se piden Chagas, malaria ni IgG de rubéola.
     const s8 = ids(semana(8), base);
     expect(exam(s8.filter((r) => r.tipo === 'examen').map((r) => r.id))).toEqual(
-      ['inicial:hemoclasificacion', 'inicial:hb', 'inicial:sifilisTreponemica', 'inicial:vih', 'inicial:hepatitisB', 'inicial:bacteriuria', 'inicial:toxoplasmosis', 'inicial:varicelaIgG'],
+      ['inicial:hemoclasificacion', 'inicial:hb', 'inicial:glucemia', 'inicial:tsh', 'inicial:sifilisTreponemica', 'inicial:vih', 'inicial:hepatitisB', 'inicial:bacteriuria', 'inicial:toxoplasmosis', 'inicial:varicelaIgG'],
     );
     expect(s8.some((r) => r.estado === 'atrasado')).toBe(false);
 
@@ -69,10 +71,12 @@ describe('Recordatorios por semana (F1)', () => {
     expect(ids(semana(14), conIniciales).filter((r) => r.id.startsWith('segundo:')).map((r) => [r.id, r.estado])).toEqual([
       ['segundo:vih', 'pendiente'],
       ['segundo:sifilis', 'pendiente'],
+      ['segundo:uroanalisis', 'pendiente'],
     ]);
     const segundoT = [
       { tipo: 'vih' as const, valor: { solicitado: true, realizado: true, resultado: 'negativo' as const }, fecha: semana(16) },
       { tipo: 'sifilisTreponemica' as const, valor: { reactiva: false }, fecha: semana(16) },
+      { tipo: 'uroanalisis' as const, valor: { resultado: 'normal' as const, hallazgos: '' }, fecha: semana(16) },
     ];
     expect(ids(semana(20), { ...conIniciales, examenes: [...examenesIniciales(semana(9)), ...segundoT] }).some((r) => r.id.startsWith('segundo:'))).toBe(false);
     expect(ids(semana(28), conIniciales).some((r) => r.id.startsWith('segundo:'))).toBe(false); // ya rige el tercer trimestre
@@ -83,6 +87,7 @@ describe('Recordatorios por semana (F1)', () => {
       ['tercer:hb', 'pendiente'],
       ['tercer:vih', 'pendiente'],
       ['tercer:sifilis', 'pendiente'],
+      ['tercer:uroanalisis', 'pendiente'],
     ]);
     expect(ids(semana(35), conIniciales).find((r) => r.id === 'tercer:vih')?.estado).toBe('atrasado');
     const vdrl3 = { tipo: 'vdrl' as const, valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: semana(29) };

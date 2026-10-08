@@ -145,9 +145,9 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       </div>
       <SeccionOrdenes embarazoId={embarazoId} ordenes={ordenes} onCambio={setOrdenes} soloLectura={cerrada} version={guardados} />
       <FirmaProfesional firma={firma} onFirma={setFirma} cierre={cerrada ? cierre : undefined} />
-      {cerrada && consultaId && (ordenes.medicamentos.length > 0 || ordenes.paraclinicos.length > 0) && (
+      {cerrada && consultaId && (ordenes.medicamentos.length > 0 || ordenes.paraclinicos.length > 0 || (ordenes.remisiones ?? []).length > 0) && (
         <button type="button" className="primario" onClick={() => ir({ tipo: 'ordenes', gestanteId, embarazoId, consultaId })}>
-          🖨️ Imprimir fórmula y órdenes
+          🖨️ Imprimir fórmula, órdenes y remisiones
         </button>
       )}
     </>
@@ -186,7 +186,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
 
   const pedirCierre = async () => {
     const incompletas = ordenesIncompletas(ordenes);
-    if (incompletas.length > 0) return setMensaje(`Complete la fórmula (sección "Plan y órdenes") antes de cerrar: ${incompletas.join('; ')}.`);
+    if (incompletas.length > 0) return setMensaje(`Complete las órdenes (sección "Plan y órdenes") antes de cerrar: ${incompletas.join('; ')}.`);
     if (!firma) return setMensaje('Firme al final de la sección "Plan y órdenes" antes de cerrar la consulta.');
     const consulta = await guardar();
     if (consulta) setVacios(servicio.camposVaciosDe(consulta));

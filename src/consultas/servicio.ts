@@ -277,7 +277,7 @@ export class ServicioConsultas {
     const consulta = await this.repo.leer('consultas', consultaId);
     if (!consulta) throw new Error('Consulta no encontrada');
     const incompletas = ordenesIncompletas(consulta.ordenes);
-    if (incompletas.length > 0) throw new Error(`Complete la fórmula antes de cerrar: ${incompletas.join('; ')}.`);
+    if (incompletas.length > 0) throw new Error(`Complete las órdenes antes de cerrar: ${incompletas.join('; ')}.`);
     // Firma del cierre: nombre y registro profesional, fecha y hora (Resolución 1995 de 1999).
     const { nombre, registroProfesional } = this.repo.usuario;
     const cierre = consulta.cierre ?? { profesional: nombre, registroProfesional: registroProfesional ?? null, fechaHora: new Date().toISOString(), firma };

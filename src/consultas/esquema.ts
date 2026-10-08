@@ -579,20 +579,8 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
     titulo: 'Control',
     campos: [
       ...camposAnamnesis<S>('anamnesis.'),
-      {
-        ruta: 'proteinuria',
-        etiqueta: 'Proteinuria',
-        control: { tipo: 'opciones', opciones: ops(['negativa', 'Negativa'], ['trazas', 'Trazas'], ['1+', '1+'], ['2+', '2+'], ['3+', '3+']) },
-      },
-      {
-        ruta: 'tamizajeTrimestral',
-        etiqueta: 'Se preguntó en este trimestre por tabaco, alcohol y violencia',
-        ayuda: 'Ofrezca un momento a solas.',
-        control: sino,
-      },
       { ruta: 'diagnosticoPreeclampsia', etiqueta: 'Diagnóstico de preeclampsia en este control', control: sino },
       { ruta: 'observaciones', etiqueta: 'Observaciones (notas internas)', privado: true, control: { tipo: 'texto', largo: true } },
-      { ruta: 'iniciales', etiqueta: 'Iniciales del profesional', control: { tipo: 'texto' } },
       {
         ruta: 'cambioResidencia',
         etiqueta: 'Cambio de residencia',
@@ -644,10 +632,28 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
   },
   {
     id: 'anticoncepcion',
-    titulo: 'Anticoncepción después del parto',
-    campos: camposAnticoncepcion<S>(''),
+    titulo: 'Tabaco, alcohol y anticoncepción',
+    campos: [
+      {
+        ruta: 'tamizajeTrimestral',
+        etiqueta: 'Se preguntó en este trimestre por tabaco, alcohol y violencia',
+        ayuda: 'Ofrezca un momento a solas.',
+        control: sino,
+      },
+      ...camposAnticoncepcion<S>(''),
+    ],
   },
-  { id: 'laboratorios', titulo: 'Laboratorios y ecografías', campos: [] },
+  {
+    id: 'laboratorios',
+    titulo: 'Laboratorios y ecografías',
+    campos: [
+      {
+        ruta: 'proteinuria',
+        etiqueta: 'Proteinuria en tira reactiva (de hoy)',
+        control: { tipo: 'opciones', opciones: ops(['negativa', 'Negativa'], ['trazas', 'Trazas'], ['1+', '1+'], ['2+', '2+'], ['3+', '3+']) },
+      },
+    ],
+  },
   {
     id: 'diagnostico',
     titulo: 'Plan y órdenes',

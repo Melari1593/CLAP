@@ -1,10 +1,36 @@
 // Fórmula médica y órdenes de paraclínicos de la consulta.
 import type { Catalogo, PlantillaMedicamento } from '../clinico/catalogo';
 import { cupsDe } from '../clinico/codigos';
-import type { OrdenMedicamento, OrdenParaclinico, Ordenes, TipoExamen } from '../datos/modelo';
+import type { OrdenMedicamento, OrdenParaclinico, OrdenRemision, Ordenes, TipoExamen } from '../datos/modelo';
 import { etiquetaExamen } from '../examenes/resumen';
 
-export const ordenesVacias = (): Ordenes => ({ medicamentos: [], paraclinicos: [] });
+export const ordenesVacias = (): Ordenes => ({ medicamentos: [], paraclinicos: [], remisiones: [] });
+
+/** Servicios sugeridos al escribir la remisión; se puede escribir cualquier otro. */
+export const SERVICIOS_REMISION = [
+  'Ginecobstetricia (control prenatal de alto riesgo)',
+  'Urgencias obstétricas',
+  'Medicina materno fetal',
+  'Nutrición',
+  'Psicología',
+  'Trabajo social',
+  'Odontología',
+  'Medicina interna',
+  'Endocrinología',
+  'Infectología',
+  'Curso de preparación para la maternidad y la paternidad',
+  'Vacunación',
+];
+
+export const PRIORIDAD_REMISION: Record<OrdenRemision['prioridad'], string> = {
+  urgente: 'Urgente (hoy)',
+  prioritaria: 'Prioritaria',
+  programada: 'Programada',
+};
+
+export function nuevaRemision(): OrdenRemision {
+  return { id: crypto.randomUUID(), servicio: '', motivo: '', prioridad: 'programada' };
+}
 
 const id = () => crypto.randomUUID();
 
@@ -44,11 +70,20 @@ export function faltantesMedicamento(m: OrdenMedicamento): string[] {
   return faltan;
 }
 
+export function faltantesRemision(r: OrdenRemision): string[] {
+  return [!r.servicio.trim() && 'servicio', !r.motivo.trim() && 'motivo'].filter((x): x is string => Boolean(x));
+}
+
 export function ordenesIncompletas(o: Ordenes | undefined): string[] {
-  return (o?.medicamentos ?? []).flatMap((m, i) => {
+  const medicamentos = (o?.medicamentos ?? []).flatMap((m, i) => {
     const faltan = faltantesMedicamento(m);
     return faltan.length ? [`${m.principio || `línea ${i + 1}`}: falta ${faltan.join(', ')}`] : [];
   });
+  const remisiones = (o?.remisiones ?? []).flatMap((r, i) => {
+    const faltan = faltantesRemision(r);
+    return faltan.length ? [`remisión ${r.servicio || i + 1}: falta ${faltan.join(', ')}`] : [];
+  });
+  return [...medicamentos, ...remisiones];
 }
 
 const UNIDADES = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'veintiuno', 'veintidós', 'veintitrés', 'veinticuatro', 'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve'];

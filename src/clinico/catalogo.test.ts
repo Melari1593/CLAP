@@ -80,7 +80,6 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
       'clap.pesoRNPrevio',
       'clap.antitetanicaConducta',
       'recordatorios.ventanas',
-      'recordatorios.examenesPrimeraConsulta',
       'trombo.suspensionAntesDelParto',
       'hta.umbrales',
       'bienestarFetal',
@@ -91,6 +90,14 @@ describe('Catálogo de parámetros clínicos (A1)', () => {
     ] as const) {
       expect(cat.parametro(id), id).toMatchObject({ estado: 'decidido', revisado: '2026-10-07' });
     }
+  });
+
+  it('los parámetros decididos el 2026-10-08 quedaron decididos', () => {
+    const cat = new Catalogo();
+    for (const id of ['recordatorios.examenesPrimeraConsulta', 'asa.semanaFin', 'hierro.inicioConHbHasta'] as const) {
+      expect(cat.parametro(id), id).toMatchObject({ estado: 'decidido', revisado: '2026-10-08' });
+    }
+    expect(cat.valor('recordatorios.examenesPrimeraConsulta')).toEqual(expect.arrayContaining(['glucemia', 'tsh']));
   });
 
   it('deja como pendientes las decisiones abiertas del plan', () => {

@@ -3,7 +3,7 @@ import { Catalogo } from '../clinico/catalogo';
 import { valor } from '../datos/campo';
 import { primeraConsultaCompleta } from '../pruebas/fixtures';
 import { gestanteConEmbarazo, nuevaBD, repo } from '../pruebas/util';
-import { faltantesMedicamento, medicamentoDesde, numeroEnLetras, ordenesVacias, paraclinicoDe } from './ordenes';
+import { faltantesMedicamento, medicamentoDesde, nuevaRemision, numeroEnLetras, ordenesIncompletas, ordenesVacias, paraclinicoDe } from './ordenes';
 import { ServicioConsultas } from './servicio';
 
 const cat = new Catalogo();
@@ -27,6 +27,15 @@ describe('Fórmula médica y órdenes', () => {
     expect(m.presentacion).toBe('Tableta 100 mg');
     expect(faltantesMedicamento(m)).toEqual(['duración', 'cantidad total']);
     expect(faltantesMedicamento({ ...m, duracion: '30 días', cantidad: 30 })).toEqual([]);
+  });
+
+  it('la remisión exige servicio y motivo', () => {
+    const r = nuevaRemision();
+    expect(r.prioridad).toBe('programada');
+    expect(ordenesIncompletas({ ...ordenesVacias(), remisiones: [r] })).toEqual(['remisión 1: falta servicio, motivo']);
+    expect(ordenesIncompletas({ ...ordenesVacias(), remisiones: [{ ...r, servicio: 'Nutrición', motivo: 'IMC de obesidad' }] })).toEqual([]);
+    // Las consultas guardadas antes de las remisiones no las tienen.
+    expect(ordenesIncompletas({ medicamentos: [], paraclinicos: [] })).toEqual([]);
   });
 
   it('el paraclínico lleva su código CUPS', () => {

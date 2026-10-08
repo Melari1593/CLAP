@@ -43,7 +43,7 @@ describe('Examen físico', () => {
       'Control',
       'Examen físico',
       'Adherencia y vacunas',
-      'Anticoncepción después del parto',
+      'Tabaco, alcohol y anticoncepción',
       'Laboratorios y ecografías',
       'Plan y órdenes',
     ]);

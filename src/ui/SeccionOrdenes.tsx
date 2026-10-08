@@ -1,7 +1,7 @@
 // Fórmula médica y órdenes de paraclínicos, al final de la consulta.
 import { useEffect, useState } from 'react';
-import type { OrdenMedicamento, OrdenParaclinico, Ordenes, TipoExamen } from '../datos/modelo';
-import { faltantesMedicamento, medicamentoDesde, numeroEnLetras, paraclinicoDe } from '../consultas/ordenes';
+import type { OrdenMedicamento, OrdenParaclinico, OrdenRemision, Ordenes, TipoExamen } from '../datos/modelo';
+import { faltantesMedicamento, faltantesRemision, medicamentoDesde, nuevaRemision, numeroEnLetras, paraclinicoDe, PRIORIDAD_REMISION, SERVICIOS_REMISION } from '../consultas/ordenes';
 import { construirContexto } from '../alertas/motor';
 import { recordatorios } from '../recordatorios/recordatorios';
 import { EXAMENES } from '../examenes/resumen';
@@ -35,6 +35,9 @@ export function SeccionOrdenes({ embarazoId, ordenes, onCambio, soloLectura, ver
     const nuevos = lista.filter((p) => !ordenes.paraclinicos.some((x) => (p.examen ? x.examen === p.examen : x.nombre === p.nombre)));
     if (nuevos.length) onCambio({ ...ordenes, paraclinicos: [...ordenes.paraclinicos, ...nuevos] });
   };
+  const remisiones = ordenes.remisiones ?? [];
+  const rem = (i: number, cambios: Partial<OrdenRemision>) =>
+    onCambio({ ...ordenes, remisiones: remisiones.map((r, j) => (j === i ? { ...r, ...cambios } : r)) });
   const sinOrdenar = pendientes.filter((t) => !ordenes.paraclinicos.some((p) => p.examen === t));
 
   const texto = (i: number, k: keyof OrdenMedicamento, etiqueta: string, ancho?: boolean) => (
@@ -153,6 +156,49 @@ export function SeccionOrdenes({ embarazoId, ordenes, onCambio, soloLectura, ver
             </button>
           </div>
         </>
+      )}
+
+      <h4>📨 Remisiones</h4>
+      {remisiones.length === 0 && <p className="suave">Sin remisiones en esta consulta.</p>}
+      {remisiones.map((r, i) => {
+        const faltan = faltantesRemision(r);
+        return (
+          <div key={r.id} className={`tarjeta orden ${faltan.length ? 'incompleta' : ''}`}>
+            <label>
+              Servicio o especialidad
+              <input list="servicios-remision" disabled={soloLectura} value={r.servicio} onChange={(e) => rem(i, { servicio: e.target.value })} />
+            </label>
+            <div className="botones" role="radiogroup" aria-label="Prioridad">
+              {(Object.keys(PRIORIDAD_REMISION) as OrdenRemision['prioridad'][]).map((p) => (
+                <button key={p} type="button" role="radio" aria-checked={r.prioridad === p} disabled={soloLectura} className={r.prioridad === p ? 'activo' : ''} onClick={() => rem(i, { prioridad: p })}>
+                  {PRIORIDAD_REMISION[p]}
+                </button>
+              ))}
+            </div>
+            <label>
+              Motivo de la remisión
+              <textarea rows={2} disabled={soloLectura} value={r.motivo} onChange={(e) => rem(i, { motivo: e.target.value })} />
+            </label>
+            <label>
+              Resumen clínico (opcional)
+              <textarea rows={2} disabled={soloLectura} value={r.resumen ?? ''} onChange={(e) => rem(i, { resumen: e.target.value || undefined })} />
+            </label>
+            {faltan.length > 0 && <p className="error">Falta: {faltan.join(', ')}.</p>}
+            {!soloLectura && (
+              <button type="button" className="enlace" onClick={() => onCambio({ ...ordenes, remisiones: remisiones.filter((_, j) => j !== i) })}>
+                Quitar
+              </button>
+            )}
+          </div>
+        );
+      })}
+      <datalist id="servicios-remision">
+        {SERVICIOS_REMISION.map((s) => <option key={s} value={s} />)}
+      </datalist>
+      {!soloLectura && (
+        <button type="button" onClick={() => onCambio({ ...ordenes, remisiones: [...remisiones, nuevaRemision()] })}>
+          + Agregar remisión
+        </button>
       )}
     </div>
   );

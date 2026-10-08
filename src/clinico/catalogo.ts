@@ -197,6 +197,15 @@ const BASE = {
     estado: 'decidido',
     nota: 'Nunca usar 15 ng/mL: la guía lo desaconseja en el embarazo.',
   }),
+  'hierro.inicioConHbHasta': p<number>({
+    nombre: 'Hb medida con la que se alerta para iniciar sulfato ferroso',
+    valor: 13,
+    unidad: 'g/dL (Hb medida de 13 o menos, sin anemia)',
+    fuentes: ['Equipo clínico'],
+    estado: 'decidido',
+    revisado: '2026-10-08',
+    nota: 'Indicado por la responsable del proyecto el 2026-10-08: alerta de inicio de sulfato ferroso desde una Hb de 13 g/dL. Con anemia, la alerta de anemia ya pide indicar o ajustar el hierro.',
+  }),
   'hierro.ferritinaSinAnemia': p<number>({
     nombre: 'Ferritina para déficit de hierro sin anemia (≤), solo como dato',
     valor: 30,
@@ -510,12 +519,12 @@ const BASE = {
   }),
   'recordatorios.examenesPrimeraConsulta': p<string[]>({
     nombre: 'Exámenes de la primera consulta',
-    valor: ['hemoclasificacion', 'hb', 'sifilisTreponemica', 'vih', 'hepatitisB', 'bacteriuria', 'toxoplasmosis', 'rubeolaIgG', 'varicelaIgG', 'chagas', 'malaria'],
+    valor: ['hemoclasificacion', 'hb', 'glucemia', 'tsh', 'sifilisTreponemica', 'vih', 'hepatitisB', 'bacteriuria', 'toxoplasmosis', 'rubeolaIgG', 'varicelaIgG', 'chagas', 'malaria'],
     fuentes: ['Spec HCP Digital v1', 'Equipo clínico'],
     estado: 'decidido',
-    revisado: '2026-10-07',
+    revisado: '2026-10-08',
     nota:
-      'Según la Ruta Materno Perinatal, aprobado por la responsable del proyecto el 2026-10-07: hemograma, prueba treponémica rápida, VIH, hepatitis B, urocultivo (no solo bacteriuria), toxoplasmosis (IgG e IgM), hemoclasificación de laboratorio a todas (aunque declare su grupo); IgG para varicela zóster solo sin antecedente de vacuna; IgG de rubéola solo sin vacuna previa; Chagas y malaria solo en zona endémica. Además, grupo y Rh, tamizaje de cuello uterino y ecografía de 10+6 a 13+6. Verificar contra la versión vigente.',
+      'Según la Ruta Materno Perinatal, aprobado por la responsable del proyecto el 2026-10-07: hemograma, prueba treponémica rápida, VIH, hepatitis B, urocultivo (no solo bacteriuria), toxoplasmosis (IgG e IgM), hemoclasificación de laboratorio a todas (aunque declare su grupo); IgG para varicela zóster solo sin antecedente de vacuna; IgG de rubéola solo sin vacuna previa; Chagas y malaria solo en zona endémica. Además, grupo y Rh, tamizaje de cuello uterino y ecografía de 10+6 a 13+6. Glucemia en ayunas y TSH agregadas por la responsable del proyecto el 2026-10-08. Verificar contra la versión vigente.',
   }),
 
   'hta.umbrales': p<{
@@ -685,6 +694,24 @@ const BASE = {
     estado: 'decidido',
     revisado: '2026-10-08',
     nota: 'Fiebre con temperatura de 38 °C o más, saturación baja por debajo de 92 % taquicardia materna con frecuencia cardíaca mayor de 100 lpm taquipnea con frecuencia respiratoria mayor de 20 rpm y bradicardia materna con frecuencia cardíaca menor de 60 lpm, por decisión de la responsable del proyecto el 2026-10-08.',
+  }),
+  'glucemia.cortes': p<{ diabetesGestacionalDesde: number; diabetesDesde: number }>({
+    nombre: 'Glucemia en ayunas del primer trimestre: puntos de corte',
+    valor: { diabetesGestacionalDesde: 92, diabetesDesde: 126 },
+    unidad: 'mg/dL (desde 92: diabetes gestacional; desde 126: diabetes manifiesta)',
+    fuentes: ['OMS 2024', 'Equipo clínico'],
+    estado: 'pendiente',
+    revisado: '2026-10-08',
+    nota: 'Criterios IADPSG/OMS 2013. Por confirmar con el equipo clínico y la GPC vigente. Un resultado desde 92 se marca como alterado en la sección de laboratorios.',
+  }),
+  'tsh.limiteSuperior': p<number>({
+    nombre: 'TSH: límite superior en el embarazo',
+    valor: 4.0,
+    unidad: 'mUI/L (por encima se marca como alterada)',
+    fuentes: ['Equipo clínico'],
+    estado: 'pendiente',
+    revisado: '2026-10-08',
+    nota: 'Valor de referencia cuando el laboratorio no tiene rangos propios por trimestre (ATA 2017). Por confirmar con el equipo clínico.',
   }),
   'plaquetas.normalDesde': p<number>({
     nombre: 'Recuento de plaquetas normal (hemograma)',
@@ -901,6 +928,9 @@ const BASE = {
       bacteriuria: { codigo: '901235', nombre: 'Urocultivo' },
       ptog: { codigo: '903843', nombre: 'Glucosa, curva de tolerancia' },
       ecografia: { codigo: '881431', nombre: 'Ecografía obstétrica transabdominal' },
+      glucemia: { codigo: '903841', nombre: 'Glucosa en suero' },
+      tsh: { codigo: '904902', nombre: 'Hormona estimulante del tiroides (TSH)' },
+      uroanalisis: { codigo: '907106', nombre: 'Uroanálisis' },
     },
     fuentes: ['CUPS (MinSalud)', 'Resolución 866 de 2021'],
     estado: 'pendiente',

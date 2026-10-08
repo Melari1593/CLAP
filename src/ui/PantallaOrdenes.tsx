@@ -4,7 +4,7 @@ import type { Consulta, Gestante } from '../datos/modelo';
 import { valorDe } from '../datos/campo';
 import { edad } from '../clinico/calculos';
 import { etiquetaCodificado } from '../clinico/codigos';
-import { numeroEnLetras } from '../consultas/ordenes';
+import { numeroEnLetras, PRIORIDAD_REMISION } from '../consultas/ordenes';
 import { useApp, type Pantalla } from './contexto';
 
 export function PantallaOrdenes({ gestanteId, embarazoId, consultaId, ir }: { gestanteId: string; embarazoId: string; consultaId: string; ir: (p: Pantalla) => void }) {
@@ -106,7 +106,18 @@ export function PantallaOrdenes({ gestanteId, embarazoId, consultaId, ir }: { ge
         </article>
       )}
 
-      {o.medicamentos.length === 0 && o.paraclinicos.length === 0 && <p>Esta consulta no tiene medicamentos ni paraclínicos ordenados.</p>}
+      {(o.remisiones ?? []).map((r) => (
+        <article key={r.id} className="hoja">
+          {encabezado('Orden de remisión')}
+          <p><strong>Remitida a:</strong> {r.servicio}</p>
+          <p><strong>Prioridad:</strong> {PRIORIDAD_REMISION[r.prioridad]}</p>
+          <p><strong>Motivo:</strong> {r.motivo}</p>
+          {r.resumen && <p><strong>Resumen clínico:</strong> {r.resumen}</p>}
+          {firma}
+        </article>
+      ))}
+
+      {o.medicamentos.length === 0 && o.paraclinicos.length === 0 && !(o.remisiones ?? []).length && <p>Esta consulta no tiene medicamentos, paraclínicos ni remisiones.</p>}
     </section>
   );
 }

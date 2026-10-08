@@ -102,7 +102,9 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 |---|---|---|---|---|---|
 | FE-01 | Anemia con ferritina de 42: déficit de hierro. | Hb 11,8 (15+1); Ferritina 42 ng/mL | **Anemia leve**; **Anemia con déficit de hierro (Hb ajustada 10,0 g/dL · ferritina 42 ng/mL)**<br>no incluye «Solicitar ferritina» | ☐ Sí ☐ No | |
 | FE-02 | Anemia con ferritina de 60: considerar otras causas. | Hb 11,8 (15+1); Ferritina 60 ng/mL | **Anemia leve**; **Anemia sin déficit de hierro por ferritina: considerar otras causas** | ☐ Sí ☐ No | |
-| FE-03 | Ferritina de 24 sin anemia: solo como dato, sin alerta. | Hb 13 (15+1); Ferritina 24 ng/mL | Sin alertas | ☐ Sí ☐ No | |
+| FE-03 | Ferritina de 24 sin anemia y Hb de 13,5: solo como dato, sin alerta. | Hb 13,5 (15+1); Ferritina 24 ng/mL | Sin alertas | ☐ Sí ☐ No | |
+| FE-04 | Hb de 13 sin anemia y sin hierro decidido: iniciar sulfato ferroso. | Hb 13 (15+1) | **Iniciar sulfato ferroso**<br>incluye «Hb medida 13,0 g/dL»<br>incluye «Sulfato ferroso» | ☐ Sí ☐ No | |
+| FE-05 | Hb de 13 con hierro ya indicado: sin alerta. | Hb 13 (15+1); Hierro indicado | Sin alertas | ☐ Sí ☐ No | |
 
 ## ASA
 

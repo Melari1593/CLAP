@@ -21,8 +21,8 @@ describe('Laboratorios y ecografías por trimestre', () => {
     expect(fila(conLab, 'ingreso:hemoclasificacion')).toMatchObject({ estado: 'hecho', resultado: { texto: 'O negativo', alterado: true } });
     // Con el Rh negativo del laboratorio se pide el Coombs indirecto.
     expect(fila(conLab, 'ingreso:coombsIndirecto')?.estado).toBe('pendiente');
-    expect(g[1]!.filas.map((f) => f.id)).toEqual(['segundo:vih', 'segundo:sifilis', 'eco_detalle', 'ptog']);
-    expect(g[2]!.filas.map((f) => f.id)).toEqual(['tercer:hb', 'tercer:vih', 'tercer:sifilis', 'egb']);
+    expect(g[1]!.filas.map((f) => f.id)).toEqual(['segundo:vih', 'segundo:sifilis', 'segundo:uroanalisis', 'eco_detalle', 'ptog']);
+    expect(g[2]!.filas.map((f) => f.id)).toEqual(['tercer:hb', 'tercer:vih', 'tercer:sifilis', 'tercer:uroanalisis', 'egb']);
   });
 
   it('estados: pendiente en su ventana, próximo antes y atrasado después', () => {

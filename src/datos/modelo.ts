@@ -337,7 +337,8 @@ export interface DatosSeguimiento {
   tamizajeTrimestral: Campo<SiNo>;
   /** Notas internas del profesional: privado, nunca en el carné. */
   observaciones: Campo<string>;
-  iniciales: Campo<string>;
+  /** Ya no se pide: la consulta queda firmada al cerrar. Se conserva para los controles anteriores. */
+  iniciales?: Campo<string>;
   /** Cambio de residencia: la anemia se reclasifica desde este control (D1). */
   cambioResidencia: Campo<{ municipio: string; altitudM: number }>;
   /** Vacuna Tdap (tosferina) aplicada en este control (recordatorio desde la semana 26). */
@@ -391,9 +392,21 @@ export interface OrdenParaclinico {
   justificacion?: string;
 }
 
+/** Remisión a otro servicio o especialidad. */
+export interface OrdenRemision {
+  id: string;
+  servicio: string;
+  motivo: string;
+  prioridad: 'urgente' | 'prioritaria' | 'programada';
+  /** Resumen clínico para quien recibe (opcional; la orden ya lleva los diagnósticos). */
+  resumen?: string;
+}
+
 export interface Ordenes {
   medicamentos: OrdenMedicamento[];
   paraclinicos: OrdenParaclinico[];
+  /** Opcional: las consultas guardadas antes de las remisiones no lo tienen. */
+  remisiones?: OrdenRemision[];
 }
 
 export interface Consulta extends Meta {
@@ -436,7 +449,13 @@ export type ResultadoPorTipo = {
   rubeolaIgG: { positivo: SiNo };
   /** IgG para varicela zóster. */
   varicelaIgG: { positivo: SiNo };
-  ecografia: { momento: 'primer_trimestre' | 'detalle' | 'otra'; hallazgos: 'normal' | 'anormal' };
+  ecografia: { momento: 'primer_trimestre' | 'detalle' | 'tercer_trimestre' | 'otra'; hallazgos: 'normal' | 'anormal' };
+  /** Glucemia en ayunas (primer trimestre). */
+  glucemia: { mgDl: number };
+  /** Hormona estimulante de tiroides (primer trimestre). */
+  tsh: { mUIL: number };
+  /** Uroanálisis (parcial de orina), en el segundo y el tercer trimestre. */
+  uroanalisis: { resultado: 'normal' | 'anormal'; hallazgos: string };
   /**
    * Toxoplasmosis: IgG e IgM. El título de IgG (UI/mL) permite ver si se duplica entre dos muestras;
    * IgA y avidez de IgG se piden cuando la IgG se duplica con IgM negativa.

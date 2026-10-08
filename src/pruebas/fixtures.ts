@@ -228,7 +228,6 @@ export function seguimiento(pesoKg: number): DatosSeguimiento {
     diagnosticoPreeclampsia: valor(false),
     tamizajeTrimestral: valor(true),
     observaciones: valor(SECRETO.notaInterna),
-    iniciales: valor('PP'),
     cambioResidencia: noCorresponde(),
     tdapAplicada: noCorresponde(),
     antiDAplicada: noCorresponde(),

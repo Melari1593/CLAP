@@ -17,6 +17,9 @@ export const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }
   { tipo: 'varicelaIgG', etiqueta: 'IgG para varicela zóster' },
   { tipo: 'coombsIndirecto', etiqueta: 'Coombs indirecto' },
   { tipo: 'ecografia', etiqueta: 'Ecografía' },
+  { tipo: 'glucemia', etiqueta: 'Glucemia en ayunas' },
+  { tipo: 'tsh', etiqueta: 'TSH' },
+  { tipo: 'uroanalisis', etiqueta: 'Uroanálisis' },
   { tipo: 'toxoplasmosis', etiqueta: 'Toxoplasmosis (IgG e IgM)' },
   { tipo: 'pcrLiquidoAmniotico', etiqueta: 'PCR para toxoplasma en líquido amniótico' },
   { tipo: 'chagas', etiqueta: 'Chagas' },
@@ -25,6 +28,13 @@ export const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }
   { tipo: 'ptog', etiqueta: 'PTOG 75 g' },
   { tipo: 'egb', etiqueta: 'Estreptococo B' },
 ];
+
+export const MOMENTO_ECOGRAFIA: Record<ResultadoPorTipo['ecografia']['momento'], string> = {
+  primer_trimestre: 'De 10+6 a 13+6 semanas',
+  detalle: 'De detalle (18 a 23+6 semanas)',
+  tercer_trimestre: 'De III trimestre',
+  otra: 'Otra',
+};
 
 export const etiquetaExamen = (t: TipoExamen) => EXAMENES.find((e) => e.tipo === t)?.etiqueta ?? t;
 const sn = (b: boolean | null | undefined) => (b === null || b === undefined ? '—' : b ? 'Sí' : 'No');
@@ -47,7 +57,10 @@ export function resumenExamen(e: ResultadoExamen): string {
     case 'coombsIndirecto': return pos((r as ResultadoPorTipo['coombsIndirecto']).positivo);
     case 'rubeolaIgG': return inmune((r as ResultadoPorTipo['rubeolaIgG']).positivo);
     case 'varicelaIgG': return inmune((r as ResultadoPorTipo['varicelaIgG']).positivo);
-    case 'ecografia': { const v = r as ResultadoPorTipo['ecografia']; return `${v.momento === 'primer_trimestre' ? 'De 10+6 a 13+6' : v.momento === 'detalle' ? 'De detalle' : 'Otra'} · ${v.hallazgos}`; }
+    case 'ecografia': { const v = r as ResultadoPorTipo['ecografia']; return `${MOMENTO_ECOGRAFIA[v.momento]} · ${v.hallazgos}`; }
+    case 'glucemia': return `${(r as ResultadoPorTipo['glucemia']).mgDl} mg/dL`;
+    case 'tsh': return `${String((r as ResultadoPorTipo['tsh']).mUIL).replace('.', ',')} mUI/L`;
+    case 'uroanalisis': { const v = r as ResultadoPorTipo['uroanalisis']; return v.resultado === 'normal' ? 'Normal' : `Anormal${v.hallazgos ? `: ${v.hallazgos}` : ''}`; }
     case 'hepatitisB': return `Antígeno de superficie ${(r as ResultadoPorTipo['hepatitisB']).antigenoSuperficie}`;
     case 'toxoplasmosis': {
       const v = r as ResultadoPorTipo['toxoplasmosis'];

@@ -183,3 +183,31 @@ export const deficitHierro: Regla = {
     };
   },
 };
+
+/**
+ * Inicio de sulfato ferroso: Hb medida de 13 g/dL o menos, sin anemia (con anemia, la alerta de
+ * anemia ya pide indicar o ajustar el hierro). No aparece si el hierro ya se decidió.
+ */
+export const inicioHierro: Regla = {
+  id: 'inicio_hierro',
+  evaluar(ctx) {
+    const c = ultimaHb(ctx);
+    const hasta = ctx.catalogo.valor('hierro.inicioConHbHasta');
+    if (!c || c.grado !== 'sin_anemia' || c.medidaGdl > hasta) return null;
+    if (ctx.historia.indicaciones.some((i) => i.tipo === 'hierro')) return null;
+    const sulfato = ctx.catalogo.valor('ordenes.medicamentos').find((m) => m.atc === 'B03AA07');
+    return {
+      titulo: 'Iniciar sulfato ferroso',
+      porque: [
+        `Hb medida ${coma(c.medidaGdl)} g/dL el ${c.fecha}: ${coma(hasta)} g/dL o menos.`,
+        ...(sulfato ? [`${sulfato.principio} ${sulfato.presentacion.toLowerCase()}: ${sulfato.dosis} ${sulfato.frecuencia.toLowerCase()}. ${sulfato.indicaciones ?? ''}`.trim()] : []),
+      ],
+      severidad: 1,
+      opciones: [
+        { etiqueta: 'Indicado', registraIndicacion: { tipo: 'hierro', estado: 'indicado' } },
+        { etiqueta: 'Ya lo toma', registraIndicacion: { tipo: 'hierro', estado: 'ya_lo_toma' } },
+        { etiqueta: 'No indicado', requiereMotivo: true, registraIndicacion: { tipo: 'hierro', estado: 'no_indicado' } },
+      ],
+    };
+  },
+};

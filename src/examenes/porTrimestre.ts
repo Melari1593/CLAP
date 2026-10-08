@@ -70,6 +70,9 @@ export function alterado(ctx: ContextoClinico, e: ResultadoExamen): boolean {
     }
     case 'pcrLiquidoAmniotico': return (r as ResultadoPorTipo['pcrLiquidoAmniotico']).positivo;
     case 'ecografia': return (r as ResultadoPorTipo['ecografia']).hallazgos === 'anormal';
+    case 'glucemia': return (r as ResultadoPorTipo['glucemia']).mgDl >= ctx.catalogo.valor('glucemia.cortes').diabetesGestacionalDesde;
+    case 'tsh': return (r as ResultadoPorTipo['tsh']).mUIL > ctx.catalogo.valor('tsh.limiteSuperior');
+    case 'uroanalisis': return (r as ResultadoPorTipo['uroanalisis']).resultado === 'anormal';
     case 'coombsIndirecto':
     case 'chagas':
     case 'malaria':
@@ -168,6 +171,7 @@ export function examenesPorTrimestre(ctx: ContextoClinico): GrupoTrimestre[] {
   const filas2 = [
     fila('segundo:vih', 'VIH del segundo trimestre', segundo, delSegundo(['vih'])),
     fila('segundo:sifilis', 'Sífilis del segundo trimestre', segundo, delSegundo(['sifilisTreponemica', 'vdrl'])),
+    fila('segundo:uroanalisis', 'Uroanálisis del segundo trimestre', segundo, buscar(['uroanalisis'], segundo.desdeSemana, tercer.desdeSemana)),
     fila('eco_detalle', 'Ecografía de detalle', v.ecografiaDetalle!, buscar(['ecografia'], 0, null, esEco('detalle'))),
     fila('ptog', etiquetaExamen('ptog'), v.ptog!, buscar(['ptog'], 0, null)),
   ];
@@ -177,8 +181,12 @@ export function examenesPorTrimestre(ctx: ContextoClinico): GrupoTrimestre[] {
     conPlaquetas(fila('tercer:hb', 'Hemograma del tercer trimestre', tercer, buscar(['hb'], tercer.desdeSemana, null))),
     fila('tercer:vih', 'VIH del tercer trimestre', tercer, buscar(['vih'], tercer.desdeSemana, null)),
     fila('tercer:sifilis', 'Sífilis del tercer trimestre', tercer, buscar(['sifilisTreponemica', 'vdrl'], tercer.desdeSemana, null)),
+    fila('tercer:uroanalisis', 'Uroanálisis del tercer trimestre', tercer, buscar(['uroanalisis'], tercer.desdeSemana, null)),
     fila('egb', etiquetaExamen('egb'), v.egb!, buscar(['egb'], 0, null)),
   ];
+  // Ecografía de III trimestre: no es de rutina; si se registró, se muestra con su nombre.
+  const eco3 = buscar(['ecografia'], 0, null, esEco('tercer_trimestre'));
+  if (eco3) filas3.push(fila('eco_3t', 'Ecografía de III trimestre', { desdeSemana: tercer.desdeSemana, hastaSemana: null }, eco3));
 
   // Toxoplasmosis cada mes mientras la IgG sea negativa: fila en el trimestre actual.
   const toxo = toxoMensual(ctx);

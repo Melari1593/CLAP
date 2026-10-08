@@ -3,7 +3,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import type { ResultadoExamen, TipoExamen } from '../datos/modelo';
 import { valorDe, type Campo } from '../datos/campo';
 import { validarHb } from '../consultas/validaciones';
-import { EXAMENES } from '../examenes/resumen';
+import { EXAMENES, MOMENTO_ECOGRAFIA } from '../examenes/resumen';
 import { useApp } from './contexto';
 
 /** Resultado guardado → valores del formulario (las claves del formulario son las del modelo). */
@@ -59,7 +59,10 @@ export function FormExamen({ inicial, onRegistrar, onCancelar }: {
     rubeolaIgG: positivo('positivo', 'Resultado'),
     varicelaIgG: positivo('positivo', 'Resultado'),
     coombsIndirecto: positivo('positivo', 'Resultado'),
-    ecografia: <>{opcion('momento', 'Momento', [['primer_trimestre', 'De 10+6 a 13+6'], ['detalle', 'De detalle (18–23+6)'], ['otra', 'Otra']])}{opcion('hallazgos', 'Hallazgos', [['normal', 'Normales'], ['anormal', 'Anormales']])}</>,
+    ecografia: <>{opcion('momento', 'Tipo de ecografía', Object.entries(MOMENTO_ECOGRAFIA))}{opcion('hallazgos', 'Hallazgos', [['normal', 'Normales'], ['anormal', 'Anormales']])}</>,
+    glucemia: numero('mgDl', 'Glucemia en ayunas', 'mg/dL'),
+    tsh: numero('mUIL', 'TSH', 'mUI/L'),
+    uroanalisis: <>{opcion('resultado', 'Resultado', [['normal', 'Normal'], ['anormal', 'Anormal']])}{campo('hallazgos', 'Hallazgos', <input value={f.hallazgos ?? ''} onChange={(e) => setF({ ...f, hallazgos: e.target.value })} />)}</>,
     hepatitisB: opcion('antigenoSuperficie', 'Antígeno de superficie', [['negativo', 'Negativo'], ['positivo', 'Positivo']]),
     toxoplasmosis: (
       <>
@@ -91,6 +94,9 @@ export function FormExamen({ inicial, onRegistrar, onCancelar }: {
       case 'vih': return f.resultado ? { solicitado: b('solicitado') ?? false, realizado: b('realizado') ?? false, resultado: f.resultado } : undefined;
       case 'sifilisTreponemica': return b('reactiva') === null ? undefined : { reactiva: b('reactiva') };
       case 'ecografia': return f.momento && f.hallazgos ? { momento: f.momento, hallazgos: f.hallazgos } : undefined;
+      case 'glucemia': return n('mgDl') !== undefined ? { mgDl: n('mgDl') } : undefined;
+      case 'tsh': return n('mUIL') !== undefined ? { mUIL: n('mUIL') } : undefined;
+      case 'uroanalisis': return f.resultado ? { resultado: f.resultado, hallazgos: f.hallazgos ?? '' } : undefined;
       case 'hepatitisB': return f.antigenoSuperficie ? { antigenoSuperficie: f.antigenoSuperficie } : undefined;
       case 'toxoplasmosis': // IgG e IgM obligatorias; título, IgA y avidez si se tienen
         return f.igg && f.igm ? { igg: f.igg, igm: f.igm, iggTitulo: n('iggTitulo') ?? null, iga: f.iga || null, avidez: f.avidez || null } : undefined;
