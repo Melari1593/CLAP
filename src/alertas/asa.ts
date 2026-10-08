@@ -73,6 +73,9 @@ export const asa: Regla = {
     const e = evaluarASA(ctx);
     // Antes de la semana 12 no hay alerta: el resumen muestra la fecha de inicio.
     if (!e || !e.cumpleCriterio || e.antesDeInicio) return null;
+    // Desde la semana 36 ya no se inicia: va hasta la semana 36.
+    const semanaFin = ctx.catalogo.valor('asa.semanaFin');
+    if (ctx.eg.estado === 'calculada' && ctx.eg.dias >= semanaFin * 7) return null;
     const { minimaMg, maximaMg } = ctx.catalogo.valor('asa.dosis');
     const semanaInicio = ctx.catalogo.valor('asa.semanaInicio');
     const factores = [...e.altos.map((f) => `${f} (alto)`), ...e.moderados.map((f) => `${f} (moderado)`)];
@@ -90,7 +93,7 @@ export const asa: Regla = {
     }
     return {
       titulo: 'Considerar ASA para prevenir preeclampsia',
-      porque: [...porque, `Aspirina ${minimaMg}–${maximaMg} mg por vía oral todos los días, desde la semana ${semanaInicio} hasta el día del parto.`],
+      porque: [...porque, `Aspirina ${minimaMg}–${maximaMg} mg por vía oral todos los días, desde la semana ${semanaInicio} hasta la semana ${semanaFin}.`],
       severidad: factores.length,
       opciones: [
         { etiqueta: 'Indicado', registraIndicacion: { tipo: 'asa', estado: 'indicado' } },

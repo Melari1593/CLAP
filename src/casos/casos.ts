@@ -615,7 +615,7 @@ export const CASOS: CasoClinico[] = [
     datos: ['HTA crónica'],
     cambios: (d) => (d.riesgoPreeclampsia.hipertensionCronica = valor(true)),
     alertas: { asa: 'Considerar ASA para prevenir preeclampsia' },
-    contiene: { asa: ['Aspirina 75–100 mg por vía oral todos los días, desde la semana 12 hasta el día del parto.'] },
+    contiene: { asa: ['Aspirina 75–100 mg por vía oral todos los días, desde la semana 12 hasta la semana 36.'] },
   }),
   caso({
     id: 'ASA-02',

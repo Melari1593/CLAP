@@ -209,8 +209,17 @@ const BASE = {
     fuentes: ['GPC Colombia 2013'],
     estado: 'decidido',
   }),
+  'asa.semanaFin': p<number>({
+    nombre: 'Semana en que se suspende el ASA',
+    valor: 36,
+    unidad: 'semanas (se toma hasta 35+6; desde 36+0 se suspende)',
+    fuentes: ['Equipo clínico'],
+    estado: 'decidido',
+    revisado: '2026-10-08',
+    nota: 'El ASA va hasta la semana 36. Indicado por la responsable del proyecto el 2026-10-08.',
+  }),
   'asa.dosis': p<{ minimaMg: number; maximaMg: number }>({
-    nombre: 'Dosis diaria de ASA hasta el parto',
+    nombre: 'Dosis diaria de ASA (desde la semana 12 hasta la 36)',
     valor: { minimaMg: 75, maximaMg: 100 },
     unidad: 'mg/día, vía oral',
     fuentes: ['GPC Colombia 2013'],

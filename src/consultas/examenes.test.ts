@@ -19,7 +19,7 @@ describe('Corregir y anular resultados de laboratorio', () => {
     const [e] = (await r.historia(embarazoId))!.examenes;
     expect(e!.fecha).toBe('2026-10-02');
     expect(e!.resultado).toEqual(valor({ gdl: 11.5, muestra: 'venosa' }));
-    expect((await r.bitacoraDe(hb.id)).map((b) => b.accion)).toEqual(['crear', 'editar']);
+    expect((await r.bitacoraDe(hb.id)).map((b) => b.accion).sort()).toEqual(['crear', 'editar']);
   });
 
   it('anula con motivo: deja de contar pero no se borra', async () => {

@@ -283,7 +283,11 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
 
   // Adherencia en cada control
   if (vigente('calcio')) lista.push({ id: 'adh:calcio', texto: 'Preguntar si toma el calcio todos los días.', tipo: 'pregunta', estado: 'pendiente' });
-  if (vigente('asa')) lista.push({ id: 'adh:asa', texto: 'Preguntar si toma la aspirina todos los días.', tipo: 'pregunta', estado: 'pendiente' });
+  const finASA = catalogo.valor('asa.semanaFin');
+  if (vigente('asa') && !desde(finASA)) lista.push({ id: 'adh:asa', texto: 'Preguntar si toma la aspirina todos los días.', tipo: 'pregunta', estado: 'pendiente' });
+  if (vigente('asa') && desde(finASA)) {
+    lista.push({ id: 'asa:suspender', texto: `Suspender la aspirina: va hasta la semana ${finASA}. Registre la suspensión en las indicaciones.`, tipo: 'accion', estado: 'pendiente' });
+  }
   if (vigente('tromboprofilaxis')) lista.push({ id: 'adh:trombo', texto: 'Preguntar si se aplica la tromboprofilaxis todos los días.', tipo: 'pregunta', estado: 'pendiente' });
 
   // Cada trimestre: tabaco, alcohol y violencia

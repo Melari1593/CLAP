@@ -16,7 +16,7 @@ export const QUE_HACER: Partial<Record<TipoIndicacion, { icono: string; texto: s
   asa: {
     icono: '💊',
     texto:
-      'Tómate la aspirina todos los días hasta el día del parto. Ayuda a prevenir la presión alta del embarazo, que puede ser peligrosa para ti y tu bebé. No la suspendas sin preguntar.',
+      'Tómate la aspirina todos los días hasta la semana 36 de embarazo. Ayuda a prevenir la presión alta del embarazo, que puede ser peligrosa para ti y tu bebé. No la suspendas sin preguntar.',
   },
   calcio: {
     icono: '🦴',

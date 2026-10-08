@@ -146,7 +146,14 @@ describe('D3 — ASA (GPC colombiana)', () => {
   it('1 factor alto: alerta con dosis', () => {
     const r = evaluar(asa, conFactores((d) => (d.riesgoPreeclampsia.hipertensionCronica = valor(true))));
     expect(r?.titulo).toBe('Considerar ASA para prevenir preeclampsia');
-    expect(r?.porque.join(' ')).toContain('Aspirina 75–100 mg por vía oral todos los días, desde la semana 12 hasta el día del parto.');
+    expect(r?.porque.join(' ')).toContain('Aspirina 75–100 mg por vía oral todos los días, desde la semana 12 hasta la semana 36.');
+  });
+
+  it('desde la semana 36 ya no hay alerta de ASA', () => {
+    const op = conFactores((d) => (d.riesgoPreeclampsia.hipertensionCronica = valor(true)));
+    const c = ctx(op, '2027-03-15');
+    expect(c.eg.estado === 'calculada' && c.eg.dias >= 36 * 7).toBe(true);
+    expect(evaluar(asa, op, '2027-03-15')).toBeNull();
   });
 
   it('2 moderados (primer embarazo y gemelar): alerta', () => {

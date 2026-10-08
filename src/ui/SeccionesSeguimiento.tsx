@@ -9,6 +9,7 @@ const INDICACIONES: { tipo: TipoIndicacion; etiqueta: string }[] = [
   { tipo: 'hierro', etiqueta: 'Hierro' },
   { tipo: 'acidoFolico', etiqueta: 'Ácido fólico' },
   { tipo: 'calcio', etiqueta: 'Carbonato de calcio' },
+  { tipo: 'asa', etiqueta: 'Aspirina (ASA), hasta la semana 36' },
   { tipo: 'preparacionParto', etiqueta: 'Preparación para el parto' },
   { tipo: 'lactancia', etiqueta: 'Consejería en lactancia' },
 ];
@@ -51,7 +52,7 @@ export function SeccionesSeguimiento({ embarazoId, alCambiar }: { embarazoId: st
               {atcDe(tipo, catalogo).length > 0 && <small>{atcDe(tipo, catalogo).map((m) => `${m.principio} · ATC ${m.atc}`).join(' + ')}</small>}
             </div>
             <div className="botones">
-              {(['indicado', 'no_indicado', 'ya_lo_toma'] as const).map((estado) => (
+              {(tipo === 'asa' ? (['indicado', 'no_indicado', 'ya_lo_toma', 'suspendido'] as const) : (['indicado', 'no_indicado', 'ya_lo_toma'] as const)).map((estado) => (
                 <button
                   key={estado}
                   type="button"
@@ -59,12 +60,12 @@ export function SeccionesSeguimiento({ embarazoId, alCambiar }: { embarazoId: st
                   onClick={async () => {
                     const motivo = estado === 'no_indicado' ? prompt('Motivo por el que no se indica:') ?? undefined : undefined;
                     if (estado === 'no_indicado' && !motivo) return;
-                    await servicio.marcarIndicacion(embarazoId, tipo, { estado, motivo });
+                    await servicio.marcarIndicacion(embarazoId, tipo, { estado, motivo, fechaSuspension: estado === 'suspendido' ? hoy() : undefined });
                     await cargar();
                     alCambiar?.();
                   }}
                 >
-                  {estado === 'indicado' ? 'Indicado' : estado === 'no_indicado' ? 'No indicado' : 'Ya lo toma'}
+                  {{ indicado: 'Indicado', no_indicado: 'No indicado', ya_lo_toma: 'Ya lo toma', suspendido: 'Suspendido' }[estado]}
                 </button>
               ))}
             </div>

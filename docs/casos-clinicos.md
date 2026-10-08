@@ -108,7 +108,7 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 
 | Caso | Qué se prueba | Datos | Resultado esperado | ¿Correcto? | Observaciones |
 |---|---|---|---|---|---|
-| ASA-01 | Hipertensión crónica (1 factor alto) en la semana 18. | HTA crónica | **Considerar ASA para prevenir preeclampsia**<br>incluye «Aspirina 75–100 mg por vía oral todos los días, desde la semana 12 hasta el día del parto.» | ☐ Sí ☐ No | |
+| ASA-01 | Hipertensión crónica (1 factor alto) en la semana 18. | HTA crónica | **Considerar ASA para prevenir preeclampsia**<br>incluye «Aspirina 75–100 mg por vía oral todos los días, desde la semana 12 hasta la semana 36.» | ☐ Sí ☐ No | |
 | ASA-02 | Primer embarazo y gemelar (2 moderados). | Gestas 0; Embarazo múltiple | **Considerar ASA para prevenir preeclampsia**<br>incluye «Primer embarazo (moderado); Embarazo múltiple (moderado)» | ☐ Sí ☐ No | |
 | ASA-03 | Solo primer embarazo (1 moderado): sin alerta. | Gestas 0 | Sin alertas | ☐ Sí ☐ No | |
 | ASA-04 | Criterio presente en la semana 10: sin alerta (el resumen muestra la fecha de inicio). | HTA crónica; Evaluada el 2026-08-10 (10+0); Evaluada el 2026-08-10 | Sin alertas | ☐ Sí ☐ No | |

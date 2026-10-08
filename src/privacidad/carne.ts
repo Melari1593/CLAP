@@ -94,6 +94,8 @@ export function proyectarCarne(historia: Historia, carne: Carne, hoy: FechaISO, 
   const ultima = cerradas[cerradas.length - 1];
   const indicaciones = historia.indicaciones
     .filter((i) => INDICACIONES_EN_CARNE.includes(i.tipo) && (i.estado === 'indicado' || i.estado === 'ya_lo_toma'))
+    // La aspirina va hasta la semana 36: desde ahí deja de aparecer en el carné.
+    .filter((i) => i.tipo !== 'asa' || ctx.eg.estado !== 'calculada' || ctx.eg.dias < catalogo.valor('asa.semanaFin') * 7)
     .map((i) => i.tipo);
   const trombo = evaluarTrombo(ctx);
   const umbralCoagulo = catalogo.valor('trombo.umbrales').desdeSemana28;
