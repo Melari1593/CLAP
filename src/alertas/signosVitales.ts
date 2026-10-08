@@ -1,10 +1,10 @@
-// Alertas por signos vitales del último registro (primera consulta o control): fiebre, saturación baja y
-// taquicardia materna.
+// Alertas por signos vitales del último registro (primera consulta o control): fiebre, saturación baja,
+// taquicardia materna y taquipnea.
 import { valorDe } from '../datos/campo';
 import { coma } from './anemia';
 import type { ContextoClinico, Regla } from './motor';
 
-type Signo = 'temperaturaC' | 'saturacionPct' | 'fcLpm';
+type Signo = 'temperaturaC' | 'saturacionPct' | 'fcLpm' | 'frRpm';
 
 /** Último valor registrado del signo vital, en los controles o en el examen físico de la primera consulta. */
 export function ultimoSigno(ctx: ContextoClinico, signo: Signo) {
@@ -67,6 +67,25 @@ export const taquicardiaMaterna: Regla = {
         `Frecuencia cardíaca ${fc.valor} lpm el ${fc.fecha} (mayor de ${taquicardiaMayorDe}).`,
         'Repetir en reposo. Buscar la causa: fiebre o infección, sangrado o anemia, deshidratación, dolor, ansiedad, enfermedad tiroidea o cardíaca, tromboembolia.',
         'Si persiste o se acompaña de otros signos de alarma, remitir.',
+      ],
+      severidad: 2,
+      opciones: [{ etiqueta: 'Valorada' }, { etiqueta: 'Remitida' }, { etiqueta: 'Medición repetida: normal', requiereMotivo: true }],
+    };
+  },
+};
+
+export const taquipnea: Regla = {
+  id: 'taquipnea',
+  evaluar(ctx) {
+    const fr = ultimoSigno(ctx, 'frRpm');
+    const { taquipneaMayorDe } = ctx.catalogo.valor('signosVitales.alertas');
+    if (!fr || fr.valor <= taquipneaMayorDe) return null;
+    return {
+      titulo: 'Taquipnea',
+      porque: [
+        `Frecuencia respiratoria ${fr.valor} rpm el ${fr.fecha} (mayor de ${taquipneaMayorDe}).`,
+        'Repetir en reposo y medir la saturación. Buscar la causa: infección respiratoria o sepsis, asma, tromboembolia pulmonar, edema pulmonar (preeclampsia, cardiopatía), anemia, ansiedad.',
+        'Si persiste, con saturación baja u otros signos de alarma, remitir.',
       ],
       severidad: 2,
       opciones: [{ etiqueta: 'Valorada' }, { etiqueta: 'Remitida' }, { etiqueta: 'Medición repetida: normal', requiereMotivo: true }],
