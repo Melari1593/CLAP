@@ -624,6 +624,59 @@ export const CASOS: CasoClinico[] = [
     alertas: {},
   }),
 
+  // ---------------- Glucemia y TSH (primer trimestre)
+  caso({
+    id: 'GLU-01',
+    grupo: 'Glucemia y TSH',
+    descripcion: 'Glucemia en ayunas de 85: sin alerta.',
+    datos: ['Glucemia 85 mg/dL (8+5)'],
+    extra: { examenes: [{ tipo: 'glucemia', valor: { mgDl: 85 }, fecha: T1 }] },
+    alertas: {},
+  }),
+  caso({
+    id: 'GLU-02',
+    grupo: 'Glucemia y TSH',
+    descripcion: 'Glucemia en ayunas de 95: diabetes gestacional.',
+    datos: ['Glucemia 95 mg/dL (8+5)'],
+    extra: { examenes: [{ tipo: 'glucemia', valor: { mgDl: 95 }, fecha: T1 }] },
+    alertas: { glucemia: 'Diabetes gestacional: glucemia en ayunas alterada' },
+    contiene: { glucemia: ['Glucemia en ayunas 95 mg/dL', 'Desde 92 mg/dL'] },
+  }),
+  caso({
+    id: 'GLU-03',
+    grupo: 'Glucemia y TSH',
+    descripcion: 'Glucemia en ayunas de 130: diabetes manifiesta.',
+    datos: ['Glucemia 130 mg/dL (8+5)'],
+    extra: { examenes: [{ tipo: 'glucemia', valor: { mgDl: 130 }, fecha: T1 }] },
+    alertas: { glucemia: 'Diabetes manifiesta en el embarazo: glucemia en ayunas alterada' },
+    contiene: { glucemia: ['Desde 126 mg/dL', 'alto riesgo'] },
+  }),
+  caso({
+    id: 'TSH-01',
+    grupo: 'Glucemia y TSH',
+    descripcion: 'TSH de 2,1: sin alerta.',
+    datos: ['TSH 2,1 mUI/L (8+5)'],
+    extra: { examenes: [{ tipo: 'tsh', valor: { mUIL: 2.1 }, fecha: T1 }] },
+    alertas: {},
+  }),
+  caso({
+    id: 'TSH-02',
+    grupo: 'Glucemia y TSH',
+    descripcion: 'TSH de 6,5: elevada.',
+    datos: ['TSH 6,5 mUI/L (8+5)'],
+    extra: { examenes: [{ tipo: 'tsh', valor: { mUIL: 6.5 }, fecha: T1 }] },
+    alertas: { tsh: 'TSH elevada: posible hipotiroidismo' },
+    contiene: { tsh: ['TSH 6,50 mUI/L', 'T4 libre'] },
+  }),
+  caso({
+    id: 'TSH-03',
+    grupo: 'Glucemia y TSH',
+    descripcion: 'TSH de 0,05: baja.',
+    datos: ['TSH 0,05 mUI/L (8+5)'],
+    extra: { examenes: [{ tipo: 'tsh', valor: { mUIL: 0.05 }, fecha: T1 }] },
+    alertas: { tsh: 'TSH baja: posible hipertiroidismo' },
+  }),
+
   // ---------------- ASA
   caso({
     id: 'ASA-01',

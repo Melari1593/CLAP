@@ -713,6 +713,15 @@ const BASE = {
     revisado: '2026-10-08',
     nota: 'Valor de referencia cuando el laboratorio no tiene rangos propios por trimestre (ATA 2017). Por confirmar con el equipo clínico.',
   }),
+  'tsh.limiteInferior': p<number>({
+    nombre: 'TSH: límite inferior en el embarazo',
+    valor: 0.1,
+    unidad: 'mUI/L (por debajo se marca como alterada)',
+    fuentes: ['Equipo clínico'],
+    estado: 'pendiente',
+    revisado: '2026-10-09',
+    nota: 'Por confirmar con el equipo clínico. En el primer trimestre la TSH baja puede ser fisiológica (efecto de la hCG).',
+  }),
   'plaquetas.normalDesde': p<number>({
     nombre: 'Recuento de plaquetas normal (hemograma)',
     valor: 150,

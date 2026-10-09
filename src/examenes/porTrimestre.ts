@@ -71,7 +71,10 @@ export function alterado(ctx: ContextoClinico, e: ResultadoExamen): boolean {
     case 'pcrLiquidoAmniotico': return (r as ResultadoPorTipo['pcrLiquidoAmniotico']).positivo;
     case 'ecografia': return (r as ResultadoPorTipo['ecografia']).hallazgos === 'anormal';
     case 'glucemia': return (r as ResultadoPorTipo['glucemia']).mgDl >= ctx.catalogo.valor('glucemia.cortes').diabetesGestacionalDesde;
-    case 'tsh': return (r as ResultadoPorTipo['tsh']).mUIL > ctx.catalogo.valor('tsh.limiteSuperior');
+    case 'tsh': {
+      const v = (r as ResultadoPorTipo['tsh']).mUIL;
+      return v > ctx.catalogo.valor('tsh.limiteSuperior') || v < ctx.catalogo.valor('tsh.limiteInferior');
+    }
     case 'uroanalisis': return (r as ResultadoPorTipo['uroanalisis']).resultado === 'anormal';
     case 'coombsIndirecto':
     case 'chagas':

@@ -106,6 +106,17 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 | FE-04 | Hb de 13 sin anemia y sin hierro decidido: iniciar sulfato ferroso. | Hb 13 (15+1) | **Iniciar sulfato ferroso**<br>incluye «Hb medida 13,0 g/dL»<br>incluye «Sulfato ferroso» | ☐ Sí ☐ No | |
 | FE-05 | Hb de 13 con hierro ya indicado: sin alerta. | Hb 13 (15+1); Hierro indicado | Sin alertas | ☐ Sí ☐ No | |
 
+## Glucemia y TSH
+
+| Caso | Qué se prueba | Datos | Resultado esperado | ¿Correcto? | Observaciones |
+|---|---|---|---|---|---|
+| GLU-01 | Glucemia en ayunas de 85: sin alerta. | Glucemia 85 mg/dL (8+5) | Sin alertas | ☐ Sí ☐ No | |
+| GLU-02 | Glucemia en ayunas de 95: diabetes gestacional. | Glucemia 95 mg/dL (8+5) | **Diabetes gestacional: glucemia en ayunas alterada**<br>incluye «Glucemia en ayunas 95 mg/dL»<br>incluye «Desde 92 mg/dL» | ☐ Sí ☐ No | |
+| GLU-03 | Glucemia en ayunas de 130: diabetes manifiesta. | Glucemia 130 mg/dL (8+5) | **Diabetes manifiesta en el embarazo: glucemia en ayunas alterada**<br>incluye «Desde 126 mg/dL»<br>incluye «alto riesgo» | ☐ Sí ☐ No | |
+| TSH-01 | TSH de 2,1: sin alerta. | TSH 2,1 mUI/L (8+5) | Sin alertas | ☐ Sí ☐ No | |
+| TSH-02 | TSH de 6,5: elevada. | TSH 6,5 mUI/L (8+5) | **TSH elevada: posible hipotiroidismo**<br>incluye «TSH 6,50 mUI/L»<br>incluye «T4 libre» | ☐ Sí ☐ No | |
+| TSH-03 | TSH de 0,05: baja. | TSH 0,05 mUI/L (8+5) | **TSH baja: posible hipertiroidismo** | ☐ Sí ☐ No | |
+
 ## ASA
 
 | Caso | Qué se prueba | Datos | Resultado esperado | ¿Correcto? | Observaciones |

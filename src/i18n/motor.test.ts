@@ -46,3 +46,13 @@ describe('Traductor', () => {
     expect(direccion('fr')).toBe('ltr');
   });
 });
+
+describe('Diccionarios reales', () => {
+  it('traducen alertas armadas con datos', async () => {
+    const en = new Traductor((await import('./en.json')).default);
+    expect(en.traducir('Glucemia en ayunas 95 mg/dL el 2026-08-01 (semana 8+5).')).toBe('Fasting blood glucose 95 mg/dL on 2026-08-01 (week 8+5).');
+    expect(en.traducir('TSH elevada: posible hipotiroidismo')).toBe('High TSH: possible hypothyroidism');
+    const ar = new Traductor((await import('./ar.json')).default);
+    expect(ar.traducir('Diabetes gestacional: glucemia en ayunas alterada')).toBe('سكري الحمل: سكر الدم الصيامي غير طبيعي');
+  });
+});
