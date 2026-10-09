@@ -83,6 +83,7 @@ export function historiaDePrueba(
     factores: (opciones.factores ?? []).map((x, i) => ({ ...meta(`f${i}`), embarazoId: 'e1', ...x })),
     derechos: [],
     consentimientos: [],
+    cuestionarios: [],
     carne: undefined,
   };
 }

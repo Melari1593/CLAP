@@ -10,6 +10,8 @@ import { PantallaLaboratorios } from './ui/PantallaLaboratorios';
 import { PantallaOrdenes } from './ui/PantallaOrdenes';
 import { ServicioCarne } from './carne/servicio';
 import { ServicioConsentimientos } from './consentimiento/servicio';
+import { ServicioCuestionarios } from './cuestionario/servicio';
+import { PantallaCuestionario } from './ui/PantallaCuestionario';
 import { PantallaImpresion } from './ui/PantallaImpresion';
 import { CarneWeb } from './ui/CarneWeb';
 import { RegistroEventos } from './eventos/eventos';
@@ -67,7 +69,8 @@ export function App() {
     const derechos = new ServicioDerechos(repo, motor, catalogo, hoy, undefined, eventos, CONFIGURACION_DEMO);
     const carnes = new ServicioCarne(bd, repo, catalogo, hoy, undefined, eventos);
     const consentimientos = new ServicioConsentimientos(repo);
-    return { bd, repo, catalogo, hoy, servicio, motor, derechos, carnes, consentimientos, institucion: CONFIGURACION_DEMO };
+    const cuestionarios = new ServicioCuestionarios(repo);
+    return { bd, repo, catalogo, hoy, servicio, motor, derechos, carnes, consentimientos, cuestionarios, institucion: CONFIGURACION_DEMO };
   }, []);
   // La pantalla actual sobrevive a una recarga de la página en esta pestaña.
   const [pantalla, setPantalla] = useState<Pantalla>(() => leerBorrador<Pantalla>('pantalla') ?? { tipo: 'buscar' });
@@ -85,6 +88,15 @@ export function App() {
     guardarBorrador('pantalla', p);
     window.scrollTo(0, 0);
   };
+
+  // Modo gestante: el cuestionario se muestra sin los menús de la historia.
+  if (pantalla.tipo === 'cuestionario') {
+    return (
+      <ContextoApp.Provider value={contexto}>
+        <PantallaCuestionario gestanteId={pantalla.gestanteId} embarazoId={pantalla.embarazoId} ir={ir} />
+      </ContextoApp.Provider>
+    );
+  }
 
   return (
     <ContextoApp.Provider value={contexto}>

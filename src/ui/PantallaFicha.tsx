@@ -84,6 +84,7 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
                 Nuevo control de seguimiento
               </button>
             )}
+            <button type="button" onClick={() => ir({ tipo: 'cuestionario', gestanteId, embarazoId: activo.id })}>📝 Cuestionario para la gestante</button>
             <button type="button" onClick={() => ir({ tipo: 'laboratorios', gestanteId, embarazoId: activo.id })}>🧪 Laboratorios y ecografías</button>
             {historia.carne && <button type="button" onClick={() => ir({ tipo: 'impresion', gestanteId, embarazoId: activo.id })}>Reimprimir carné</button>}
             <button type="button" onClick={() => ir({ tipo: 'derechos', gestanteId, embarazoId: activo.id })}>🔒 Opciones y derechos</button>

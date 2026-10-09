@@ -21,6 +21,8 @@ export const DATOS_NUNCA_EN_CARNE = [
   'derechos',
   // Consentimientos informados (incluye el de la IVE).
   'consentimientos',
+  // Respuestas de la gestante al cuestionario previo a la consulta.
+  'cuestionarios',
   // Bitácora: contiene los valores anteriores de todos los campos.
   'bitacora',
 ] as const;

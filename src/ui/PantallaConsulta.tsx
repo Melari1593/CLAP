@@ -1,6 +1,8 @@
 // B2 / B4 — Primera consulta y control de seguimiento.
 import { useEffect, useRef, useState } from 'react';
-import type { Consulta, DatosPrimeraConsulta, DatosSeguimiento, Gestante, Ordenes } from '../datos/modelo';
+import type { Consulta, Cuestionario, DatosPrimeraConsulta, DatosSeguimiento, Gestante, Ordenes } from '../datos/modelo';
+import { aplicarRespuestas, type ResultadoAplicar } from '../cuestionario/servicio';
+import { localeDe } from '../i18n/dom';
 import {
   BLOQUES_PRIMERA,
   BLOQUES_SEGUIMIENTO,
@@ -40,7 +42,9 @@ interface Props {
 }
 
 export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idInicial, ir }: Props) {
-  const { repo, servicio, hoy } = useApp();
+  const { repo, servicio, hoy, catalogo, cuestionarios } = useApp();
+  const [cuestionario, setCuestionario] = useState<Cuestionario>();
+  const [aplicado, setAplicado] = useState<Omit<ResultadoAplicar, 'datos'>>();
   const [gestante, setGestante] = useState<Gestante>();
   const [primeraDelEmbarazo, setPrimeraDelEmbarazo] = useState<DatosPrimeraConsulta>();
   const [egSemanas, setEgSemanas] = useState<number>();
@@ -78,6 +82,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
           setEgSemanas(eg.semanas);
           setEgTexto(`${eg.semanas} sem + ${eg.diasResto} d`);
         }
+        setCuestionario(historia.cuestionarios.at(-1));
         const primera = historia.consultas.find((c) => c.tipo === 'primera')?.primera;
         setPrimeraDelEmbarazo(primera);
         setRhNegativo(grupoRh(primera, historia.examenes).rh === '-');
@@ -212,7 +217,43 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       {tipo === 'primera' ? (
         <>
           <PanelCalculos gestante={gestante} datos={primera} />
-          <Formulario bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} extras={extras} ctx={{ edad: edadGestante }} />
+          {cuestionario && !aplicado && (
+            <div className="aviso cuestionario-aviso">
+              📝 La gestante respondió el cuestionario el {new Date(cuestionario.fechaHora).toLocaleString(localeDe(), { dateStyle: 'medium', timeStyle: 'short' })}
+              {cuestionario.aplicadoEn && ' (ya se pasó a la historia una vez)'}.{' '}
+              <button
+                type="button"
+                className="primario"
+                onClick={async () => {
+                  const r = aplicarRespuestas(primera!, cuestionario.respuestas, catalogo);
+                  setPrimera(r.datos);
+                  setAplicado({ llenados: r.llenados, conservados: r.conservados, paraHablar: r.paraHablar });
+                  await cuestionarios.marcarAplicado(cuestionario.id);
+                }}
+              >
+                Pasar sus respuestas a la historia
+              </button>
+            </div>
+          )}
+          {aplicado && (
+            <div className="aviso cuestionario-aviso" role="status">
+              <p>
+                <strong>Se llenaron {aplicado.llenados.length} campos con lo que respondió la gestante.</strong> Revíselos con ella y guarde la consulta. Lo que ya estaba registrado no se cambió
+                {aplicado.conservados.length > 0 && ` (${aplicado.conservados.length} campos)`}.
+              </p>
+              {aplicado.paraHablar.length > 0 && (
+                <p>
+                  🔒 Prefiere hablar con usted, a solas: <em>{aplicado.paraHablar.join(' · ')}</em>
+                </p>
+              )}
+              <details>
+                <summary>Campos llenados</summary>
+                <p>{aplicado.llenados.join(' · ')}</p>
+              </details>
+            </div>
+          )}
+          {/* Se vuelve a montar al pasar el cuestionario, para que los controles muestren lo nuevo. */}
+          <Formulario key={aplicado ? 'con-cuestionario' : 'sin-cuestionario'} bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} extras={extras} ctx={{ edad: edadGestante }} />
         </>
       ) : (
         <>

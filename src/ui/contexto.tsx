@@ -8,6 +8,7 @@ import type { MotorAlertas } from '../alertas/motor';
 import type { ServicioDerechos } from '../derechos/servicio';
 import type { ServicioCarne } from '../carne/servicio';
 import type { ServicioConsentimientos } from '../consentimiento/servicio';
+import type { ServicioCuestionarios } from '../cuestionario/servicio';
 import type { ConfiguracionInstitucional } from '../institucion/configuracion';
 
 export interface Contexto {
@@ -18,6 +19,7 @@ export interface Contexto {
   derechos: ServicioDerechos;
   carnes: ServicioCarne;
   consentimientos: ServicioConsentimientos;
+  cuestionarios: ServicioCuestionarios;
   institucion: ConfiguracionInstitucional;
   catalogo: Catalogo;
   hoy: () => FechaISO;
@@ -39,5 +41,6 @@ export type Pantalla =
   | { tipo: 'derechos'; gestanteId: string; embarazoId: string }
   | { tipo: 'impresion'; gestanteId: string; embarazoId: string }
   | { tipo: 'laboratorios'; gestanteId: string; embarazoId: string }
+  | { tipo: 'cuestionario'; gestanteId: string; embarazoId: string }
   | { tipo: 'ordenes'; gestanteId: string; embarazoId: string; consultaId: string }
   | { tipo: 'catalogo' };

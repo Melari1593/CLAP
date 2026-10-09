@@ -4,6 +4,7 @@ import type {
   Alerta,
   Carne,
   Consentimiento,
+  Cuestionario,
   Consulta,
   Embarazo,
   EntradaBitacora,
@@ -27,6 +28,7 @@ export interface TablasHistoria {
   derechos: RegistroDerechos;
   carnes: Carne;
   consentimientos: Consentimiento;
+  cuestionarios: Cuestionario;
 }
 
 export type NombreTabla = keyof TablasHistoria;
@@ -42,6 +44,7 @@ export const TABLAS_HISTORIA: NombreTabla[] = [
   'derechos',
   'carnes',
   'consentimientos',
+  'cuestionarios',
 ];
 
 export class BaseDatos extends Dexie {
@@ -55,6 +58,7 @@ export class BaseDatos extends Dexie {
   derechos!: EntityTable<RegistroDerechos, 'id'>;
   carnes!: EntityTable<Carne, 'id'>;
   consentimientos!: EntityTable<Consentimiento, 'id'>;
+  cuestionarios!: EntityTable<Cuestionario, 'id'>;
   bitacora!: EntityTable<EntradaBitacora, 'id'>;
   cola!: EntityTable<ItemCola, 'id'>;
   eventos!: EntityTable<Evento, 'id'>;
@@ -76,5 +80,6 @@ export class BaseDatos extends Dexie {
     });
     this.version(2).stores({ eventos: 'id, embarazoId, tipo, fechaHora, enviado' });
     this.version(3).stores({ consentimientos: 'id, embarazoId, tipo' });
+    this.version(4).stores({ cuestionarios: 'id, embarazoId, fechaHora' });
   }
 }

@@ -164,7 +164,7 @@ export class Repositorio {
     const embarazo = await this.leer('embarazos', embarazoId);
     if (!embarazo) return undefined;
     const porEmbarazo = { embarazoId };
-    const [gestante, consultas, examenes, indicaciones, alertas, factores, derechos, carnes, consentimientos] = await Promise.all([
+    const [gestante, consultas, examenes, indicaciones, alertas, factores, derechos, carnes, consentimientos, cuestionarios] = await Promise.all([
       this.leer('gestantes', embarazo.gestanteId),
       this.bd.consultas.where(porEmbarazo).sortBy('fecha'),
       this.bd.examenes.where(porEmbarazo).sortBy('fecha').then((l) => l.filter((e) => !e.anulado)),
@@ -174,9 +174,10 @@ export class Repositorio {
       this.bd.derechos.where(porEmbarazo).sortBy('fechaHora'),
       this.bd.carnes.where(porEmbarazo).toArray(),
       this.bd.consentimientos.where(porEmbarazo).sortBy('fechaHora'),
+      this.bd.cuestionarios.where(porEmbarazo).sortBy('fechaHora'),
     ]);
     if (!gestante) return undefined;
-    return { gestante, embarazo, consultas, examenes, indicaciones, alertas, factores, derechos, consentimientos, carne: carnes[0] };
+    return { gestante, embarazo, consultas, examenes, indicaciones, alertas, factores, derechos, consentimientos, cuestionarios, carne: carnes[0] };
   }
 
   async bitacoraDe(entidadId: string) {

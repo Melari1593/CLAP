@@ -650,6 +650,18 @@ export interface Consentimiento extends Meta {
   notas?: string;
 }
 
+// ---------------------------------------------------------------- Cuestionario de la gestante
+
+/** Respuestas de la gestante antes de la consulta. Privado: nunca en el carné. */
+export interface Cuestionario extends Meta {
+  embarazoId: string;
+  fechaHora: FechaHoraISO;
+  idioma: 'es' | 'en' | 'fr' | 'ar';
+  respuestas: Record<string, unknown>;
+  /** Cuándo el profesional pasó las respuestas a la primera consulta. */
+  aplicadoEn?: FechaHoraISO;
+}
+
 // ---------------------------------------------------------------- Carné
 
 /** Canales por los que se entrega el enlace del carné. */
