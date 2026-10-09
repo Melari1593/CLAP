@@ -71,7 +71,7 @@ describe('Cuestionario de los controles de seguimiento', () => {
     expect(ids).toEqual(['hierro', 'calcio', 'otrosMedicamentos']);
   });
 
-  it('pasa signos de alarma y adherencia, muestra el método posparto, y resalta las alarmas', () => {
+  it('pasa signos de alarma, adherencia y método posparto, y resalta las alarmas', () => {
     const r = aplicarRespuestas(
       seguimientoVacio(),
       { motivo: 'Me siento bien', alarmas: ['dolorCabeza', 'vision'], movimientos: 'menos', calcio: false, hierro: true, vrs: false, metodoPosparto: 'implante', fuma: false },
@@ -82,10 +82,10 @@ describe('Cuestionario de los controles de seguimiento', () => {
     expect(r.datos.anamnesis.motivoConsulta).toEqual(valor('Me siento bien'));
     expect(r.datos.anamnesis.revisionSistemas).toEqual(valor('Refiere: dolor de cabeza fuerte, visión borrosa o lucecitas (cuestionario de la gestante).'));
     expect(r.datos.tomaCalcioDiario).toEqual(valor(false));
-    expect(r.datos.metodoAnticonceptivoPosparto.estado).toBe('no_corresponde');
+    expect(r.datos.metodoAnticonceptivoPosparto).toEqual(valor('implante'));
     expect(r.datos.observaciones).toEqual(valor('Cuestionario: ¿Fumas cigarrillo? No.'));
     expect(r.alarmas).toEqual(['Dolor de cabeza fuerte', 'Visión borrosa o lucecitas', 'El bebé se mueve menos que antes']);
-    expect(r.otras.map((o) => o.respuesta)).toEqual(['Sí', 'No', 'Implante en el brazo']);
+    expect(r.otras.map((o) => o.respuesta)).toEqual(['Sí', 'No']);
     expect(r.otras[1]?.pregunta).toContain('VRS');
   });
 

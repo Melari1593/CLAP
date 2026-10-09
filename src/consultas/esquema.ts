@@ -165,7 +165,9 @@ function camposAnticoncepcion<D>(prefijo: string): DefCampo<D>[] {
           ['no_ha_decidido', 'No ha decidido'],
         ),
       },
-      aplica: (d) => es(obtener(d, `${prefijo}asesoriaAnticoncepcion`), true),
+      // También se muestra si ya tiene dato: lo que ella respondió en el cuestionario del control.
+      aplica: (d) =>
+        es(obtener(d, `${prefijo}asesoriaAnticoncepcion`), true) || (obtener(d, `${prefijo}metodoAnticonceptivoPosparto`) as Campo<unknown> | undefined)?.estado === 'valor',
     },
   ];
 }

@@ -366,8 +366,7 @@ export const CUESTIONARIO_SEGUIMIENTO: SeccionCuestionario[] = [
         texto: 'Después del parto, ¿qué método quieres usar para no quedar embarazada pronto?',
         tipo: 'opciones',
         opciones: op(['diu_posparto', 'DIU antes de salir del hospital'], ['implante', 'Implante en el brazo'], ['hormonal', 'Pastillas o inyección'], ['barrera', 'Condón'], ['ligadura', 'Operación para no tener más hijos'], ['no_ha_decidido', 'Todavía no sé']),
-        // Se registra en la historia solo después de la asesoría del profesional: aquí es un dato para conversar.
-        resumen: true,
+        rutas: ['metodoAnticonceptivoPosparto'],
       },
       sino('mudanza', '¿Te cambiaste de casa o de municipio desde la última consulta?', [], { resumen: true }),
     ],
