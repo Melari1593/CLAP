@@ -1,5 +1,6 @@
 // Firma del profesional al final de la consulta: nombre, registro profesional y firma manuscrita
 // digitalizada (se dibuja con el dedo, el lápiz o el mouse). Se guarda al cerrar la consulta.
+import { localeDe } from '../i18n/dom';
 import { useEffect, useRef, useState } from 'react';
 import { useApp } from './contexto';
 
@@ -40,7 +41,7 @@ export function FirmaProfesional({ firma, onFirma, cierre }: {
             <strong>{nombre}</strong>
             {registro && ` · Registro profesional ${registro}`}
             <br />
-            <small className="suave">Firmado al cerrar la consulta: {new Date(cierre.fechaHora).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}</small>
+            <small className="suave">Firmado al cerrar la consulta: {new Date(cierre.fechaHora).toLocaleString(localeDe(), { dateStyle: 'medium', timeStyle: 'short' })}</small>
           </p>
         </>
       ) : (

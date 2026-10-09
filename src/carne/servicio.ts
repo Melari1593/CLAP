@@ -17,6 +17,8 @@ export interface Destino {
   canal: CanalEnvio;
   /** Número de WhatsApp o correo; no aplica para el impreso. */
   destino?: string;
+  /** Idioma del carné. */
+  idioma?: Carne['idioma'];
 }
 
 function validarDestino({ canal, destino }: Destino): string | undefined {
@@ -58,6 +60,7 @@ export class ServicioCarne {
       pinHash: await derivarPin(pin, pinSal),
       canal: destino.canal,
       destino: validarDestino(destino),
+      idioma: destino.idioma ?? 'es',
       estado: carneDebeEstarPausado(historia.derechos, historia.consentimientos) ? 'pausado' : 'activo',
       intentosFallidos: 0,
     });
@@ -76,7 +79,14 @@ export class ServicioCarne {
   async cambiarDestino(carneId: string, destino: Destino): Promise<Carne> {
     const carne = await this.repo.leer('carnes', carneId);
     if (!carne) throw new ErrorCarne('Carné no encontrado.');
-    return this.repo.guardar('carnes', { ...carne, canal: destino.canal, destino: validarDestino(destino), token: aleatorio(32) });
+    return this.repo.guardar('carnes', { ...carne, canal: destino.canal, destino: validarDestino(destino), idioma: destino.idioma ?? carne.idioma, token: aleatorio(32) });
+  }
+
+  /** Cambia el idioma en que la gestante lee su carné (el enlace no cambia). */
+  async cambiarIdioma(carneId: string, idioma: NonNullable<Carne['idioma']>): Promise<Carne> {
+    const carne = await this.repo.leer('carnes', carneId);
+    if (!carne) throw new ErrorCarne('Carné no encontrado.');
+    return this.repo.guardar('carnes', { ...carne, idioma });
   }
 
   /** Lo mismo que verá la gestante: misma proyección que el carné web y el impreso. */

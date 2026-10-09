@@ -10,6 +10,8 @@ import { verificarPin } from '../carne/pin';
 import { proyectarCarne, type DatosCarne } from '../privacidad/carne';
 import { CarneGestante } from './CarneGestante';
 import { RegistroEventos } from '../eventos/eventos';
+import { esIdioma, type Idioma } from '../i18n/motor';
+import { SelectorIdioma } from './SelectorIdioma';
 
 async function historiaPorToken(bd: BaseDatos, token: string): Promise<Historia | undefined> {
   const carne = await bd.carnes.get({ token });
@@ -38,9 +40,36 @@ export function CarneWeb({ bd, token, catalogo, hoy }: { bd: BaseDatos; token: s
   const [pin, setPin] = useState('');
   const [mensaje, setMensaje] = useState<string>();
   const [datos, setDatos] = useState<DatosCarne>();
+  // El idioma que eligió en la consulta; ella puede cambiarlo aquí (se recuerda en su teléfono).
+  const clave = `hcp-idioma-carne:${token}`;
+  const [idioma, setIdiomaEstado] = useState<Idioma>(() => {
+    try {
+      const x = localStorage.getItem(clave);
+      return esIdioma(x) ? x : 'es';
+    } catch {
+      return 'es';
+    }
+  });
+  const setIdioma = (i: Idioma) => {
+    setIdiomaEstado(i);
+    try {
+      localStorage.setItem(clave, i);
+    } catch {
+      /* sin almacenamiento */
+    }
+  };
 
   useEffect(() => {
-    void bd.carnes.get({ token }).then((c) => setExiste(Boolean(c)));
+    void bd.carnes.get({ token }).then((c) => {
+      setExiste(Boolean(c));
+      let elegido = false;
+      try {
+        elegido = localStorage.getItem(clave) !== null;
+      } catch {
+        /* sin almacenamiento */
+      }
+      if (c?.idioma && !elegido) setIdiomaEstado(c.idioma);
+    });
   }, [bd, token]);
 
   const entrar = async (e: FormEvent) => {
@@ -61,11 +90,24 @@ export function CarneWeb({ bd, token, catalogo, hoy }: { bd: BaseDatos; token: s
     }
   };
 
-  if (existe === undefined) return <p className="carne-web">Cargando…</p>;
-  if (!existe) return <p className="carne-web">Este enlace ya no funciona. Pide en tu servicio de salud que te envíen el nuevo.</p>;
-  if (datos) return <main className="carne-web"><p className="demo no-imprimir">Versión de demostración con datos ficticios.</p><CarneGestante datos={datos} /></main>;
+  const selector = (
+    <div className="no-imprimir">
+      <SelectorIdioma idioma={idioma} onCambio={setIdioma} />
+    </div>
+  );
+  if (existe === undefined) return <p className="carne-web" data-idioma={idioma}>Cargando…</p>;
+  if (!existe) return <p className="carne-web" data-idioma={idioma}>Este enlace ya no funciona. Pide en tu servicio de salud que te envíen el nuevo.</p>;
+  if (datos)
+    return (
+      <main className="carne-web" data-idioma={idioma}>
+        {selector}
+        <p className="demo no-imprimir">Versión de demostración con datos ficticios.</p>
+        <CarneGestante datos={datos} idioma={idioma} />
+      </main>
+    );
   return (
-    <main className="carne-web">
+    <main className="carne-web" data-idioma={idioma}>
+      {selector}
       <form onSubmit={entrar} className="carne pin">
         <img src="/logo.png" alt="" width={45} height={96} className="logo-pin" />
         <h2>Tu carné de control prenatal</h2>

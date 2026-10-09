@@ -1,11 +1,12 @@
 // B3 — Lo que la app calcula sola mientras el profesional llena la primera consulta.
+import { localeDe } from '../i18n/dom';
 import { edad, edadGestacional, imc, intervaloIntergenesico, sumarDias } from '../clinico/calculos';
 import { valorDe } from '../datos/campo';
 import type { DatosPrimeraConsulta, Gestante } from '../datos/modelo';
 import { useApp } from './contexto';
 
 function fechaLarga(fecha: string): string {
-  return new Date(`${fecha}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+  return new Date(`${fecha}T12:00:00`).toLocaleDateString(localeDe(), { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 export function PanelCalculos({ gestante, datos }: { gestante: Gestante; datos?: DatosPrimeraConsulta }) {

@@ -1,12 +1,13 @@
 // Consentimiento informado: registro de lo que se explicó, quién decide y su decisión, con la
 // posibilidad de revocarlo. El de la IVE solo se muestra en "Opciones y derechos".
+import { localeDe } from '../i18n/dom';
 import { useEffect, useState, type FormEvent } from 'react';
 import type { Consentimiento, TipoConsentimiento } from '../datos/modelo';
 import { ErrorConsentimiento } from '../consentimiento/servicio';
 import { GUIA_CONSENTIMIENTO, PROCEDIMIENTOS_FRECUENTES } from '../consentimiento/textos';
 import { useApp } from './contexto';
 
-const fechaHora = (iso: string) => new Date(iso).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+const fechaHora = (iso: string) => new Date(iso).toLocaleString(localeDe(), { dateStyle: 'medium', timeStyle: 'short' });
 const PUNTOS = ['beneficios', 'riesgos', 'alternativas', 'implicaciones'] as const;
 const NOMBRE_PUNTO: Record<(typeof PUNTOS)[number], string> = {
   beneficios: 'Beneficios',

@@ -5,6 +5,7 @@ import type { DatosCarne } from '../privacidad/carne';
 import { ErrorCarne } from '../carne/servicio';
 import { CarneGestante } from './CarneGestante';
 import { useApp } from './contexto';
+import { IDIOMAS, type Idioma } from '../i18n/motor';
 import { PanelConsentimientos } from './PanelConsentimientos';
 import { datosCarneAutorizados } from '../consentimiento/servicio';
 
@@ -14,12 +15,25 @@ const CANALES: { canal: CanalEnvio; etiqueta: string }[] = [
   { canal: 'impreso', etiqueta: 'Solo impreso' },
 ];
 
+/** Idioma en que la gestante lee su carné. Los nombres de los idiomas no se traducen. */
+function ElegirIdioma({ idioma, onCambio }: { idioma: Idioma; onCambio: (i: Idioma) => void }) {
+  return (
+    <label>
+      Idioma del carné{' '}
+      <select data-no-traducir value={idioma} onChange={(e) => onCambio(e.target.value as Idioma)}>
+        {IDIOMAS.map((i) => <option key={i.id} value={i.id}>{i.nombre}</option>)}
+      </select>
+    </label>
+  );
+}
+
 function FormDestino({ inicial, onGuardar, conPin }: {
-  inicial?: { canal: CanalEnvio; destino?: string };
-  onGuardar: (d: { canal: CanalEnvio; destino?: string; pin?: string }) => Promise<void>;
+  inicial?: { canal: CanalEnvio; destino?: string; idioma?: Idioma };
+  onGuardar: (d: { canal: CanalEnvio; destino?: string; pin?: string; idioma: Idioma }) => Promise<void>;
   conPin: boolean;
 }) {
   const [canal, setCanal] = useState<CanalEnvio>(inicial?.canal ?? 'whatsapp');
+  const [idioma, setIdioma] = useState<Idioma>(inicial?.idioma ?? 'es');
   const [destino, setDestino] = useState(inicial?.destino ?? '');
   const [pin, setPin] = useState('');
   const [pin2, setPin2] = useState('');
@@ -30,7 +44,7 @@ function FormDestino({ inicial, onGuardar, conPin }: {
     setError(undefined);
     if (conPin && pin !== pin2) return setError('Los dos PIN no coinciden.');
     try {
-      await onGuardar({ canal, destino: canal === 'impreso' ? undefined : destino, pin: conPin ? pin : undefined });
+      await onGuardar({ canal, destino: canal === 'impreso' ? undefined : destino, pin: conPin ? pin : undefined, idioma });
     } catch (err) {
       setError(err instanceof ErrorCarne ? err.message : String(err));
     }
@@ -58,6 +72,7 @@ function FormDestino({ inicial, onGuardar, conPin }: {
       {canal === 'correo' && (
         <label>Correo (solo si lo revisa; confírmelo con ella) <input type="email" required value={destino} onChange={(e) => setDestino(e.target.value)} /></label>
       )}
+      <ElegirIdioma idioma={idioma} onCambio={setIdioma} />
       {error && <p className="error" role="alert">{error}</p>}
       <button type="submit" className="primario">Guardar</button>
     </form>
@@ -113,8 +128,8 @@ export function CierreCarne({ embarazoId, telefono, correo, onImprimir }: {
         <FormDestino
           conPin
           inicial={{ canal: telefono ? 'whatsapp' : correo ? 'correo' : 'impreso', destino: telefono ?? correo }}
-          onGuardar={async ({ canal, destino, pin }) => {
-            await carnes.crear(embarazoId, pin!, { canal, destino });
+          onGuardar={async ({ canal, destino, pin, idioma }) => {
+            await carnes.crear(embarazoId, pin!, { canal, destino, idioma });
             await cargar();
           }}
         />
@@ -125,6 +140,14 @@ export function CierreCarne({ embarazoId, telefono, correo, onImprimir }: {
             {carne.destino && ` · ${carne.destino}`}
             {carne.estado === 'pausado' && ' · pausado'}
           </p>
+          <ElegirIdioma
+            idioma={carne.idioma ?? 'es'}
+            onCambio={async (i) => {
+              await carnes.cambiarIdioma(carne.id, i);
+              setMensaje('Idioma del carné actualizado.');
+              await cargar();
+            }}
+          />
           <div className="botones">
             {carne.canal !== 'impreso' && carne.estado === 'activo' && (
               <button type="button" className="primario" onClick={() => void enviar()}>
@@ -149,9 +172,9 @@ export function CierreCarne({ embarazoId, telefono, correo, onImprimir }: {
               <p className="aviso">Al cambiar el número o el correo, el enlace anterior deja de funcionar.</p>
               <FormDestino
                 conPin={false}
-                inicial={{ canal: carne.canal, destino: carne.destino }}
-                onGuardar={async ({ canal, destino }) => {
-                  await carnes.cambiarDestino(carne.id, { canal, destino });
+                inicial={{ canal: carne.canal, destino: carne.destino, idioma: carne.idioma }}
+                onGuardar={async ({ canal, destino, idioma }) => {
+                  await carnes.cambiarDestino(carne.id, { canal, destino, idioma });
                   setEditando(undefined);
                   setMensaje('Destino actualizado: reenvíe el enlace.');
                   await cargar();
@@ -167,7 +190,7 @@ export function CierreCarne({ embarazoId, telefono, correo, onImprimir }: {
         <details open>
           <summary>Vista previa: así verá la gestante su carné</summary>
           <div className="vista-previa">
-            <CarneGestante datos={vista} />
+            <CarneGestante datos={vista} idioma={carne?.idioma ?? 'es'} />
           </div>
         </details>
       )}

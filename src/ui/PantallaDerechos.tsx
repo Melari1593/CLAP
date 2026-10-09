@@ -1,4 +1,5 @@
 // E1 — Pantalla privada "Opciones y derechos". Nada de lo que se registra aquí llega al carné.
+import { localeDe } from '../i18n/dom';
 import { useEffect, useState, type FormEvent } from 'react';
 import type { Causal, DecisionDerechos, DesencadenanteDerechos, Gestante, RegistroDerechos } from '../datos/modelo';
 import type { Historia } from '../datos/repositorio';
@@ -22,7 +23,7 @@ const ahoraLocal = () => {
   const d = new Date();
   return new Date(d.getTime() - d.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 };
-const fechaHora = (iso: string) => new Date(iso).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+const fechaHora = (iso: string) => new Date(iso).toLocaleString(localeDe(), { dateStyle: 'medium', timeStyle: 'short' });
 
 export function PantallaDerechos({ gestanteId, embarazoId, ir }: { gestanteId: string; embarazoId: string; ir: (p: Pantalla) => void }) {
   const { repo, derechos } = useApp();

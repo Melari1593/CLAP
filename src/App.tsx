@@ -25,6 +25,9 @@ import { PantallaFicha } from './ui/PantallaFicha';
 import { AvisoActualizacion } from './ui/Actualizacion';
 import { guardarBorrador, leerBorrador } from './ui/borrador';
 import { CONFIGURACION_DEMO } from './institucion/configuracion';
+import { SelectorIdioma } from './ui/SelectorIdioma';
+import { cambiarIdioma, guardarIdioma, idiomaGuardado } from './i18n/dom';
+import type { Idioma } from './i18n/motor';
 
 // El inicio de sesión con roles reales llega con el servidor. Mientras tanto, la app
 // usa un profesional autorizado de demostración en este dispositivo.
@@ -69,6 +72,8 @@ export function App() {
   // La pantalla actual sobrevive a una recarga de la página en esta pestaña.
   const [pantalla, setPantalla] = useState<Pantalla>(() => leerBorrador<Pantalla>('pantalla') ?? { tipo: 'buscar' });
   const [aviso, setAviso] = useState<string>();
+  // Al cambiar el idioma se vuelve a dibujar la pantalla (fechas en el formato del idioma).
+  const [idioma, setIdioma] = useState<Idioma>(idiomaGuardado);
 
   // Enlace del carné de la gestante: #/carne/<token>
   const token = window.location.hash.match(/^#\/carne\/([\w-]+)$/)?.[1];
@@ -91,6 +96,14 @@ export function App() {
         <p className="demo" role="note">Versión de demostración: use solo datos ficticios. Los datos quedan en este dispositivo.</p>
         <EstadoConexion bd={contexto.bd} />
         <AvisoActualizacion />
+        <SelectorIdioma
+          idioma={idioma}
+          onCambio={(i) => {
+            setIdioma(i);
+            guardarIdioma(i);
+            cambiarIdioma(i);
+          }}
+        />
         <nav className="menu">
           <button type="button" onClick={() => ir({ tipo: 'buscar' })}>Buscar gestante</button>
           <button type="button" onClick={() => ir({ tipo: 'catalogo' })}>Catálogo clínico</button>

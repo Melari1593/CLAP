@@ -1,24 +1,26 @@
 // F4 / F6 — Lo que ve la gestante. Un solo componente para la vista previa, el carné web y el impreso.
 import type { DatosCarne } from '../privacidad/carne';
 import { ANTIRRUBEOLA, QUE_HACER, SENALES_COAGULO, SIGNOS_ALARMA, TUS_DERECHOS } from '../carne/textos';
+import { localeDe } from '../i18n/dom';
+import type { Idioma } from '../i18n/motor';
 
-const fecha = (iso: string) =>
-  new Date(`${iso}T12:00:00`).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-const fechaCorta = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
-
-export function CarneGestante({ datos }: { datos: DatosCarne }) {
+/** El carné se lee en el idioma de la gestante (data-idioma), sin importar el de la interfaz. */
+export function CarneGestante({ datos, idioma = 'es' }: { datos: DatosCarne; idioma?: Idioma }) {
+  const fecha = (iso: string) =>
+    new Date(`${iso}T12:00:00`).toLocaleDateString(localeDe(idioma), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const fechaCorta = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString(localeDe(idioma), { day: 'numeric', month: 'short', year: 'numeric' });
   if (datos.estado === 'pausado') {
     return (
-      <article className="carne">
+      <article className="carne" data-idioma={idioma} lang={idioma}>
         <p className="carne-pausado">{datos.mensaje}</p>
       </article>
     );
   }
   const queHacer = datos.indicaciones.flatMap((i) => (QUE_HACER[i] ? [{ id: i, ...QUE_HACER[i]! }] : []));
   return (
-    <article className="carne" aria-label="Carné de control prenatal">
+    <article className="carne" aria-label="Carné de control prenatal" data-idioma={idioma} lang={idioma}>
       <header>
-        <h2>Hola, {datos.nombre}</h2>
+        <h2>Hola, <span data-no-traducir>{datos.nombre}</span></h2>
         <small>Actualizado el {fechaCorta(datos.actualizado)}</small>
       </header>
 

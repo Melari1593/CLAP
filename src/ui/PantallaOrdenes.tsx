@@ -1,4 +1,5 @@
 // Fórmula médica y orden de paraclínicos para imprimir o guardar en PDF, con la firma del cierre.
+import { localeDe } from '../i18n/dom';
 import { useEffect, useState } from 'react';
 import type { Consulta, Gestante } from '../datos/modelo';
 import { valorDe } from '../datos/campo';
@@ -59,7 +60,7 @@ export function PantallaOrdenes({ gestanteId, embarazoId, consultaId, ir }: { ge
         <strong>{consulta.cierre.profesional}</strong>
         {consulta.cierre.registroProfesional && ` · Registro profesional ${consulta.cierre.registroProfesional}`}
         <br />
-        <small>{new Date(consulta.cierre.fechaHora).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}</small>
+        <small>{new Date(consulta.cierre.fechaHora).toLocaleString(localeDe(), { dateStyle: 'medium', timeStyle: 'short' })}</small>
       </p>
     </footer>
   );

@@ -1,5 +1,6 @@
 // Ficha de la gestante: embarazo actual, cálculos y consultas. (El resumen completo con
 // alertas y pendientes es la tarea F2.)
+import { localeDe } from '../i18n/dom';
 import { useEffect, useState } from 'react';
 import type { Embarazo, Gestante } from '../datos/modelo';
 import type { Historia } from '../datos/repositorio';
@@ -42,7 +43,7 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
   return (
     <section>
       {aviso && <p className="aviso">{aviso}</p>}
-      <h2>{gestante.nombres} {gestante.apellidos}</h2>
+      <h2 data-no-traducir>{gestante.nombres} {gestante.apellidos}</h2>
       <p className="suave">{gestante.documentoTipo} {gestante.documentoNumero}</p>
 
       {activo && historia ? (
@@ -66,7 +67,7 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
                   {c.cierre && (
                     <small className="suave">
                       {' '}· cerrada por {c.cierre.profesional}
-                      {c.cierre.registroProfesional && ` (${c.cierre.registroProfesional})`} el {new Date(c.cierre.fechaHora).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}
+                      {c.cierre.registroProfesional && ` (${c.cierre.registroProfesional})`} el {new Date(c.cierre.fechaHora).toLocaleString(localeDe(), { dateStyle: 'medium', timeStyle: 'short' })}
                     </small>
                   )}
                 </button>

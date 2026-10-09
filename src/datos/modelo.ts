@@ -647,6 +647,8 @@ export interface Carne extends Meta {
   pinSal: string;
   canal: CanalEnvio;
   destino?: string;
+  /** Idioma en que la gestante lee su carné (español si no se eligió otro). */
+  idioma?: 'es' | 'en' | 'fr' | 'ar';
   estado: 'activo' | 'pausado';
   intentosFallidos: number;
   bloqueadoHasta?: FechaHoraISO;
