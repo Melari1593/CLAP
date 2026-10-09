@@ -41,6 +41,6 @@ export type Pantalla =
   | { tipo: 'derechos'; gestanteId: string; embarazoId: string }
   | { tipo: 'impresion'; gestanteId: string; embarazoId: string }
   | { tipo: 'laboratorios'; gestanteId: string; embarazoId: string }
-  | { tipo: 'cuestionario'; gestanteId: string; embarazoId: string }
+  | { tipo: 'cuestionario'; gestanteId: string; embarazoId: string; consulta?: 'primera' | 'seguimiento' }
   | { tipo: 'ordenes'; gestanteId: string; embarazoId: string; consultaId: string }
   | { tipo: 'catalogo' };

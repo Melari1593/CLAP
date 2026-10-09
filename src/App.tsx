@@ -93,7 +93,7 @@ export function App() {
   if (pantalla.tipo === 'cuestionario') {
     return (
       <ContextoApp.Provider value={contexto}>
-        <PantallaCuestionario gestanteId={pantalla.gestanteId} embarazoId={pantalla.embarazoId} ir={ir} />
+        <PantallaCuestionario key={pantalla.consulta ?? 'primera'} gestanteId={pantalla.gestanteId} embarazoId={pantalla.embarazoId} consulta={pantalla.consulta} ir={ir} />
       </ContextoApp.Provider>
     );
   }

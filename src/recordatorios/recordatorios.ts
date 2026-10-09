@@ -226,6 +226,26 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
     });
   }
 
+  // Vacuna contra el VRS: dosis única de la semana 32 a la 36+6. Si no la recibió, avisar a pediatría.
+  const vrs = catalogo.valor('vacunas.vrs');
+  const vrsAplicada = ctx.seguimientos.some((c) => valorDe(c.seguimiento?.vrsAplicada) === true);
+  if (!vrsAplicada && desde(vrs.desdeSemana) && !desde(vrs.hastaSemana + 1)) {
+    lista.push({
+      id: 'vrs',
+      texto: `Aplicar la vacuna contra el VRS (virus respiratorio sincitial): dosis única entre las semanas ${vrs.desdeSemana} y ${vrs.hastaSemana}+6. Se puede aplicar el mismo día que la Tdap.`,
+      tipo: 'accion',
+      estado: 'pendiente',
+      paraGestante: `Entre las semanas ${vrs.desdeSemana} y ${vrs.hastaSemana} te pondrán la vacuna contra el virus respiratorio sincitial (VRS), que protege a tu bebé de infecciones de los pulmones en sus primeros meses.`,
+    });
+  } else if (!vrsAplicada && desde(vrs.hastaSemana + 1)) {
+    lista.push({
+      id: 'vrs_no_recibida',
+      texto: 'No registra la vacuna contra el VRS: informar a pediatría para valorar nirsevimab en el recién nacido.',
+      tipo: 'accion',
+      estado: 'pendiente',
+    });
+  }
+
   // Toxoplasmosis cada mes mientras la IgG sea negativa
   const toxo = toxoMensual(ctx);
   if (toxo?.toca) {

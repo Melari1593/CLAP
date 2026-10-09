@@ -1,7 +1,8 @@
 // B2 / B4 — Primera consulta y control de seguimiento.
 import { useEffect, useRef, useState } from 'react';
 import type { Consulta, Cuestionario, DatosPrimeraConsulta, DatosSeguimiento, Gestante, Ordenes } from '../datos/modelo';
-import { aplicarRespuestas, type ResultadoAplicar } from '../cuestionario/servicio';
+import { aplicarRespuestas, contextoCuestionario, tipoDeCuestionario, type ResultadoAplicar } from '../cuestionario/servicio';
+import type { ContextoCuestionario } from '../cuestionario/preguntas';
 import { localeDe } from '../i18n/dom';
 import {
   BLOQUES_PRIMERA,
@@ -44,7 +45,8 @@ interface Props {
 export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idInicial, ir }: Props) {
   const { repo, servicio, hoy, catalogo, cuestionarios } = useApp();
   const [cuestionario, setCuestionario] = useState<Cuestionario>();
-  const [aplicado, setAplicado] = useState<Omit<ResultadoAplicar, 'datos'>>();
+  const [aplicado, setAplicado] = useState<Omit<ResultadoAplicar<unknown>, 'datos'>>();
+  const [ctxCuestionario, setCtxCuestionario] = useState<ContextoCuestionario>({ indicaciones: [] });
   const [gestante, setGestante] = useState<Gestante>();
   const [primeraDelEmbarazo, setPrimeraDelEmbarazo] = useState<DatosPrimeraConsulta>();
   const [egSemanas, setEgSemanas] = useState<number>();
@@ -82,7 +84,11 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
           setEgSemanas(eg.semanas);
           setEgTexto(`${eg.semanas} sem + ${eg.diasResto} d`);
         }
-        setCuestionario(historia.cuestionarios.at(-1));
+        // El último cuestionario de este tipo de consulta.
+        // En un control solo se ofrece el que aún no se ha pasado (cada control tiene el suyo).
+        const delTipo = historia.cuestionarios.filter((c) => tipoDeCuestionario(c) === tipo && (tipo === 'primera' || !c.aplicadoEn)).sort((a, b) => a.fechaHora.localeCompare(b.fechaHora));
+        setCuestionario(delTipo.at(-1));
+        setCtxCuestionario(contextoCuestionario(historia.indicaciones));
         const primera = historia.consultas.find((c) => c.tipo === 'primera')?.primera;
         setPrimeraDelEmbarazo(primera);
         setRhNegativo(grupoRh(primera, historia.examenes).rh === '-');
@@ -197,6 +203,74 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
     if (consulta) setVacios(servicio.camposVaciosDe(consulta));
   };
 
+  // Respuestas del cuestionario de la gestante: se pasan a la consulta y se confirman con ella.
+  const pasarCuestionario = async (c: Cuestionario) => {
+    let resto: Omit<ResultadoAplicar<unknown>, 'datos'>;
+    if (tipo === 'primera') {
+      const { datos, ...r } = aplicarRespuestas(primera!, c.respuestas, catalogo);
+      setPrimera(datos);
+      resto = r;
+    } else {
+      const { datos, ...r } = aplicarRespuestas(seguimiento!, c.respuestas, catalogo, 'seguimiento', ctxCuestionario);
+      setSeguimiento(datos);
+      resto = r;
+    }
+    setAplicado(resto);
+    await cuestionarios.marcarAplicado(c.id);
+  };
+  const avisoCuestionario = (
+    <>
+      {cuestionario && !aplicado && !cerrada && (
+        <div className="aviso cuestionario-aviso">
+          📝 La gestante respondió el cuestionario el {new Date(cuestionario.fechaHora).toLocaleString(localeDe(), { dateStyle: 'medium', timeStyle: 'short' })}
+          {cuestionario.aplicadoEn && ' (ya se pasó a la historia una vez)'}.{' '}
+          <button type="button" className="primario" onClick={() => void pasarCuestionario(cuestionario)}>
+            Pasar sus respuestas a la historia
+          </button>
+        </div>
+      )}
+      {aplicado && (
+        <div className="aviso cuestionario-aviso" role="status">
+          {aplicado.alarmas.length > 0 && (
+            <div className="cuestionario-alarmas" role="alert">
+              <strong>⚠️ Revise primero lo que refiere la gestante:</strong>
+              <ul>
+                {aplicado.alarmas.map((a) => (
+                  <li key={a}>{a}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <p>
+            <strong>Se llenaron {aplicado.llenados.length} campos con lo que respondió la gestante.</strong> Revíselos con ella y guarde la consulta. Lo que ya estaba registrado no se cambió
+            {aplicado.conservados.length > 0 && ` (${aplicado.conservados.length} campos)`}.
+          </p>
+          {aplicado.paraHablar.length > 0 && (
+            <p>
+              🔒 Prefiere hablar con usted, a solas: <em>{aplicado.paraHablar.join(' · ')}</em>
+            </p>
+          )}
+          {aplicado.otras.length > 0 && (
+            <div>
+              <strong>Otras respuestas (no llenan campos):</strong>
+              <ul>
+                {aplicado.otras.map((o) => (
+                  <li key={o.pregunta}>
+                    {o.pregunta} <strong>{o.respuesta}</strong>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <details>
+            <summary>Campos llenados</summary>
+            <p>{aplicado.llenados.join(' · ')}</p>
+          </details>
+        </div>
+      )}
+    </>
+  );
+
   const cerrar = async () => {
     if (!consultaId) return;
     const { consulta } = await servicio.cerrarConsulta(consultaId, idInicial ? undefined : Math.round((Date.now() - inicio.current.getTime()) / 1000), firma);
@@ -217,41 +291,7 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
       {tipo === 'primera' ? (
         <>
           <PanelCalculos gestante={gestante} datos={primera} />
-          {cuestionario && !aplicado && (
-            <div className="aviso cuestionario-aviso">
-              📝 La gestante respondió el cuestionario el {new Date(cuestionario.fechaHora).toLocaleString(localeDe(), { dateStyle: 'medium', timeStyle: 'short' })}
-              {cuestionario.aplicadoEn && ' (ya se pasó a la historia una vez)'}.{' '}
-              <button
-                type="button"
-                className="primario"
-                onClick={async () => {
-                  const r = aplicarRespuestas(primera!, cuestionario.respuestas, catalogo);
-                  setPrimera(r.datos);
-                  setAplicado({ llenados: r.llenados, conservados: r.conservados, paraHablar: r.paraHablar });
-                  await cuestionarios.marcarAplicado(cuestionario.id);
-                }}
-              >
-                Pasar sus respuestas a la historia
-              </button>
-            </div>
-          )}
-          {aplicado && (
-            <div className="aviso cuestionario-aviso" role="status">
-              <p>
-                <strong>Se llenaron {aplicado.llenados.length} campos con lo que respondió la gestante.</strong> Revíselos con ella y guarde la consulta. Lo que ya estaba registrado no se cambió
-                {aplicado.conservados.length > 0 && ` (${aplicado.conservados.length} campos)`}.
-              </p>
-              {aplicado.paraHablar.length > 0 && (
-                <p>
-                  🔒 Prefiere hablar con usted, a solas: <em>{aplicado.paraHablar.join(' · ')}</em>
-                </p>
-              )}
-              <details>
-                <summary>Campos llenados</summary>
-                <p>{aplicado.llenados.join(' · ')}</p>
-              </details>
-            </div>
-          )}
+          {avisoCuestionario}
           {/* Se vuelve a montar al pasar el cuestionario, para que los controles muestren lo nuevo. */}
           <Formulario key={aplicado ? 'con-cuestionario' : 'sin-cuestionario'} bloques={BLOQUES_PRIMERA} datos={primera!} onCambio={setPrimera} clave={clave} extras={extras} ctx={{ edad: edadGestante }} />
         </>
@@ -259,7 +299,8 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
         <>
           <PanelCalculos gestante={gestante} datos={primeraDelEmbarazo} />
           <p className="suave">EG del día: {egTexto ?? 'no calculable'}</p>
-          <Formulario bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} clave={clave} extras={extras} ctx={{ egSemanas, rhNegativo }} />
+          {avisoCuestionario}
+          <Formulario key={aplicado ? 'con-cuestionario' : 'sin-cuestionario'} bloques={BLOQUES_SEGUIMIENTO} datos={seguimiento!} onCambio={setSeguimiento} clave={clave} extras={extras} ctx={{ egSemanas, rhNegativo }} />
         </>
       )}
 

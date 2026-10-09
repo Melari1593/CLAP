@@ -2,7 +2,8 @@
 // idioma. Sin menús de la historia: al terminar, entrega la tableta al profesional.
 import { useEffect, useState } from 'react';
 import type { Gestante } from '../datos/modelo';
-import { CUESTIONARIO, NO_SABE, PREFIERO_HABLARLO, preguntasVisibles, type Pregunta, type Respuestas } from '../cuestionario/preguntas';
+import { NO_SABE, PREFIERO_HABLARLO, cuestionarioDe, preguntasVisibles, type ContextoCuestionario, type Pregunta, type Respuestas, type TipoCuestionario } from '../cuestionario/preguntas';
+import { contextoCuestionario } from '../cuestionario/servicio';
 import { etiquetaCodificado } from '../clinico/codigos';
 import type { Idioma } from '../i18n/motor';
 import { borrarBorrador, guardarBorrador, leerBorrador } from './borrador';
@@ -22,6 +23,24 @@ function Control({ p, valor, onCambio }: { p: Pregunta; valor: unknown; onCambio
   switch (p.tipo) {
     case 'sino':
       return <div className="opciones-grandes" role="radiogroup" aria-label={p.texto}>{boton(true, 'Sí')}{boton(false, 'No')}{finales}</div>;
+    case 'multiple': {
+      // Varias a la vez; "Ninguno" deja la lista vacía (respondida, sin síntomas).
+      const marcados = Array.isArray(valor) ? (valor as string[]) : [];
+      const casilla = (activo: boolean, texto: string, alPulsar: () => void, clave: string) => (
+        <button key={clave} type="button" role="checkbox" aria-checked={activo} className={`opcion-grande ${activo ? 'activo' : ''}`} onClick={alPulsar}>
+          {activo ? '☑' : '☐'} {texto}
+        </button>
+      );
+      return (
+        <div className="opciones-grandes" role="group" aria-label={p.texto}>
+          {p.opciones!.map((o) =>
+            casilla(marcados.includes(o.valor), o.texto, () => onCambio(marcados.includes(o.valor) ? marcados.filter((v) => v !== o.valor) : [...marcados, o.valor]), o.valor),
+          )}
+          {casilla(Array.isArray(valor) && marcados.length === 0, 'Ninguno', () => onCambio([]), 'ninguno')}
+          {finales}
+        </div>
+      );
+    }
     case 'opciones':
       return <div className="opciones-grandes" role="radiogroup" aria-label={p.texto}>{p.opciones!.map((o) => boton(o.valor, o.texto))}{finales}</div>;
     case 'numero':
@@ -65,9 +84,19 @@ function Control({ p, valor, onCambio }: { p: Pregunta; valor: unknown; onCambio
   }
 }
 
-export function PantallaCuestionario({ gestanteId, embarazoId, ir }: { gestanteId: string; embarazoId: string; ir: (p: Pantalla) => void }) {
+interface Props {
+  gestanteId: string;
+  embarazoId: string;
+  /** Primera consulta o control de seguimiento. */
+  consulta?: TipoCuestionario;
+  ir: (p: Pantalla) => void;
+}
+
+export function PantallaCuestionario({ gestanteId, embarazoId, consulta = 'primera', ir }: Props) {
   const { repo, cuestionarios } = useApp();
-  const clave = `cuestionario:${embarazoId}`;
+  const clave = `cuestionario:${embarazoId}:${consulta}`;
+  const secciones = cuestionarioDe(consulta);
+  const [ctx, setCtx] = useState<ContextoCuestionario>({ indicaciones: [] });
   const [gestante, setGestante] = useState<Gestante>();
   const [estado, setEstadoInterno] = useState<Estado>(() => leerBorrador<Estado>(clave) ?? { paso: -1, respuestas: {}, idioma: 'es' });
   const [terminado, setTerminado] = useState(false);
@@ -79,21 +108,22 @@ export function PantallaCuestionario({ gestanteId, embarazoId, ir }: { gestanteI
   useEffect(() => {
     void repo.leer('gestantes', gestanteId).then(setGestante);
     void repo.historia(embarazoId).then((h) => {
+      if (h) setCtx(contextoCuestionario(h.indicaciones));
       // Ofrece el idioma del carné si ya lo eligió.
       const idioma = h?.carne?.idioma;
       if (idioma && !leerBorrador<Estado>(clave)) setEstadoInterno((e) => ({ ...e, idioma }));
     });
   }, [repo, gestanteId, embarazoId]);
 
-  const total = CUESTIONARIO.length;
-  const seccion = CUESTIONARIO[estado.paso];
+  const total = secciones.length;
+  const seccion = secciones[estado.paso];
   const responder = (id: string, v: unknown) => setEstado({ ...estado, respuestas: { ...estado.respuestas, [id]: v } });
   const irPaso = (paso: number) => {
     setEstado({ ...estado, paso });
     window.scrollTo(0, 0);
   };
   const terminar = async () => {
-    await cuestionarios.guardar(embarazoId, estado.respuestas, estado.idioma);
+    await cuestionarios.guardar(embarazoId, estado.respuestas, estado.idioma, consulta);
     borrarBorrador(clave);
     setTerminado(true);
     window.scrollTo(0, 0);
@@ -118,7 +148,11 @@ export function PantallaCuestionario({ gestanteId, embarazoId, ir }: { gestanteI
             Hola{gestante ? ', ' : ''}
             {gestante && <span data-no-traducir>{gestante.nombres.split(' ')[0]}</span>}
           </h2>
-          <p>Antes de tu consulta, responde unas preguntas sobre tu salud y tu embarazo. Toma unos 10 minutos.</p>
+          {consulta === 'primera' ? (
+            <p>Antes de tu consulta, responde unas preguntas sobre tu salud y tu embarazo. Toma unos 10 minutos.</p>
+          ) : (
+            <p>Antes de tu control, cuéntanos cómo has estado desde la última consulta. Toma unos 3 minutos.</p>
+          )}
           <ul>
             <li>Si no sabes una respuesta, marca "No sé".</li>
             <li>Tus respuestas son confidenciales y solo las ve el profesional que te atiende.</li>
@@ -135,7 +169,7 @@ export function PantallaCuestionario({ gestanteId, embarazoId, ir }: { gestanteI
             <span aria-hidden>{seccion.icono} </span>
             {seccion.titulo}
           </h2>
-          {preguntasVisibles(seccion, estado.respuestas).map((p) => (
+          {preguntasVisibles(seccion, estado.respuestas, ctx).map((p) => (
             <div key={p.id} className="pregunta">
               <p className="pregunta-texto">{p.texto}</p>
               {p.ayuda && <p className="suave">{p.ayuda}</p>}

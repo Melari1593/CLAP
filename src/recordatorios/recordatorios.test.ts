@@ -199,3 +199,18 @@ describe('Seguimiento de la TSH (protocolo BCNatal 2025)', () => {
     expect(ids(semana(15), { examenes: [tshEn(semana(10))] }).some((r) => r.id.startsWith('tiroides:'))).toBe(false);
   });
 });
+
+describe('Vacuna contra el VRS', () => {
+  const vrs = (hoy: string, op = {}) => ids(hoy, op).filter((r) => r.id.startsWith('vrs')).map((r) => r.id);
+  it('se recuerda de la semana 32 a la 36+6; después, avisar a pediatría', () => {
+    expect(vrs(semana(31))).toEqual([]);
+    expect(vrs(semana(32))).toEqual(['vrs']);
+    expect(vrs(semana(36))).toEqual(['vrs']);
+    expect(vrs(semana(37))).toEqual(['vrs_no_recibida']);
+  });
+  it('aplicada en un control: ya no se recuerda', () => {
+    const aplicada = { seguimientos: [{ fecha: semana(33), cambios: (s: { vrsAplicada: unknown }) => (s.vrsAplicada = valor(true)) }] };
+    expect(vrs(semana(34), aplicada as never)).toEqual([]);
+    expect(vrs(semana(38), aplicada as never)).toEqual([]);
+  });
+});

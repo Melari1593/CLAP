@@ -643,6 +643,13 @@ export const BLOQUES_SEGUIMIENTO: Bloque<S>[] = [
     campos: [
       { ruta: 'tdapAplicada', etiqueta: 'Vacuna Tdap (tosferina) aplicada hoy', ayuda: 'Desde la semana 26, en cada embarazo.', control: sino },
       {
+        ruta: 'vrsAplicada',
+        etiqueta: 'Vacuna contra el VRS (virus respiratorio sincitial) aplicada hoy',
+        ayuda: 'Dosis única, de la semana 32 a la 36+6. Se puede aplicar el mismo día que la Tdap.',
+        control: sino,
+        aplica: (_d, ctx) => ctx.egSemanas === undefined || (ctx.egSemanas >= 32 && ctx.egSemanas < 37),
+      },
+      {
         ruta: 'antiDAplicada',
         etiqueta: 'Inmunoglobulina anti-D aplicada hoy',
         ayuda: 'Rh negativo no sensibilizada: semana 28, y después de sangrado, trauma o procedimientos invasivos.',

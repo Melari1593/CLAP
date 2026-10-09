@@ -4,7 +4,7 @@
 import type { Catalogo } from '../clinico/catalogo';
 import { interpretarCodificado } from '../clinico/codigos';
 
-export type TipoPregunta = 'sino' | 'opciones' | 'numero' | 'fecha' | 'texto' | 'municipio' | 'aseguradora';
+export type TipoPregunta = 'sino' | 'opciones' | 'multiple' | 'numero' | 'fecha' | 'texto' | 'municipio' | 'aseguradora';
 
 export interface OpcionPregunta {
   valor: string;
@@ -25,7 +25,17 @@ export interface Pregunta {
   /** Tema delicado: se ofrece "Prefiero hablarlo con el profesional". */
   delicada?: boolean;
   /** Si devuelve false, la pregunta no se muestra. */
-  aplica?: (r: Respuestas) => boolean;
+  aplica?: (r: Respuestas, ctx: ContextoCuestionario) => boolean;
+  /** Para el profesional: la respuesta se resalta como signo de alarma o dato a revisar. */
+  alerta?: (respuesta: unknown) => string[];
+  /** Si no llena ningún campo, se muestra al profesional como "otras respuestas". */
+  resumen?: boolean;
+}
+
+/** Lo que el cuestionario sabe de la historia para decidir qué preguntar. */
+export interface ContextoCuestionario {
+  /** Indicaciones vigentes (indicadas o que ya toma). */
+  indicaciones: string[];
 }
 
 export interface SeccionCuestionario {
@@ -231,8 +241,140 @@ export const CUESTIONARIO: SeccionCuestionario[] = [
   },
 ];
 
-/** Preguntas visibles según lo respondido. */
-export const preguntasVisibles = (seccion: SeccionCuestionario, r: Respuestas) => seccion.preguntas.filter((p) => !p.aplica || p.aplica(r));
+export type TipoCuestionario = 'primera' | 'seguimiento';
+
+const SIN_CONTEXTO: ContextoCuestionario = { indicaciones: [] };
+
+/** Preguntas visibles según lo respondido y la historia. */
+export const preguntasVisibles = (seccion: SeccionCuestionario, r: Respuestas, ctx: ContextoCuestionario = SIN_CONTEXTO) =>
+  seccion.preguntas.filter((p) => !p.aplica || p.aplica(r, ctx));
+
+/** Texto de una respuesta, para mostrarla al profesional. */
+export function textoRespuesta(p: Pregunta, r: unknown): string {
+  if (r === NO_SABE) return 'No sé';
+  if (r === PREFIERO_HABLARLO) return 'Prefiere hablarlo';
+  if (r === true) return 'Sí';
+  if (r === false) return 'No';
+  if (Array.isArray(r)) return r.map((v) => p.opciones?.find((o) => o.valor === v)?.texto ?? String(v)).join(', ');
+  return p.opciones?.find((o) => o.valor === r)?.texto ?? String(r);
+}
+
+// ---------------------------------------------------------------- Controles de seguimiento
+
+const ALARMAS = op(
+  ['sangrado', 'Sangrado por la vagina'],
+  ['liquido', 'Salida de líquido por la vagina'],
+  ['dolorCabeza', 'Dolor de cabeza fuerte'],
+  ['vision', 'Visión borrosa o lucecitas'],
+  ['hinchazon', 'Hinchazón de la cara o de las manos'],
+  ['fiebre', 'Fiebre'],
+  ['dolorBarriga', 'Dolor fuerte en la barriga'],
+  ['contracciones', 'Contracciones o la barriga se pone dura muy seguido'],
+  ['orina', 'Ardor o dolor al orinar'],
+  ['vomito', 'Vómito que no se quita'],
+  ['tristeza', 'Tristeza, angustia o ganas de llorar casi todos los días'],
+);
+const MOVIMIENTOS = op(['siempre', 'Sí, se mueve como siempre'], ['menos', 'Se mueve menos que antes'], ['aun_no', 'Todavía no lo siento']);
+const tiene = (tipo: string) => (_r: Respuestas, ctx: ContextoCuestionario) => ctx.indicaciones.includes(tipo);
+/** Lo que responde sobre un tema: va como texto a la historia. */
+const comoTexto = (p: () => Pregunta) => (r: unknown) => `${p().texto} ${textoRespuesta(p(), r)}.`;
+
+const preguntaAlarmas: Pregunta = {
+  id: 'alarmas',
+  texto: 'Desde la última consulta, ¿has tenido alguno de estos síntomas?',
+  ayuda: 'Marca todos los que hayas tenido. Si no has tenido ninguno, marca "Ninguno".',
+  tipo: 'multiple',
+  opciones: ALARMAS,
+  rutas: ['anamnesis.revisionSistemas'],
+  convertir: (r) => {
+    if (!Array.isArray(r)) return undefined;
+    if (r.length === 0) return 'Niega signos de alarma (cuestionario de la gestante).';
+    return `Refiere: ${r.map((v) => ALARMAS.find((o) => o.valor === v)?.texto.toLowerCase() ?? v).join(', ')} (cuestionario de la gestante).`;
+  },
+  alerta: (r) => (Array.isArray(r) ? r.map((v) => ALARMAS.find((o) => o.valor === v)?.texto ?? String(v)) : []),
+};
+const preguntaMovimientos: Pregunta = {
+  id: 'movimientos',
+  texto: '¿Sientes que tu bebé se mueve?',
+  tipo: 'opciones',
+  opciones: MOVIMIENTOS,
+  rutas: ['anamnesis.enfermedadActual'],
+  convertir: comoTexto(() => preguntaMovimientos),
+  alerta: (r) => (r === 'menos' ? ['El bebé se mueve menos que antes'] : []),
+};
+
+const habito = (id: string, texto: string): Pregunta => ({
+  id,
+  texto,
+  tipo: 'sino',
+  delicada: true,
+  rutas: ['observaciones'],
+  convertir: (r) => `Cuestionario: ${texto} ${r === true ? 'Sí' : 'No'}.`,
+  alerta: (r) => (r === true ? [texto] : []),
+});
+
+export const CUESTIONARIO_SEGUIMIENTO: SeccionCuestionario[] = [
+  {
+    id: 'comoEstas',
+    titulo: '¿Cómo estás?',
+    icono: '🙂',
+    preguntas: [
+      { id: 'motivo', texto: '¿Cómo te has sentido desde la última consulta? ¿Hay algo que te preocupe?', tipo: 'texto', rutas: ['anamnesis.motivoConsulta'] },
+      preguntaAlarmas,
+      preguntaMovimientos,
+    ],
+  },
+  {
+    id: 'medicamentos',
+    titulo: 'Tus medicamentos',
+    icono: '💊',
+    preguntas: [
+      sino('hierro', '¿Te tomas el hierro todos los días?', [], { aplica: tiene('hierro'), resumen: true }),
+      sino('calcio', '¿Te tomas el calcio todos los días?', ['tomaCalcioDiario'], { aplica: tiene('calcio') }),
+      sino('asa', '¿Te tomas la aspirina todos los días?', ['tomaASADiario'], { aplica: tiene('asa') }),
+      sino('heparina', '¿Te aplicas la inyección para prevenir coágulos (heparina) todos los días?', ['aplicaTromboprofilaxisDiario'], { aplica: tiene('tromboprofilaxis') }),
+      sino('levotiroxina', '¿Te tomas la levotiroxina todos los días, en ayunas?', [], { aplica: tiene('levotiroxina'), resumen: true }),
+      { id: 'otrosMedicamentos', texto: '¿Estás tomando algún otro medicamento, vitamina o planta? ¿Cuál?', tipo: 'texto', resumen: true },
+    ],
+  },
+  {
+    id: 'bienestar',
+    titulo: 'Hábitos y bienestar',
+    icono: '🌱',
+    preguntas: [
+      habito('fuma', '¿Fumas cigarrillo?'),
+      habito('alcohol', '¿Has tomado bebidas con alcohol?'),
+      habito('drogas', '¿Has usado alguna droga?'),
+      {
+        ...habito('violencia', '¿Alguien te ha golpeado, maltratado o te hace sentir miedo?'),
+        ayuda: 'Tu respuesta es confidencial. Si quieres, puedes hablarlo a solas con el profesional.',
+      },
+    ],
+  },
+  {
+    id: 'vacunasParto',
+    titulo: 'Vacunas y después del parto',
+    icono: '💉',
+    preguntas: [
+      sino('tdap', '¿Ya te pusieron en este embarazo la vacuna contra la tosferina (Tdap)?', [], { resumen: true }),
+      sino('vrs', '¿Ya te pusieron en este embarazo la vacuna contra el virus respiratorio sincitial (VRS)?', [], {
+        resumen: true,
+        ayuda: 'Se pone entre las semanas 32 y 36 y protege a tu bebé de infecciones de los pulmones en sus primeros meses.',
+      }),
+      {
+        id: 'metodoPosparto',
+        texto: 'Después del parto, ¿qué método quieres usar para no quedar embarazada pronto?',
+        tipo: 'opciones',
+        opciones: op(['diu_posparto', 'DIU antes de salir del hospital'], ['implante', 'Implante en el brazo'], ['hormonal', 'Pastillas o inyección'], ['barrera', 'Condón'], ['ligadura', 'Operación para no tener más hijos'], ['no_ha_decidido', 'Todavía no sé']),
+        // Se registra en la historia solo después de la asesoría del profesional: aquí es un dato para conversar.
+        resumen: true,
+      },
+      sino('mudanza', '¿Te cambiaste de casa o de municipio desde la última consulta?', [], { resumen: true }),
+    ],
+  },
+];
+
+export const cuestionarioDe = (tipo: TipoCuestionario): SeccionCuestionario[] => (tipo === 'seguimiento' ? CUESTIONARIO_SEGUIMIENTO : CUESTIONARIO);
 
 /** Valor que va a la historia, o undefined si la respuesta no llena nada ("No sé", en blanco…). */
 export function valorParaHistoria(p: Pregunta, respuesta: unknown, catalogo: Catalogo): unknown {
@@ -241,5 +383,6 @@ export function valorParaHistoria(p: Pregunta, respuesta: unknown, catalogo: Cat
   if (p.tipo === 'municipio') return interpretarCodificado(String(respuesta), 'codigos.divipola', catalogo);
   if (p.tipo === 'aseguradora') return interpretarCodificado(String(respuesta), 'codigos.aseguradoras', catalogo);
   if (p.convertir) return p.convertir(respuesta, catalogo);
+  if (Array.isArray(respuesta)) return respuesta.length ? respuesta : undefined;
   return typeof respuesta === 'string' ? respuesta.trim() : respuesta;
 }

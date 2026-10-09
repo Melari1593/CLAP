@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { Catalogo } from '../clinico/catalogo';
 import { valor } from '../datos/campo';
 import { primeraConsultaVacia } from '../consultas/esquema';
-import { CUESTIONARIO, NO_SABE, PREFIERO_HABLARLO, preguntasVisibles } from './preguntas';
-import { aplicarRespuestas } from './servicio';
-import { BLOQUES_PRIMERA, aplicarNoCorresponde } from '../consultas/esquema';
+import { CUESTIONARIO, CUESTIONARIO_SEGUIMIENTO, NO_SABE, PREFIERO_HABLARLO, preguntasVisibles } from './preguntas';
+import { aplicarRespuestas, contextoCuestionario, tipoDeCuestionario } from './servicio';
+import { BLOQUES_PRIMERA, BLOQUES_SEGUIMIENTO, aplicarNoCorresponde, seguimientoVacio } from '../consultas/esquema';
 
 const cat = new Catalogo();
 const rutasDelFormulario = new Set(BLOQUES_PRIMERA.flatMap((b) => b.campos.map((c) => c.ruta)));
@@ -53,5 +53,60 @@ describe('Cuestionario de la gestante', () => {
     const embarazos = CUESTIONARIO.find((s) => s.id === 'embarazosAnteriores')!;
     expect(preguntasVisibles(embarazos, { gestas: 0 }).map((p) => p.id)).toEqual(['gestas']);
     expect(preguntasVisibles(embarazos, { gestas: 2 }).length).toBeGreaterThan(5);
+  });
+});
+
+describe('Cuestionario de los controles de seguimiento', () => {
+  const rutasSeguimiento = new Set(BLOQUES_SEGUIMIENTO.flatMap((b) => b.campos.map((c) => c.ruta)));
+  const ctx = { indicaciones: ['calcio', 'hierro'] };
+
+  it('cada pregunta llena un campo que existe en el control', () => {
+    for (const p of CUESTIONARIO_SEGUIMIENTO.flatMap((s) => s.preguntas)) {
+      for (const r of p.rutas ?? []) expect(rutasSeguimiento.has(r), `${p.id} → ${r}`).toBe(true);
+    }
+  });
+
+  it('solo pregunta por los medicamentos que tiene indicados', () => {
+    const ids = preguntasVisibles(CUESTIONARIO_SEGUIMIENTO.find((s) => s.id === 'medicamentos')!, {}, ctx).map((p) => p.id);
+    expect(ids).toEqual(['hierro', 'calcio', 'otrosMedicamentos']);
+  });
+
+  it('pasa signos de alarma y adherencia, muestra el método posparto, y resalta las alarmas', () => {
+    const r = aplicarRespuestas(
+      seguimientoVacio(),
+      { motivo: 'Me siento bien', alarmas: ['dolorCabeza', 'vision'], movimientos: 'menos', calcio: false, hierro: true, vrs: false, metodoPosparto: 'implante', fuma: false },
+      cat,
+      'seguimiento',
+      ctx,
+    );
+    expect(r.datos.anamnesis.motivoConsulta).toEqual(valor('Me siento bien'));
+    expect(r.datos.anamnesis.revisionSistemas).toEqual(valor('Refiere: dolor de cabeza fuerte, visión borrosa o lucecitas (cuestionario de la gestante).'));
+    expect(r.datos.tomaCalcioDiario).toEqual(valor(false));
+    expect(r.datos.metodoAnticonceptivoPosparto.estado).toBe('no_corresponde');
+    expect(r.datos.observaciones).toEqual(valor('Cuestionario: ¿Fumas cigarrillo? No.'));
+    expect(r.alarmas).toEqual(['Dolor de cabeza fuerte', 'Visión borrosa o lucecitas', 'El bebé se mueve menos que antes']);
+    expect(r.otras.map((o) => o.respuesta)).toEqual(['Sí', 'No', 'Implante en el brazo']);
+    expect(r.otras[1]?.pregunta).toContain('VRS');
+  });
+
+  it('"Ninguno" queda como que niega signos de alarma', () => {
+    const r = aplicarRespuestas(seguimientoVacio(), { alarmas: [] }, cat, 'seguimiento');
+    expect(r.datos.anamnesis.revisionSistemas).toEqual(valor('Niega signos de alarma (cuestionario de la gestante).'));
+    expect(r.alarmas).toEqual([]);
+  });
+
+  it('junta las respuestas de hábitos en las notas internas y no reemplaza lo registrado', () => {
+    const base = seguimientoVacio();
+    base.tomaCalcioDiario = valor(true);
+    const r = aplicarRespuestas(base, { calcio: false, alcohol: true, violencia: PREFIERO_HABLARLO }, cat, 'seguimiento', ctx);
+    expect(r.datos.tomaCalcioDiario).toEqual(valor(true));
+    expect(r.datos.observaciones).toEqual(valor('Cuestionario: ¿Has tomado bebidas con alcohol? Sí.'));
+    expect(r.alarmas).toEqual(['¿Has tomado bebidas con alcohol?']);
+    expect(r.paraHablar).toHaveLength(1);
+  });
+
+  it('los cuestionarios guardados antes de existir el de seguimiento son de la primera', () => {
+    expect(tipoDeCuestionario({ embarazoId: 'e', fechaHora: '', idioma: 'es', respuestas: {} } as never)).toBe('primera');
+    expect(contextoCuestionario([{ tipo: 'asa', estado: 'indicado' }, { tipo: 'hierro', estado: 'no_indicado' }] as never).indicaciones).toEqual(['asa']);
   });
 });

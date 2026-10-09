@@ -238,3 +238,5 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 .cuestionario .numero input { width: 140px; }
 .cuestionario button.grande { font-size: 1.2rem; min-height: 56px; width: 100%; margin: 12px 0; }
 .cuestionario-aviso button { margin-inline-start: 8px; }
+.cuestionario-alarmas { border-inline-start: 4px solid var(--alerta, #b42318); padding: 6px 10px; margin-block-end: 8px; background: color-mix(in srgb, #b42318 8%, transparent); }
+.cuestionario-alarmas ul { margin: 4px 0 0; }

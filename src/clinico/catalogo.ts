@@ -785,6 +785,16 @@ const BASE = {
     nota: 'Recordatorio desde la semana 26 hasta que se registre aplicada. Sin semana límite para marcarla atrasada. Decidido por la responsable del proyecto el 2026-10-07.',
   }),
 
+  'vacunas.vrs': p<{ desdeSemana: number; hastaSemana: number; diasAntesDelParto: number }>({
+    nombre: 'Vacuna materna contra el virus respiratorio sincitial (VRS)',
+    valor: { desdeSemana: 32, hastaSemana: 36, diasAntesDelParto: 14 },
+    unidad: 'semanas (de 32+0 a 36+6) y días',
+    fuentes: ['OMS 2024', 'Equipo clínico'],
+    estado: 'pendiente',
+    revisado: '2026-10-09',
+    nota: 'Vacuna de proteína F prefusión (RSVpreF), dosis única intramuscular en cada embarazo, de la semana 32+0 a la 36+6 (ficha técnica); la OMS la acepta desde la semana 28. Protege al bebé en sus primeros 6 meses si nace al menos 14 días después de la vacuna; si no, valorar nirsevimab en el recién nacido. Se puede aplicar el mismo día que la Tdap. Por confirmar con el PAI de Colombia (ventana y disponibilidad).',
+  }),
+
   // ---------- Validaciones de datos imposibles (B2) ----------
   'validacion.rangos': p<Record<string, { min: number; max: number }>>({
     nombre: 'Rangos fuera de los cuales se pide confirmar el dato',

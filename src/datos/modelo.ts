@@ -351,6 +351,8 @@ export interface DatosSeguimiento {
   cambioResidencia: Campo<{ municipio: string; altitudM: number }>;
   /** Vacuna Tdap (tosferina) aplicada en este control (recordatorio desde la semana 26). */
   tdapAplicada: Campo<SiNo>;
+  /** Vacuna contra el virus respiratorio sincitial (VRS) aplicada en este control. */
+  vrsAplicada: Campo<SiNo>;
   /** Inmunoglobulina anti-D aplicada en este control (Rh negativo no sensibilizada). */
   antiDAplicada: Campo<SiNo>;
   tomaCalcioDiario: Campo<SiNo>;
@@ -658,7 +660,9 @@ export interface Cuestionario extends Meta {
   fechaHora: FechaHoraISO;
   idioma: 'es' | 'en' | 'fr' | 'ar';
   respuestas: Record<string, unknown>;
-  /** Cuándo el profesional pasó las respuestas a la primera consulta. */
+  /** Para qué consulta es. Los guardados antes de existir el de seguimiento son de la primera. */
+  tipo?: 'primera' | 'seguimiento';
+  /** Cuándo el profesional pasó las respuestas a la consulta. */
   aplicadoEn?: FechaHoraISO;
 }
 
