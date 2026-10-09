@@ -61,6 +61,9 @@ export function FormExamen({ inicial, onRegistrar, onCancelar }: {
     coombsIndirecto: positivo('positivo', 'Resultado'),
     ecografia: <>{opcion('momento', 'Tipo de ecografía', Object.entries(MOMENTO_ECOGRAFIA))}{opcion('hallazgos', 'Hallazgos', [['normal', 'Normales'], ['anormal', 'Anormales']])}</>,
     glucemia: numero('mgDl', 'Glucemia en ayunas', 'mg/dL'),
+    t4libre: numero('ngDl', 'T4 libre', 'ng/dL'),
+    antiTPO: positivo('positivo', 'Resultado'),
+    trab: positivo('positivo', 'Resultado'),
     tsh: numero('mUIL', 'TSH', 'mUI/L'),
     uroanalisis: <>{opcion('resultado', 'Resultado', [['normal', 'Normal'], ['anormal', 'Anormal']])}{campo('hallazgos', 'Hallazgos', <input value={f.hallazgos ?? ''} onChange={(e) => setF({ ...f, hallazgos: e.target.value })} />)}</>,
     hepatitisB: opcion('antigenoSuperficie', 'Antígeno de superficie', [['negativo', 'Negativo'], ['positivo', 'Positivo']]),
@@ -95,6 +98,7 @@ export function FormExamen({ inicial, onRegistrar, onCancelar }: {
       case 'sifilisTreponemica': return b('reactiva') === null ? undefined : { reactiva: b('reactiva') };
       case 'ecografia': return f.momento && f.hallazgos ? { momento: f.momento, hallazgos: f.hallazgos } : undefined;
       case 'glucemia': return n('mgDl') !== undefined ? { mgDl: n('mgDl') } : undefined;
+      case 't4libre': return n('ngDl') !== undefined ? { ngDl: n('ngDl') } : undefined;
       case 'tsh': return n('mUIL') !== undefined ? { mUIL: n('mUIL') } : undefined;
       case 'uroanalisis': return f.resultado ? { resultado: f.resultado, hallazgos: f.hallazgos ?? '' } : undefined;
       case 'hepatitisB': return f.antigenoSuperficie ? { antigenoSuperficie: f.antigenoSuperficie } : undefined;

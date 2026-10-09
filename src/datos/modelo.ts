@@ -116,7 +116,15 @@ export interface AntecedentesPersonales {
   inicioVidaSexualEdad: Campo<number>;
   /** Privado, nunca en el carné. */
   itsPrevias: Campo<SiNo>;
+  /** Enfermedad tiroidea previa (protocolo BCNatal 2025). */
+  tiroides: Campo<EnfermedadTiroidea>;
+  /** Anticuerpos antitiroideos (anti-TPO) positivos conocidos antes del embarazo. */
+  antiTpoPrevios: Campo<SiNo>;
+  /** Dosis diaria de levotiroxina antes del embarazo (si la toma). */
+  levotiroxinaUgDia: Campo<number>;
 }
+
+export type EnfermedadTiroidea = 'no' | 'hipotiroidismo_primario' | 'hipotiroidismo_ablacion' | 'hipertiroidismo' | 'bocio_nodulos';
 
 export interface AntecedentesObstetricos {
   gestas: Campo<number>;
@@ -450,6 +458,12 @@ export type ResultadoPorTipo = {
   /** IgG para varicela zóster. */
   varicelaIgG: { positivo: SiNo };
   ecografia: { momento: 'primer_trimestre' | 'detalle' | 'tercer_trimestre' | 'otra'; hallazgos: 'normal' | 'anormal' };
+  /** T4 libre en ng/dL. */
+  t4libre: { ngDl: number };
+  /** Anticuerpos antiperoxidasa tiroidea. */
+  antiTPO: { positivo: SiNo };
+  /** Anticuerpos contra el receptor de TSH (TRAb, anti-TSI). */
+  trab: { positivo: SiNo };
   /** Glucemia en ayunas (primer trimestre). */
   glucemia: { mgDl: number };
   /** Hormona estimulante de tiroides (primer trimestre). */
@@ -503,6 +517,8 @@ export type TipoIndicacion =
   | 'calcio'
   | 'asa'
   | 'tromboprofilaxis'
+  /** Hipotiroidismo (protocolo BCNatal 2025). */
+  | 'levotiroxina'
   /** Toxoplasmosis: tratamiento placentario. */
   | 'espiramicina'
   /** Toxoplasmosis: tratamiento pleno (sulfadiazina + pirimetamina + ácido folínico). */

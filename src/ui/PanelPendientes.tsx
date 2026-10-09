@@ -11,6 +11,7 @@ const NOMBRE_INDICACION: Record<Indicacion['tipo'], string> = {
   calcio: 'Carbonato de calcio',
   asa: 'ASA',
   tromboprofilaxis: 'Tromboprofilaxis',
+  levotiroxina: 'Levotiroxina',
   espiramicina: 'Espiramicina (toxoplasmosis)',
   toxoTratamientoPleno: 'Tratamiento pleno de toxoplasmosis',
   preparacionParto: 'Preparación para el parto',

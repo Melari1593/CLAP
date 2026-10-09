@@ -19,6 +19,9 @@ export const EXAMENES: { tipo: TipoExamen; etiqueta: string; privado?: boolean }
   { tipo: 'ecografia', etiqueta: 'Ecografía' },
   { tipo: 'glucemia', etiqueta: 'Glucemia en ayunas' },
   { tipo: 'tsh', etiqueta: 'TSH' },
+  { tipo: 't4libre', etiqueta: 'T4 libre' },
+  { tipo: 'antiTPO', etiqueta: 'Anticuerpos anti-TPO' },
+  { tipo: 'trab', etiqueta: 'Anticuerpos TRAb (anti-TSI)' },
   { tipo: 'uroanalisis', etiqueta: 'Uroanálisis' },
   { tipo: 'toxoplasmosis', etiqueta: 'Toxoplasmosis (IgG e IgM)' },
   { tipo: 'pcrLiquidoAmniotico', etiqueta: 'PCR para toxoplasma en líquido amniótico' },
@@ -59,6 +62,7 @@ export function resumenExamen(e: ResultadoExamen): string {
     case 'varicelaIgG': return inmune((r as ResultadoPorTipo['varicelaIgG']).positivo);
     case 'ecografia': { const v = r as ResultadoPorTipo['ecografia']; return `${MOMENTO_ECOGRAFIA[v.momento]} · ${v.hallazgos}`; }
     case 'glucemia': return `${(r as ResultadoPorTipo['glucemia']).mgDl} mg/dL`;
+    case 't4libre': return `${String((r as ResultadoPorTipo['t4libre']).ngDl).replace('.', ',')} ng/dL`;
     case 'tsh': return `${String((r as ResultadoPorTipo['tsh']).mUIL).replace('.', ',')} mUI/L`;
     case 'uroanalisis': { const v = r as ResultadoPorTipo['uroanalisis']; return v.resultado === 'normal' ? 'Normal' : `Anormal${v.hallazgos ? `: ${v.hallazgos}` : ''}`; }
     case 'hepatitisB': return `Antígeno de superficie ${(r as ResultadoPorTipo['hepatitisB']).antigenoSuperficie}`;

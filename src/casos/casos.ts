@@ -653,7 +653,7 @@ export const CASOS: CasoClinico[] = [
   }),
   caso({
     id: 'TSH-01',
-    grupo: 'Glucemia y TSH',
+    grupo: 'Tiroides',
     descripcion: 'TSH de 2,1: sin alerta.',
     datos: ['TSH 2,1 mUI/L (8+5)'],
     extra: { examenes: [{ tipo: 'tsh', valor: { mUIL: 2.1 }, fecha: T1 }] },
@@ -661,20 +661,162 @@ export const CASOS: CasoClinico[] = [
   }),
   caso({
     id: 'TSH-02',
-    grupo: 'Glucemia y TSH',
-    descripcion: 'TSH de 6,5: elevada.',
+    grupo: 'Tiroides',
+    descripcion: 'TSH de 6,5 sin T4 libre ni anti-TPO: completar el estudio.',
     datos: ['TSH 6,5 mUI/L (8+5)'],
     extra: { examenes: [{ tipo: 'tsh', valor: { mUIL: 6.5 }, fecha: T1 }] },
-    alertas: { tsh: 'TSH elevada: posible hipotiroidismo' },
-    contiene: { tsh: ['TSH 6,50 mUI/L', 'T4 libre'] },
+    alertas: { tsh: 'TSH elevada: solicitar T4 libre y anti-TPO' },
+    contiene: { tsh: ['TSH 6,50 mUI/L', 'Desde 2,5 mUI/L'] },
   }),
   caso({
     id: 'TSH-03',
-    grupo: 'Glucemia y TSH',
-    descripcion: 'TSH de 0,05: baja.',
+    grupo: 'Tiroides',
+    descripcion: 'TSH de 0,05 en el primer trimestre: posible hipertiroidismo transitorio.',
     datos: ['TSH 0,05 mUI/L (8+5)'],
     extra: { examenes: [{ tipo: 'tsh', valor: { mUIL: 0.05 }, fecha: T1 }] },
     alertas: { tsh: 'TSH baja: posible hipertiroidismo' },
+    contiene: { tsh: ['Solicitar T4 libre', 'hCG'] },
+  }),
+  caso({
+    id: 'TSH-04',
+    grupo: 'Tiroides',
+    descripcion: 'TSH de 12: hipotiroidismo clínico; dosis por peso (62 kg).',
+    datos: ['TSH 12 mUI/L (8+5)', 'Peso 62 kg'],
+    extra: { examenes: [{ tipo: 'tsh', valor: { mUIL: 12 }, fecha: T1 }] },
+    alertas: { tsh: 'Hipotiroidismo clínico: TSH de 10 o más' },
+    contiene: { tsh: ['2,3 µg/kg al día: unos 150 µg al día con 62,0 kg', 'Meta: TSH < 2,5'] },
+  }),
+  caso({
+    id: 'TSH-05',
+    grupo: 'Tiroides',
+    descripcion: 'TSH de 3,2, T4 libre normal y anti-TPO positivo: levotiroxina 1,2 µg/kg.',
+    datos: ['TSH 3,2 mUI/L', 'T4 libre 1,10 ng/dL', 'Anti-TPO positivo'],
+    extra: {
+      examenes: [
+        { tipo: 'tsh', valor: { mUIL: 3.2 }, fecha: T1 },
+        { tipo: 't4libre', valor: { ngDl: 1.1 }, fecha: T1 },
+        { tipo: 'antiTPO', valor: { positivo: true }, fecha: T1 },
+      ],
+    },
+    alertas: { tsh: 'Hipotiroidismo subclínico con anti-TPO positivo: iniciar levotiroxina' },
+    contiene: { tsh: ['1,2 µg/kg al día: unos 75 µg al día'] },
+  }),
+  caso({
+    id: 'TSH-06',
+    grupo: 'Tiroides',
+    descripcion: 'TSH de 3,2, T4 libre normal, anti-TPO negativo y sin antecedentes: seguimiento.',
+    datos: ['TSH 3,2 mUI/L', 'T4 libre 1,10 ng/dL', 'Anti-TPO negativo'],
+    extra: {
+      examenes: [
+        { tipo: 'tsh', valor: { mUIL: 3.2 }, fecha: T1 },
+        { tipo: 't4libre', valor: { ngDl: 1.1 }, fecha: T1 },
+        { tipo: 'antiTPO', valor: { positivo: false }, fecha: T1 },
+      ],
+    },
+    alertas: { tsh: 'Hipotiroidismo subclínico sin criterio de tratamiento' },
+  }),
+  caso({
+    id: 'TSH-07',
+    grupo: 'Tiroides',
+    descripcion: 'TSH de 5 con anti-TPO negativo y un aborto previo: levotiroxina 1,4 µg/kg.',
+    datos: ['TSH 5 mUI/L', 'T4 libre 1,10 ng/dL', 'Anti-TPO negativo', '1 aborto'],
+    cambios: (d) => (d.antecedentesObstetricos.abortos = valor(1)),
+    extra: {
+      examenes: [
+        { tipo: 'tsh', valor: { mUIL: 5 }, fecha: T1 },
+        { tipo: 't4libre', valor: { ngDl: 1.1 }, fecha: T1 },
+        { tipo: 'antiTPO', valor: { positivo: false }, fecha: T1 },
+      ],
+    },
+    alertas: { tsh: 'Hipotiroidismo subclínico con antecedentes desfavorables: iniciar levotiroxina' },
+    contiene: { tsh: ['1,4 µg/kg'] },
+  }),
+  caso({
+    id: 'TSH-08',
+    grupo: 'Tiroides',
+    descripcion: 'TSH de 5 con T4 libre baja: hipotiroidismo clínico (2,3 y luego 1,6 µg/kg).',
+    datos: ['TSH 5 mUI/L', 'T4 libre 0,60 ng/dL'],
+    extra: {
+      examenes: [
+        { tipo: 'tsh', valor: { mUIL: 5 }, fecha: T1 },
+        { tipo: 't4libre', valor: { ngDl: 0.6 }, fecha: T1 },
+        { tipo: 'antiTPO', valor: { positivo: false }, fecha: T1 },
+      ],
+    },
+    alertas: { tsh: 'Hipotiroidismo clínico: TSH elevada con T4 libre baja' },
+    contiene: { tsh: ['2,3 µg/kg', '1,6 µg/kg'] },
+  }),
+  caso({
+    id: 'TSH-09',
+    grupo: 'Tiroides',
+    descripcion: 'TSH de 1,5 con T4 libre baja: hipotiroxinemia, sin levotiroxina.',
+    datos: ['TSH 1,5 mUI/L', 'T4 libre 0,60 ng/dL'],
+    extra: {
+      examenes: [
+        { tipo: 'tsh', valor: { mUIL: 1.5 }, fecha: T1 },
+        { tipo: 't4libre', valor: { ngDl: 0.6 }, fecha: T1 },
+      ],
+    },
+    alertas: { tsh: 'Hipotiroxinemia: TSH normal con T4 libre baja' },
+  }),
+  caso({
+    id: 'TSH-10',
+    grupo: 'Tiroides',
+    descripcion: 'TSH suprimida con T4 libre alta: hipertiroidismo, remisión inmediata.',
+    datos: ['TSH 0,05 mUI/L', 'T4 libre 2,50 ng/dL'],
+    extra: {
+      examenes: [
+        { tipo: 'tsh', valor: { mUIL: 0.05 }, fecha: T1 },
+        { tipo: 't4libre', valor: { ngDl: 2.5 }, fecha: T1 },
+      ],
+    },
+    alertas: { tsh: 'Hipertiroidismo: TSH suprimida con T4 libre alta' },
+    contiene: { tsh: ['TRAb', 'metimazol'] },
+  }),
+  caso({
+    id: 'TSH-11',
+    grupo: 'Tiroides',
+    descripcion: 'TSH suprimida después de la semana 16 con T4 libre normal: remitir.',
+    datos: ['TSH 0,05 mUI/L (16+4)', 'T4 libre 1,50 ng/dL'],
+    extra: {
+      examenes: [
+        { tipo: 'tsh', valor: { mUIL: 0.05 }, fecha: '2026-09-25' },
+        { tipo: 't4libre', valor: { ngDl: 1.5 }, fecha: '2026-09-25' },
+      ],
+    },
+    alertas: { tsh: 'TSH suprimida después de la semana 16: remitir a endocrinología' },
+  }),
+  caso({
+    id: 'TSH-12',
+    grupo: 'Tiroides',
+    descripcion: 'Con levotiroxina y TSH de 3: fuera de meta, ajustar la dosis.',
+    datos: ['Levotiroxina indicada', 'TSH 3 mUI/L'],
+    extra: {
+      examenes: [{ tipo: 'tsh', valor: { mUIL: 3 }, fecha: T2 }],
+      indicaciones: [...CALCIO_INDICADO, { tipo: 'levotiroxina', estado: 'indicado' }],
+    },
+    alertas: { tsh: 'TSH fuera de meta con levotiroxina: ajustar la dosis' },
+  }),
+  caso({
+    id: 'TIR-01',
+    grupo: 'Tiroides',
+    descripcion: 'Hipotiroidismo primario previo con 100 µg de levotiroxina: aumentar 25 a 30 %.',
+    datos: ['Hipotiroidismo primario', 'Toma levotiroxina 100 µg al día'],
+    cambios: (d) => {
+      d.antecedentesPersonales.tiroides = valor('hipotiroidismo_primario');
+      d.antecedentesPersonales.levotiroxinaUgDia = valor(100);
+      d.antecedentesCalcio.levotiroxina = valor(true);
+    },
+    alertas: { tiroides_antecedente: 'Hipotiroidismo previo al embarazo: ajustar la levotiroxina' },
+    contiene: { tiroides_antecedente: ['entre 25 y 30 %', 'nueva dosis de unos 125 µg al día'] },
+  }),
+  caso({
+    id: 'TIR-02',
+    grupo: 'Tiroides',
+    descripcion: 'Antecedente de enfermedad de Graves: TRAb y control con endocrinología.',
+    datos: ['Hipertiroidismo o enfermedad de Graves'],
+    cambios: (d) => (d.antecedentesPersonales.tiroides = valor('hipertiroidismo')),
+    alertas: { tiroides_antecedente: 'Antecedente de hipertiroidismo o enfermedad de Graves' },
   }),
 
   // ---------------- ASA

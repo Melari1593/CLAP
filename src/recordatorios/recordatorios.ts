@@ -3,7 +3,9 @@
 import { grupoRh } from '../clinico/grupoRh';
 import { toxoMensual } from '../examenes/porTrimestre';
 import { diasDesde, evaluarToxo } from '../alertas/toxoplasmosis';
+import { antiTpoPositivo, levotiroxinaVigente } from '../alertas/tiroides';
 import { trimestreDeEG } from '../clinico/trimestre';
+import { diasEntre } from '../clinico/calculos';
 import { valorDe } from '../datos/campo';
 import type { TipoExamen, TipoIndicacion } from '../datos/modelo';
 import type { ContextoClinico } from '../alertas/motor';
@@ -287,6 +289,23 @@ export function recordatorios(ctx: ContextoClinico): Recordatorio[] {
   // Factores transitorios activos
   for (const f of historia.factores.filter((f) => !f.resolucion)) {
     lista.push({ id: `factor:${f.id}`, texto: `Preguntar si ya se resolvió el factor transitorio (desde ${f.inicio}) para calcular la fecha de suspensión.`, tipo: 'pregunta', estado: 'pendiente' });
+  }
+
+  // Tiroides: TSH cada 4 semanas hasta la 20 y una entre la 26 y la 32 (tratadas o anti-TPO positivo).
+  if (levotiroxinaVigente(ctx) || antiTpoPositivo(ctx)) {
+    const seg = catalogo.valor('tiroides.seguimiento');
+    const tshs = historia.examenes.filter((e) => e.tipo === 'tsh' && e.resultado.estado === 'valor').map((e) => e.fecha).sort();
+    const ultimaTsh = tshs.at(-1);
+    if (egDias !== undefined && egDias < seg.hastaSemana * 7 && (!ultimaTsh || diasEntre(ultimaTsh, ctx.hoy) >= seg.cadaDias)) {
+      const texto = ultimaTsh
+        ? `TSH de control (cada 4 semanas hasta la semana ${seg.hastaSemana}; la última, el ${ultimaTsh}).`
+        : `TSH de control (cada 4 semanas hasta la semana ${seg.hastaSemana}).`;
+      examen('tiroides:tsh', 'tsh', texto, null);
+    }
+    const [desdeT, hastaT] = seg.ventanaTardia;
+    if (desde(desdeT) && !hechoDesde('tsh', desdeT)) {
+      examen('tiroides:tsh_tardia', 'tsh', `TSH entre las semanas ${desdeT} y ${hastaT}.`, hastaT);
+    }
   }
 
   // Adherencia en cada control

@@ -226,7 +226,7 @@ describe('D4 — Carbonato de calcio', () => {
   it('con levotiroxina: la dosis con la nota de separación', () => {
     const r = evaluar(calcio); // los datos de prueba toman levotiroxina
     expect(r?.porque.join(' ')).toContain('Dosis: carbonato de calcio 1200 mg');
-    expect(r?.porque.join(' ')).toContain('Precaución — Levotiroxina: Tomarla separada del calcio por varias horas');
+    expect(r?.porque.join(' ')).toContain('Precaución — Levotiroxina: Tomarla en ayunas y separada 4 a 6 horas del calcio');
   });
 
   it('calcio ya indicado: sin alerta; si se registra hipercalcemia, vuelve a avisar', () => {

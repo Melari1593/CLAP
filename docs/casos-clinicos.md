@@ -113,9 +113,25 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 | GLU-01 | Glucemia en ayunas de 85: sin alerta. | Glucemia 85 mg/dL (8+5) | Sin alertas | ☐ Sí ☐ No | |
 | GLU-02 | Glucemia en ayunas de 95: diabetes gestacional. | Glucemia 95 mg/dL (8+5) | **Diabetes gestacional: glucemia en ayunas alterada**<br>incluye «Glucemia en ayunas 95 mg/dL»<br>incluye «Desde 92 mg/dL» | ☐ Sí ☐ No | |
 | GLU-03 | Glucemia en ayunas de 130: diabetes manifiesta. | Glucemia 130 mg/dL (8+5) | **Diabetes manifiesta en el embarazo: glucemia en ayunas alterada**<br>incluye «Desde 126 mg/dL»<br>incluye «alto riesgo» | ☐ Sí ☐ No | |
+
+## Tiroides
+
+| Caso | Qué se prueba | Datos | Resultado esperado | ¿Correcto? | Observaciones |
+|---|---|---|---|---|---|
 | TSH-01 | TSH de 2,1: sin alerta. | TSH 2,1 mUI/L (8+5) | Sin alertas | ☐ Sí ☐ No | |
-| TSH-02 | TSH de 6,5: elevada. | TSH 6,5 mUI/L (8+5) | **TSH elevada: posible hipotiroidismo**<br>incluye «TSH 6,50 mUI/L»<br>incluye «T4 libre» | ☐ Sí ☐ No | |
-| TSH-03 | TSH de 0,05: baja. | TSH 0,05 mUI/L (8+5) | **TSH baja: posible hipertiroidismo** | ☐ Sí ☐ No | |
+| TSH-02 | TSH de 6,5 sin T4 libre ni anti-TPO: completar el estudio. | TSH 6,5 mUI/L (8+5) | **TSH elevada: solicitar T4 libre y anti-TPO**<br>incluye «TSH 6,50 mUI/L»<br>incluye «Desde 2,5 mUI/L» | ☐ Sí ☐ No | |
+| TSH-03 | TSH de 0,05 en el primer trimestre: posible hipertiroidismo transitorio. | TSH 0,05 mUI/L (8+5) | **TSH baja: posible hipertiroidismo**<br>incluye «Solicitar T4 libre»<br>incluye «hCG» | ☐ Sí ☐ No | |
+| TSH-04 | TSH de 12: hipotiroidismo clínico; dosis por peso (62 kg). | TSH 12 mUI/L (8+5); Peso 62 kg | **Hipotiroidismo clínico: TSH de 10 o más**<br>incluye «2,3 µg/kg al día: unos 150 µg al día con 62,0 kg»<br>incluye «Meta: TSH < 2,5» | ☐ Sí ☐ No | |
+| TSH-05 | TSH de 3,2, T4 libre normal y anti-TPO positivo: levotiroxina 1,2 µg/kg. | TSH 3,2 mUI/L; T4 libre 1,10 ng/dL; Anti-TPO positivo | **Hipotiroidismo subclínico con anti-TPO positivo: iniciar levotiroxina**<br>incluye «1,2 µg/kg al día: unos 75 µg al día» | ☐ Sí ☐ No | |
+| TSH-06 | TSH de 3,2, T4 libre normal, anti-TPO negativo y sin antecedentes: seguimiento. | TSH 3,2 mUI/L; T4 libre 1,10 ng/dL; Anti-TPO negativo | **Hipotiroidismo subclínico sin criterio de tratamiento** | ☐ Sí ☐ No | |
+| TSH-07 | TSH de 5 con anti-TPO negativo y un aborto previo: levotiroxina 1,4 µg/kg. | TSH 5 mUI/L; T4 libre 1,10 ng/dL; Anti-TPO negativo; 1 aborto | **Hipotiroidismo subclínico con antecedentes desfavorables: iniciar levotiroxina**<br>incluye «1,4 µg/kg» | ☐ Sí ☐ No | |
+| TSH-08 | TSH de 5 con T4 libre baja: hipotiroidismo clínico (2,3 y luego 1,6 µg/kg). | TSH 5 mUI/L; T4 libre 0,60 ng/dL | **Hipotiroidismo clínico: TSH elevada con T4 libre baja**<br>incluye «2,3 µg/kg»<br>incluye «1,6 µg/kg» | ☐ Sí ☐ No | |
+| TSH-09 | TSH de 1,5 con T4 libre baja: hipotiroxinemia, sin levotiroxina. | TSH 1,5 mUI/L; T4 libre 0,60 ng/dL | **Hipotiroxinemia: TSH normal con T4 libre baja** | ☐ Sí ☐ No | |
+| TSH-10 | TSH suprimida con T4 libre alta: hipertiroidismo, remisión inmediata. | TSH 0,05 mUI/L; T4 libre 2,50 ng/dL | **Hipertiroidismo: TSH suprimida con T4 libre alta**<br>incluye «TRAb»<br>incluye «metimazol» | ☐ Sí ☐ No | |
+| TSH-11 | TSH suprimida después de la semana 16 con T4 libre normal: remitir. | TSH 0,05 mUI/L (16+4); T4 libre 1,50 ng/dL | **TSH suprimida después de la semana 16: remitir a endocrinología** | ☐ Sí ☐ No | |
+| TSH-12 | Con levotiroxina y TSH de 3: fuera de meta, ajustar la dosis. | Levotiroxina indicada; TSH 3 mUI/L | **TSH fuera de meta con levotiroxina: ajustar la dosis** | ☐ Sí ☐ No | |
+| TIR-01 | Hipotiroidismo primario previo con 100 µg de levotiroxina: aumentar 25 a 30 %. | Hipotiroidismo primario; Toma levotiroxina 100 µg al día | **Hipotiroidismo previo al embarazo: ajustar la levotiroxina**<br>incluye «entre 25 y 30 %»<br>incluye «nueva dosis de unos 125 µg al día» | ☐ Sí ☐ No | |
+| TIR-02 | Antecedente de enfermedad de Graves: TRAb y control con endocrinología. | Hipertiroidismo o enfermedad de Graves | **Antecedente de hipertiroidismo o enfermedad de Graves** | ☐ Sí ☐ No | |
 
 ## ASA
 

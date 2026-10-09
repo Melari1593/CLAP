@@ -77,6 +77,9 @@ export function primeraConsultaCompleta(): DatosPrimeraConsulta {
       ciclos: valor('regulares'),
       inicioVidaSexualEdad: valor(17),
       itsPrevias: valor(false),
+      tiroides: valor('no'),
+      antiTpoPrevios: valor(false),
+      levotiroxinaUgDia: noCorresponde(),
     },
     antecedentesObstetricos: {
       gestas: valor(0),

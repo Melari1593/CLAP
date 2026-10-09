@@ -25,6 +25,7 @@ export type Fuente =
   | 'Supersalud (códigos de EPS)'
   | 'CUPS (MinSalud)'
   | 'OMS (ATC)'
+  | 'Protocolo BCNatal Tiroides y embarazo 2025'
   | 'Spec HCP Digital v1'
   | 'Equipo clínico';
 
@@ -325,7 +326,7 @@ const BASE = {
       sarcoidosis: 'Usar con cautela por mayor activación de la vitamina D; vigilar calcio sérico.',
       tiazidas: 'Reducen la excreción urinaria de calcio; vigilar calcio sérico por riesgo de hipercalcemia.',
       digoxina: 'Vigilar calcio sérico.',
-      levotiroxina: 'Tomarla separada del calcio por varias horas, porque el calcio reduce su absorción.',
+      levotiroxina: 'Tomarla en ayunas y separada 4 a 6 horas del calcio (y del hierro), porque reducen su absorción.',
       antiacidosConCalcioFrecuentes:
         'Riesgo de hipercalcemia por exceso de calcio con álcalis; sumar el calcio de los antiácidos y vigilar.',
       vomitoPersistente:
@@ -708,19 +709,62 @@ const BASE = {
     nombre: 'TSH: límite superior en el embarazo',
     valor: 4.0,
     unidad: 'mUI/L (por encima se marca como alterada)',
-    fuentes: ['Equipo clínico'],
-    estado: 'pendiente',
-    revisado: '2026-10-08',
-    nota: 'Valor de referencia cuando el laboratorio no tiene rangos propios por trimestre (ATA 2017). Por confirmar con el equipo clínico.',
+    fuentes: ['Protocolo BCNatal Tiroides y embarazo 2025'],
+    estado: 'decidido',
+    revisado: '2026-10-09',
+    nota: 'Rango de TSH en la gestante: 0,1 a 4,0 mUI/L (protocolo BCNatal 2025, adoptado por la responsable del proyecto el 2026-10-09). Si el laboratorio tiene rangos propios por trimestre, se ajusta.',
+  }),
+  'tiroides.cortesTsh': p<{ estudiarDesde: number; clinicoDesde: number; meta: number; supresionPersistenteDesdeSemana: number }>({
+    nombre: 'TSH: cortes del algoritmo de tamizaje y meta del tratamiento',
+    valor: { estudiarDesde: 2.5, clinicoDesde: 10, meta: 2.5, supresionPersistenteDesdeSemana: 16 },
+    unidad: 'mUI/L (desde 2,5: T4 libre y anti-TPO; desde 10: hipotiroidismo clínico; meta < 2,5) y semanas',
+    fuentes: ['Protocolo BCNatal Tiroides y embarazo 2025'],
+    estado: 'decidido',
+    revisado: '2026-10-09',
+    nota: 'Figura 1 y 2 del protocolo. TSH suprimida después de la semana 16: remitir a endocrinología. Adoptado por la responsable del proyecto el 2026-10-09.',
+  }),
+  'tiroides.t4libre': p<{ inferior: number; superior: number }>({
+    nombre: 'T4 libre: rango normal',
+    valor: { inferior: 0.71, superior: 1.94 },
+    unidad: 'ng/dL',
+    fuentes: ['Protocolo BCNatal Tiroides y embarazo 2025'],
+    estado: 'decidido',
+    revisado: '2026-10-09',
+    nota: 'El protocolo da 9,1 a 25,0 pmol/L (igual que fuera del embarazo); convertido a ng/dL (÷ 12,87). Ajustar al rango del laboratorio si es distinto.',
+  }),
+  'tiroides.levotiroxina': p<{
+    subclinicoAntiTpo: number;
+    subclinicoAntecedentes: number;
+    clinicoInicial: number;
+    clinicoMantenimiento: number;
+    aumentoPrimarioPct: [number, number];
+    aumentoAblacionPct: [number, number];
+  }>({
+    nombre: 'Levotiroxina: dosis por peso y ajuste del hipotiroidismo previo',
+    valor: { subclinicoAntiTpo: 1.2, subclinicoAntecedentes: 1.4, clinicoInicial: 2.3, clinicoMantenimiento: 1.6, aumentoPrimarioPct: [25, 30], aumentoAblacionPct: [40, 45] },
+    unidad: 'µg/kg al día; porcentaje de aumento de la dosis previa',
+    fuentes: ['Protocolo BCNatal Tiroides y embarazo 2025'],
+    estado: 'decidido',
+    revisado: '2026-10-09',
+    nota: 'Subclínico: 1,2 µg/kg con TSH ≥ 2,5 y anti-TPO positivo; 1,4 µg/kg con TSH ≥ 4 y antecedentes desfavorables. Clínico: 2,3 µg/kg la primera semana y luego 1,6 (con TSH > 10, 2,3 o hasta el doble). Previo al embarazo: primario +25–30 % (doblar 2 días por semana); por ablación +40–45 % (doblar 3 días por semana). Aumentos de 25 a 50 µg.',
+  }),
+  'tiroides.seguimiento': p<{ cadaDias: number; hastaSemana: number; ventanaTardia: [number, number] }>({
+    nombre: 'Seguimiento de la TSH (tratadas con levotiroxina o anti-TPO positivo)',
+    valor: { cadaDias: 28, hastaSemana: 20, ventanaTardia: [26, 32] },
+    unidad: 'días / semanas',
+    fuentes: ['Protocolo BCNatal Tiroides y embarazo 2025'],
+    estado: 'decidido',
+    revisado: '2026-10-09',
+    nota: 'TSH cada 4 semanas hasta la semana 20 y al menos una vez entre las semanas 26 y 32; 4 semanas después de cada cambio de dosis.',
   }),
   'tsh.limiteInferior': p<number>({
     nombre: 'TSH: límite inferior en el embarazo',
     valor: 0.1,
     unidad: 'mUI/L (por debajo se marca como alterada)',
-    fuentes: ['Equipo clínico'],
-    estado: 'pendiente',
+    fuentes: ['Protocolo BCNatal Tiroides y embarazo 2025'],
+    estado: 'decidido',
     revisado: '2026-10-09',
-    nota: 'Por confirmar con el equipo clínico. En el primer trimestre la TSH baja puede ser fisiológica (efecto de la hCG).',
+    nota: 'Protocolo BCNatal 2025, adoptado el 2026-10-09. En el primer trimestre la TSH baja puede ser fisiológica (efecto de la hCG).',
   }),
   'plaquetas.normalDesde': p<number>({
     nombre: 'Recuento de plaquetas normal (hemograma)',
@@ -955,6 +999,7 @@ const BASE = {
       asa: [{ principio: 'Ácido acetilsalicílico', atc: 'B01AC06' }],
       tromboprofilaxis: [{ principio: 'Enoxaparina', atc: 'B01AB05' }],
       espiramicina: [{ principio: 'Espiramicina', atc: 'J01FA02' }],
+      levotiroxina: [{ principio: 'Levotiroxina sódica', atc: 'H03AA01' }],
       toxoTratamientoPleno: [
         { principio: 'Sulfadiazina', atc: 'J01EC02' },
         { principio: 'Pirimetamina', atc: 'P01BD01' },
@@ -977,6 +1022,7 @@ const BASE = {
       { principio: 'Ácido acetilsalicílico', atc: 'B01AC06', presentacion: 'Tableta 100 mg', dosis: '1 tableta', via: 'Oral', frecuencia: 'Cada 24 horas, en la noche', indicaciones: 'Desde la semana 12 hasta la semana 36.' },
       { principio: 'Enoxaparina', atc: 'B01AB05', presentacion: 'Jeringa prellenada 40 mg / 0,4 mL', dosis: 'Según el peso (ver tromboprofilaxis)', via: 'Subcutánea', frecuencia: 'Cada 24 horas' },
       { principio: 'Espiramicina', atc: 'J01FA02', presentacion: 'Tableta 3.000.000 UI', dosis: '1 tableta', via: 'Oral', frecuencia: 'Cada 8 horas', indicaciones: 'Hasta el parto.' },
+      { principio: 'Levotiroxina sódica', atc: 'H03AA01', presentacion: 'Tableta 50 µg', dosis: 'Según el peso', via: 'Oral', frecuencia: 'Cada 24 horas, en ayunas', indicaciones: 'En ayunas, 30 minutos antes de comer; separada 4 a 6 horas del hierro y del calcio.' },
       { principio: 'Sulfadiazina', atc: 'J01EC02', presentacion: 'Tableta 500 mg', dosis: '', via: 'Oral', frecuencia: '' },
       { principio: 'Pirimetamina', atc: 'P01BD01', presentacion: 'Tableta 25 mg', dosis: '', via: 'Oral', frecuencia: '' },
       { principio: 'Ácido folínico (folinato cálcico)', atc: 'V03AF03', presentacion: 'Tableta 15 mg', dosis: '', via: 'Oral', frecuencia: '' },

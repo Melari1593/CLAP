@@ -75,6 +75,14 @@ export function alterado(ctx: ContextoClinico, e: ResultadoExamen): boolean {
       const v = (r as ResultadoPorTipo['tsh']).mUIL;
       return v > ctx.catalogo.valor('tsh.limiteSuperior') || v < ctx.catalogo.valor('tsh.limiteInferior');
     }
+    case 't4libre': {
+      const v = (r as ResultadoPorTipo['t4libre']).ngDl;
+      const { inferior, superior } = ctx.catalogo.valor('tiroides.t4libre');
+      return v < inferior || v > superior;
+    }
+    case 'antiTPO':
+    case 'trab':
+      return (r as { positivo: boolean }).positivo;
     case 'uroanalisis': return (r as ResultadoPorTipo['uroanalisis']).resultado === 'anormal';
     case 'coombsIndirecto':
     case 'chagas':

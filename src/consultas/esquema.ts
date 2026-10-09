@@ -348,6 +348,21 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
           ['nefropatia', 'Nefropatía'],
         ] as [string, string][]
       ).map(([r, e]) => siNo([`antecedentesPersonales.${r}`, e])),
+      {
+        ruta: 'antecedentesPersonales.tiroides',
+        etiqueta: 'Enfermedad tiroidea',
+        control: {
+          tipo: 'opciones',
+          opciones: ops(
+            ['no', 'No'],
+            ['hipotiroidismo_primario', 'Hipotiroidismo (Hashimoto u otro)'],
+            ['hipotiroidismo_ablacion', 'Hipotiroidismo por cirugía o yodo radiactivo'],
+            ['hipertiroidismo', 'Hipertiroidismo o enfermedad de Graves'],
+            ['bocio_nodulos', 'Bocio o nódulos tiroideos'],
+          ),
+        },
+      },
+      { ruta: 'antecedentesPersonales.antiTpoPrevios', etiqueta: 'Anticuerpos antitiroideos (anti-TPO) positivos conocidos', control: sino },
       { ruta: 'antecedentesPersonales.violencia', etiqueta: 'Violencia', privado: true, control: sino },
       { ruta: 'antecedentesPersonales.quirurgicos', etiqueta: 'Antecedentes quirúrgicos', ayuda: 'Cirugías y año. Si no tiene, escriba "Ninguno".', control: { tipo: 'texto', largo: true } },
       { ruta: 'antecedentesPersonales.alergias', etiqueta: 'Alergias', control: sino },
@@ -462,7 +477,22 @@ export const BLOQUES_PRIMERA: Bloque<P>[] = [
         ['antiacidosConCalcioFrecuentes', 'Usa antiácidos con calcio con frecuencia'],
         ['vomitoPersistente', 'Vómito persistente'],
       ] as [string, string][]
-    ).map(([r, e]) => siNo([`antecedentesCalcio.${r}`, e])),
+    )
+      .map(([r, e]) => siNo([`antecedentesCalcio.${r}`, e]))
+      .flatMap((c) =>
+        c.ruta === 'antecedentesCalcio.levotiroxina'
+          ? [
+              c,
+              {
+                ruta: 'antecedentesPersonales.levotiroxinaUgDia',
+                etiqueta: 'Dosis de levotiroxina antes del embarazo',
+                ayuda: 'Para proponer el ajuste de dosis al confirmar el embarazo.',
+                control: num('µg al día'),
+                aplica: (d: P) => es(d.antecedentesCalcio.levotiroxina, true),
+              },
+            ]
+          : [c],
+      ),
   },
   {
     id: 'trombotico',

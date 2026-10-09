@@ -10,6 +10,7 @@ const INDICACIONES: { tipo: TipoIndicacion; etiqueta: string }[] = [
   { tipo: 'acidoFolico', etiqueta: 'Ácido fólico' },
   { tipo: 'calcio', etiqueta: 'Carbonato de calcio' },
   { tipo: 'asa', etiqueta: 'Aspirina (ASA), hasta la semana 36' },
+  { tipo: 'levotiroxina', etiqueta: 'Levotiroxina' },
   { tipo: 'preparacionParto', etiqueta: 'Preparación para el parto' },
   { tipo: 'lactancia', etiqueta: 'Consejería en lactancia' },
 ];

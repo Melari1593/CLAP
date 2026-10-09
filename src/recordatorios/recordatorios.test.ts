@@ -176,3 +176,26 @@ describe('Recordatorios por semana (F1)', () => {
     for (const r of ids(semana(21))) expect((r.paraGestante ?? '').toLowerCase()).not.toContain('vih');
   });
 });
+
+describe('Seguimiento de la TSH (protocolo BCNatal 2025)', () => {
+  const conLevo = (examenes: Examen[]) => ({
+    indicaciones: [{ tipo: 'levotiroxina' as const, estado: 'indicado' as const }],
+    examenes,
+  });
+  const tshEn = (fecha: string): Examen => ({ tipo: 'tsh', valor: { mUIL: 2 }, fecha });
+
+  it('con levotiroxina: TSH cada 4 semanas hasta la semana 20', () => {
+    expect(ids(semana(12), conLevo([tshEn(semana(10))])).map((r) => r.id)).not.toContain('tiroides:tsh');
+    expect(ids(semana(15), conLevo([tshEn(semana(10))])).map((r) => r.id)).toContain('tiroides:tsh');
+    expect(ids(semana(21), conLevo([tshEn(semana(10))])).map((r) => r.id)).not.toContain('tiroides:tsh');
+  });
+
+  it('y una TSH entre las semanas 26 y 32', () => {
+    expect(ids(semana(27), conLevo([tshEn(semana(18))])).map((r) => r.id)).toContain('tiroides:tsh_tardia');
+    expect(ids(semana(29), conLevo([tshEn(semana(27))])).map((r) => r.id)).not.toContain('tiroides:tsh_tardia');
+  });
+
+  it('sin levotiroxina ni anti-TPO positivo no se pide', () => {
+    expect(ids(semana(15), { examenes: [tshEn(semana(10))] }).some((r) => r.id.startsWith('tiroides:'))).toBe(false);
+  });
+});
