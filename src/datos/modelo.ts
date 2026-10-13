@@ -400,6 +400,12 @@ export interface OrdenParaclinico {
   examen: TipoExamen | null;
   cups: string | null;
   justificacion?: string;
+  /** Prioridad (la orden de ecografía por sospecha de restricción del crecimiento es prioritaria). */
+  prioridad?: 'prioritaria';
+  /** Generada por la app (crecimiento fetal por altura uterina), a nombre del profesional del control. */
+  automatica?: { clase: string; motivo: string; fechaHora: FechaHoraISO };
+  /** Anulada por el profesional, con el motivo (queda en la bitácora). No se imprime. */
+  anulada?: { fechaHora: FechaHoraISO; motivo: string; profesionalId: string };
 }
 
 /** Remisión a otro servicio o especialidad. */
@@ -435,6 +441,11 @@ export interface Consulta extends Meta {
    * con la firma manuscrita digitalizada (imagen PNG en data URL).
    */
   cierre?: { profesional: string; registroProfesional: string | null; fechaHora: FechaHoraISO; firma?: string };
+  /**
+   * Crecimiento fetal en este control (se recalcula si se corrige una medición). Guarda también lo
+   * que habría hecho la regla clásica (una medición bajo p10) para comparar las dos reglas.
+   */
+  crecimiento?: { clase: string; reglaClasica: boolean; probDescenso?: number; ordenGenerada: boolean };
 }
 
 // ---------------------------------------------------------------- Exámenes
@@ -459,7 +470,21 @@ export type ResultadoPorTipo = {
   rubeolaIgG: { positivo: SiNo };
   /** IgG para varicela zóster. */
   varicelaIgG: { positivo: SiNo };
-  ecografia: { momento: 'primer_trimestre' | 'detalle' | 'tercer_trimestre' | 'otra'; hallazgos: 'normal' | 'anormal' };
+  ecografia: {
+    momento: 'primer_trimestre' | 'detalle' | 'tercer_trimestre' | 'otra';
+    hallazgos: 'normal' | 'anormal';
+    /** Biometría, tal como viene en el informe (crecimiento fetal). Todo opcional: se guarda lo que haya. */
+    egSemanas?: number;
+    egDias?: number;
+    pfeGramos?: number;
+    pfePercentil?: number;
+    caMm?: number;
+    caPercentil?: number;
+    /** Número de fetos: con 2 o más, la curva de altura uterina del CLAP no aplica. */
+    fetos?: number;
+    liquido?: 'normal' | 'oligohidramnios' | 'polihidramnios';
+    miomas?: SiNo;
+  };
   /** T4 libre en ng/dL. */
   t4libre: { ngDl: number };
   /** Anticuerpos antiperoxidasa tiroidea. */

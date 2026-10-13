@@ -1,5 +1,6 @@
 // Ficha de la gestante: embarazo actual, cálculos y consultas. (El resumen completo con
 // alertas y pendientes es la tarea F2.)
+import { NOMBRE_CLASE, type ClaseCrecimiento } from '../alertas/crecimientoFetal';
 import { localeDe } from '../i18n/dom';
 import { useEffect, useState } from 'react';
 import type { Embarazo, Gestante } from '../datos/modelo';
@@ -64,6 +65,9 @@ export function PantallaFicha({ gestanteId, aviso, ir }: { gestanteId: string; a
                 >
                   <strong>{c.fecha}</strong> · {c.tipo === 'primera' ? 'Primera consulta' : 'Control'}
                   {!c.cerrada && <span className="etiqueta-estado"> abierta</span>}
+                  {c.crecimiento && c.tipo === 'seguimiento' && (
+                    <span className="clase-control"> · {NOMBRE_CLASE[c.crecimiento.clase as ClaseCrecimiento] ?? c.crecimiento.clase}</span>
+                  )}
                   {c.cierre && (
                     <small className="suave">
                       {' '}· cerrada por {c.cierre.profesional}

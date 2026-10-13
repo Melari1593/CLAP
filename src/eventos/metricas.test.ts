@@ -71,7 +71,7 @@ async function escenario() {
       resultado: valor(tipo === 'hb' ? { gdl: 13, muestra: 'venosa' } : { reactiva: false }),
     } as Parameters<typeof consultas.registrarExamen>[0]);
   }
-  await consultas.cerrarConsulta(guardado(await consultas.guardarSeguimiento(e1!.id, seguimiento(64))), 15 * 60);
+  await consultas.cerrarConsulta(guardado(await consultas.guardarSeguimiento(e1!.id, seguimiento(64), { confirmado: true })), 15 * 60);
 
   ir('2026-11-23T14:00:00.000Z'); // 25+0: PTOG
   await consultas.registrarExamen({
@@ -83,7 +83,7 @@ async function escenario() {
   });
 
   ir('2026-12-21T14:00:00.000Z'); // 29+0
-  await consultas.cerrarConsulta(guardado(await consultas.guardarSeguimiento(e1!.id, seguimiento(68))), 25 * 60);
+  await consultas.cerrarConsulta(guardado(await consultas.guardarSeguimiento(e1!.id, seguimiento(68), { confirmado: true })), 25 * 60);
 
   // Gestante 2: 13 años, no planeado y no desea continuar; solicita IVE con remisión el mismo día.
   ir('2026-08-24T15:00:00.000Z');

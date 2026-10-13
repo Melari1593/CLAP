@@ -64,6 +64,13 @@ export function CarneGestante({ datos, idioma = 'es' }: { datos: DatosCarne; idi
         </section>
       )}
 
+      {datos.avisos.length > 0 && (
+        <section className="carne-aviso">
+          <h3><span aria-hidden>⚠️</span> Importante</h3>
+          {datos.avisos.map((a) => <p key={a}>{a}</p>)}
+        </section>
+      )}
+
       {datos.examenesPendientes.length > 0 && (
         <section>
           <h3><span aria-hidden>🧪</span> Exámenes y vacunas que te faltan</h3>

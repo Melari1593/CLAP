@@ -26,7 +26,9 @@ import type { RegistroEventos } from '../eventos/eventos';
 import { construirContexto } from '../alertas/motor';
 import { evaluarTrombo } from '../alertas/trombo';
 import { recordatorios } from '../recordatorios/recordatorios';
-import { ordenesIncompletas } from './ordenes';
+import { ordenesIncompletas, ordenesVacias, paraclinicoDe } from './ordenes';
+import { decidirOrden, evaluarCrecimientoHasta } from '../alertas/crecimientoHistoria';
+import { curvaAU } from '../alertas/crecimientoFetal';
 
 // ------------------------------------------------------------------ Cambios clínicos
 
@@ -38,6 +40,17 @@ export type CambioClinico =
   | { tipo: 'factor_transitorio'; embarazoId: string; factor: TipoFactorTransitorio; resuelto: boolean };
 
 type Oyente = (cambio: CambioClinico) => void | Promise<void>;
+
+/**
+ * Las órdenes que generó la app no se pierden si la pantalla guarda una lista de órdenes sin ellas
+ * (por ejemplo, abierta antes de que se generaran): solo se anulan, con el motivo.
+ */
+export function conservarAutomaticas(nuevas: Ordenes | undefined, previas: Ordenes | undefined): Ordenes | undefined {
+  const faltan = (previas?.paraclinicos ?? []).filter((o) => o.automatica && !nuevas?.paraclinicos.some((n) => n.id === o.id));
+  if (!faltan.length) return nuevas;
+  const base = nuevas ?? ordenesVacias();
+  return { ...base, paraclinicos: [...base.paraclinicos, ...faltan] };
+}
 
 // ------------------------------------------------------------------ Búsqueda (B1)
 
@@ -159,6 +172,8 @@ export class ServicioConsultas {
       ordenes: opciones.ordenes ?? previa?.ordenes,
       primera: ajustados,
     });
+    // La altura uterina de la primera consulta también entra en la tendencia del crecimiento.
+    await this.actualizarCrecimiento(embarazoId);
     await this.avisar({ tipo: 'consulta', embarazoId, consultaId: consulta.id });
     return { estado: 'guardado', registro: consulta };
   }
@@ -172,10 +187,11 @@ export class ServicioConsultas {
     const primera = historia?.consultas.find((c) => c.tipo === 'primera')?.primera;
     const rhNegativo = grupoRh(primera, historia?.examenes ?? []).rh === '-';
     const ajustados = aplicarNoCorresponde(BLOQUES_SEGUIMIENTO, datos, { egSemanas: opciones.egSemanas, rhNegativo });
+    const previa = opciones.consultaId ? await this.repo.leer('consultas', opciones.consultaId) : undefined;
     const advertencias = validarSeguimiento(ajustados, this.catalogo);
+    if (historia) advertencias.push(...this.alturaImprobable(historia, ajustados, previa?.fecha ?? this.hoy(), opciones.consultaId));
     if (advertencias.length > 0 && !opciones.confirmado) return { estado: 'requiere_confirmacion', advertencias };
 
-    const previa = opciones.consultaId ? await this.repo.leer('consultas', opciones.consultaId) : undefined;
     const consulta = await this.repo.guardar('consultas', {
       id: opciones.consultaId,
       embarazoId,
@@ -184,11 +200,99 @@ export class ServicioConsultas {
       profesionalId: this.repo.usuarioId,
       proximaCita: opciones.proximaCita ?? previa?.proximaCita ?? { estado: 'vacio' },
       cerrada: previa?.cerrada ?? false,
-      ordenes: opciones.ordenes ?? previa?.ordenes,
+      ordenes: conservarAutomaticas(opciones.ordenes ?? previa?.ordenes, previa?.ordenes),
       seguimiento: ajustados,
+      crecimiento: previa?.crecimiento,
     });
+    await this.actualizarCrecimiento(embarazoId, consulta.id);
     await this.avisar({ tipo: 'consulta', embarazoId, consultaId: consulta.id });
-    return { estado: 'guardado', registro: consulta };
+    return { estado: 'guardado', registro: (await this.repo.leer('consultas', consulta.id)) ?? consulta };
+  }
+
+  /**
+   * Altura uterina muy distinta de la esperada según el control anterior: se pide confirmarla antes
+   * de guardar (si se confirma, entra al cálculo del crecimiento).
+   */
+  private alturaImprobable(historia: Historia, datos: DatosSeguimiento, fecha: FechaISO, consultaId?: string): Advertencia[] {
+    const cm = valorDe(datos.alturaUterinaCm);
+    if (cm === undefined) return [];
+    const ctx = construirContexto(historia, this.hoy(), this.catalogo);
+    const anterior = historia.consultas
+      .filter((c) => c.id !== consultaId && c.fecha <= fecha)
+      .flatMap((c) => {
+        const valor = valorDe(c.seguimiento?.alturaUterinaCm ?? c.primera?.examenFisico?.alturaUterinaCm);
+        return valor === undefined ? [] : [{ fecha: c.fecha, orden: c.fecha + c.creadoEn, cm: valor }];
+      })
+      .sort((a, b) => a.orden.localeCompare(b.orden))
+      .at(-1);
+    if (!anterior) return [];
+    const egAntes = ctx.egEn(anterior.fecha);
+    const egHoy = ctx.egEn(fecha);
+    const cAntes = egAntes !== undefined ? curvaAU(this.catalogo, egAntes) : undefined;
+    const cHoy = egHoy !== undefined ? curvaAU(this.catalogo, egHoy) : undefined;
+    if (!cAntes || !cHoy) return [];
+    const esperado = anterior.cm + (cHoy.p50 - cAntes.p50);
+    if (Math.abs(cm - esperado) <= this.catalogo.valor('crecimiento.au').cambioImprobableCm) return [];
+    const coma = (x: number) => String(x).replace('.', ',');
+    return [{ ruta: 'alturaUterinaCm', mensaje: `¿Confirma ${coma(cm)} cm de altura uterina? En el control anterior (${anterior.fecha}) midió ${coma(anterior.cm)} cm.` }];
+  }
+
+  /**
+   * Crecimiento fetal: guarda la clasificación de cada control desde el que cambió (con lo que habría
+   * hecho la regla clásica) y, en el último control abierto, genera la orden de ecografía si hace falta.
+   * Sin `consultaId` solo recalcula (por ejemplo, al registrar o corregir una ecografía).
+   */
+  async actualizarCrecimiento(embarazoId: string, consultaId?: string): Promise<void> {
+    const historia = await this.repo.historia(embarazoId);
+    if (!historia) return;
+    const ctx = construirContexto(historia, this.hoy(), this.catalogo);
+    const seguimientos = historia.consultas.filter((c) => c.tipo === 'seguimiento').sort((a, b) => (a.fecha + a.creadoEn).localeCompare(b.fecha + b.creadoEn));
+    const desde = historia.consultas.find((c) => c.id === consultaId)?.fecha ?? '';
+    const ultima = seguimientos.at(-1);
+    for (const c of seguimientos.filter((x) => x.fecha >= desde)) {
+      const ev = evaluarCrecimientoHasta(ctx, c.fecha);
+      let ordenes = c.ordenes;
+      let ordenNueva = false;
+      if (c.id === consultaId && c.id === ultima?.id && !c.cerrada) {
+        const d = decidirOrden(ctx, ev, c);
+        if (d.tipo === 'generar') {
+          ordenNueva = true;
+          const base = paraclinicoDe('ecografia', this.catalogo);
+          const orden = {
+            ...base,
+            nombre: 'Ecografía obstétrica de crecimiento',
+            justificacion: d.motivo,
+            ...(d.prioritaria ? { prioridad: 'prioritaria' as const } : {}),
+            automatica: { clase: ev.clase, motivo: d.motivo, fechaHora: new Date().toISOString() },
+          };
+          ordenes = { ...(ordenes ?? ordenesVacias()), paraclinicos: [...(ordenes?.paraclinicos ?? []), orden] };
+        }
+      }
+      const crecimiento = {
+        clase: ev.clase,
+        reglaClasica: ev.ultimaBajoP10,
+        ...(ev.probDescenso !== undefined ? { probDescenso: Math.round(ev.probDescenso * 100) / 100 } : {}),
+        ordenGenerada: Boolean(ordenes?.paraclinicos.some((o) => o.automatica)),
+      };
+      // Solo se guarda si algo cambió (cada cambio queda en la bitácora).
+      if (ordenNueva || JSON.stringify(crecimiento) !== JSON.stringify(c.crecimiento)) {
+        await this.repo.guardar('consultas', { ...c, crecimiento, ordenes });
+      }
+    }
+  }
+
+  /** Anula una orden (por ejemplo, la de ecografía que generó la app) con el motivo. Queda en la bitácora. */
+  async anularOrden(consultaId: string, ordenId: string, motivo: string): Promise<Consulta> {
+    if (!motivo.trim()) throw new Error('Escriba el motivo de la anulación.');
+    const consulta = await this.repo.leer('consultas', consultaId);
+    if (!consulta?.ordenes) throw new Error('Consulta no encontrada.');
+    const anulada = { fechaHora: new Date().toISOString(), motivo: motivo.trim(), profesionalId: this.repo.usuarioId };
+    const guardada = await this.repo.guardar('consultas', {
+      ...consulta,
+      ordenes: { ...consulta.ordenes, paraclinicos: consulta.ordenes.paraclinicos.map((o) => (o.id === ordenId ? { ...o, anulada } : o)) },
+    });
+    await this.avisar({ tipo: 'consulta', embarazoId: consulta.embarazoId, consultaId });
+    return guardada;
   }
 
   /** Lista lo que quedó vacío (con su etiqueta) para que el profesional decida si lo completa. */
@@ -206,6 +310,7 @@ export class ServicioConsultas {
 
   async registrarExamen(datos: NuevoRegistro<'examenes'>): Promise<ResultadoExamen> {
     const examen = await this.repo.guardar('examenes', datos);
+    if (examen.tipo === 'ecografia') await this.actualizarCrecimiento(examen.embarazoId);
     await this.avisar({ tipo: 'examen', embarazoId: examen.embarazoId, examen: examen.tipo });
     if (this.eventos && examen.resultado.estado === 'valor') {
       const historia = await this.repo.historia(examen.embarazoId);
@@ -220,6 +325,7 @@ export class ServicioConsultas {
     const previo = await this.repo.leer('examenes', id);
     if (!previo) throw new Error('Resultado no encontrado.');
     const examen = await this.repo.guardar('examenes', { ...previo, fecha: cambios.fecha, resultado: cambios.resultado } as ResultadoExamen);
+    if (examen.tipo === 'ecografia') await this.actualizarCrecimiento(examen.embarazoId);
     await this.avisar({ tipo: 'examen', embarazoId: examen.embarazoId, examen: examen.tipo });
     return examen;
   }
@@ -230,6 +336,7 @@ export class ServicioConsultas {
     const previo = await this.repo.leer('examenes', id);
     if (!previo) throw new Error('Resultado no encontrado.');
     const examen = await this.repo.guardar('examenes', { ...previo, anulado: { fechaHora: new Date().toISOString(), motivo: motivo.trim() } });
+    if (examen.tipo === 'ecografia') await this.actualizarCrecimiento(examen.embarazoId);
     await this.avisar({ tipo: 'examen', embarazoId: examen.embarazoId, examen: examen.tipo });
     return examen;
   }

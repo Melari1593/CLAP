@@ -240,3 +240,24 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 .cuestionario-aviso button { margin-inline-start: 8px; }
 .cuestionario-alarmas { border-inline-start: 4px solid var(--alerta, #b42318); padding: 6px 10px; margin-block-end: 8px; background: color-mix(in srgb, #b42318 8%, transparent); }
 .cuestionario-alarmas ul { margin: 4px 0 0; }
+.orden-automatica { border-inline-start: 3px solid var(--marca); padding-inline-start: 8px; }
+.orden-anulada strong { text-decoration: line-through; }
+/* Crecimiento fetal: estimación de la app, proyección, ecografías y clasificación */
+.grafica-au .estimado { fill: none; stroke: #4338ca; stroke-width: 2; }
+.grafica-au .estimado.proyeccion { stroke-dasharray: 6 4; }
+.grafica-au .estimado-margen { fill: #6366f1; fill-opacity: 0.16; stroke: none; }
+.grafica-au .estimado-margen.proyeccion { fill-opacity: 0.08; }
+.grafica-au .eco-marca line { stroke: #7c3aed; stroke-width: 1.5; stroke-dasharray: 2 3; }
+.grafica-au .eco-marca text { fill: #6d28d9; }
+.leyenda-au .muestra.estimado { width: 16px; height: 3px; background: #4338ca; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.16); }
+.leyenda-au .muestra.eco { width: 2px; height: 12px; background: #7c3aed; }
+.crecimiento-clase { border: 1px solid var(--borde); border-inline-start-width: 4px; border-radius: 6px; padding: 8px 12px; margin: 8px 0; }
+.crecimiento-clase p { margin: 0; }
+.crecimiento-clase ul { margin: 6px 0 0; }
+.crecimiento-clase .chip-clase { font-weight: 600; white-space: nowrap; }
+.crecimiento-clase.adecuado { border-inline-start-color: #15803d; }
+.crecimiento-clase.pequeno_estable, .crecimiento-clase.insuficientes, .crecimiento-clase.no_aplica { border-inline-start-color: #64748b; }
+.crecimiento-clase.descenso { border-inline-start-color: #b45309; background: #fffbeb; }
+.crecimiento-clase.sospecha_restriccion { border-inline-start-color: #b42318; background: #fef3f2; }
+.clase-control { font-size: 0.85em; }
+.carne-aviso { border-inline-start: 4px solid #b45309; background: #fffbeb; padding: 8px 12px; border-radius: 6px; }

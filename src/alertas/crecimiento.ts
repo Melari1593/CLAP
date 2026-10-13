@@ -49,15 +49,13 @@ export const alturaUterina: Regla = {
     const p = percentilesAU(ctx, au.egDias);
     if (!p) return null;
     const cm = au.valor as number;
-    if (cm >= p.p10 && cm <= p.p90) return null;
-    const baja = cm < p.p10;
+    // Bajo el percentil 10 lo evalúa la regla de crecimiento fetal (tendencia de las mediciones).
+    if (cm <= p.p90) return null;
     return {
-      titulo: baja ? 'Altura uterina por debajo del percentil 10' : 'Altura uterina por encima del percentil 90',
+      titulo: 'Altura uterina por encima del percentil 90',
       porque: [
         `Altura uterina ${coma(cm)} cm en la semana ${semanaTexto(au.egDias)} (${au.fecha}); percentil 10: ${coma(p.p10)} · percentil 90: ${coma(p.p90)} (CLAP).`,
-        baja
-          ? 'Posible restricción del crecimiento fetal u oligohidramnios.'
-          : 'Posible macrosomía, polihidramnios o embarazo múltiple.',
+        'Posible macrosomía, polihidramnios o embarazo múltiple.',
         'Confirmar la edad gestacional y la técnica de medida; solicitar ecografía.',
       ],
       opciones: [{ etiqueta: 'Ecografía solicitada' }, { etiqueta: 'Referida' }, { etiqueta: 'No requiere acción', requiereMotivo: true }],

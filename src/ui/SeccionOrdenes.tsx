@@ -7,8 +7,10 @@ import { recordatorios } from '../recordatorios/recordatorios';
 import { EXAMENES } from '../examenes/resumen';
 import { useApp } from './contexto';
 
-export function SeccionOrdenes({ embarazoId, ordenes, onCambio, soloLectura, version = 0 }: {
+export function SeccionOrdenes({ embarazoId, ordenes, onCambio, onAnular, soloLectura, version = 0 }: {
   embarazoId: string;
+  /** Anula una orden generada por la app (pide el motivo). */
+  onAnular?: (ordenId: string, motivo: string) => Promise<void>;
   /** Sube con cada guardado para recalcular los exámenes pendientes. */
   version?: number;
   ordenes: Ordenes;
@@ -108,20 +110,44 @@ export function SeccionOrdenes({ embarazoId, ordenes, onCambio, soloLectura, ver
       {ordenes.paraclinicos.length === 0 && <p className="suave">Sin paraclínicos ordenados en esta consulta.</p>}
       <ul className="lista">
         {ordenes.paraclinicos.map((p, i) => (
-          <li key={p.id}>
+          <li key={p.id} className={p.anulada ? 'orden-anulada' : p.automatica ? 'orden-automatica' : undefined}>
             <strong>{p.nombre}</strong>
             {p.cups ? <small className="suave"> · CUPS {p.cups}</small> : <small className="suave"> · sin código CUPS</small>}
-            <input
-              aria-label={`Justificación de ${p.nombre}`}
-              placeholder="Justificación (opcional)"
-              disabled={soloLectura}
-              value={p.justificacion ?? ''}
-              onChange={(e) => par(i, { justificacion: e.target.value || undefined })}
-            />
-            {!soloLectura && (
-              <button type="button" className="enlace" onClick={() => onCambio({ ...ordenes, paraclinicos: ordenes.paraclinicos.filter((_, j) => j !== i) })}>
-                Quitar
-              </button>
+            {p.prioridad === 'prioritaria' && <span className="etiqueta-estado"> Prioritaria</span>}
+            {p.automatica && <small className="suave"> · Generada por la app</small>}
+            {p.anulada ? (
+              <p className="suave">Anulada: {p.anulada.motivo}</p>
+            ) : p.automatica ? (
+              <>
+                <p className="suave">Motivo: {p.justificacion}</p>
+                {!soloLectura && onAnular && (
+                  <button
+                    type="button"
+                    className="enlace"
+                    onClick={() => {
+                      const motivo = prompt('¿Por qué anula la orden de ecografía? El motivo queda en la historia.');
+                      if (motivo?.trim()) void onAnular(p.id, motivo.trim());
+                    }}
+                  >
+                    Anular
+                  </button>
+                )}
+              </>
+            ) : (
+              <>
+                <input
+                  aria-label={`Justificación de ${p.nombre}`}
+                  placeholder="Justificación (opcional)"
+                  disabled={soloLectura}
+                  value={p.justificacion ?? ''}
+                  onChange={(e) => par(i, { justificacion: e.target.value || undefined })}
+                />
+                {!soloLectura && (
+                  <button type="button" className="enlace" onClick={() => onCambio({ ...ordenes, paraclinicos: ordenes.paraclinicos.filter((_, j) => j !== i) })}>
+                    Quitar
+                  </button>
+                )}
+              </>
             )}
           </li>
         ))}

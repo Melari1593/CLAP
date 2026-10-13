@@ -31,7 +31,9 @@ export function PantallaOrdenes({ gestanteId, embarazoId, consultaId, ir }: { ge
   }, [repo, servicio, gestanteId, embarazoId, consultaId]);
 
   if (!gestante || !consulta) return <p>Cargando…</p>;
-  const o = consulta.ordenes ?? { medicamentos: [], paraclinicos: [] };
+  const todas = consulta.ordenes ?? { medicamentos: [], paraclinicos: [] };
+  // Las órdenes anuladas no se imprimen.
+  const o = { ...todas, paraclinicos: todas.paraclinicos.filter((p) => !p.anulada) };
   const dx = valorDe((consulta.primera ?? consulta.seguimiento)?.diagnosticoPlan.diagnosticos) ?? [];
   const nacimiento = valorDe(gestante.fechaNacimiento);
   const id = datos.identificacion;
@@ -99,7 +101,7 @@ export function PantallaOrdenes({ gestanteId, embarazoId, consultaId, ir }: { ge
             <thead><tr><th>CUPS</th><th>Examen</th><th>Justificación</th></tr></thead>
             <tbody>
               {o.paraclinicos.map((p) => (
-                <tr key={p.id}><td>{p.cups ?? '—'}</td><td>{p.nombre}</td><td>{p.justificacion ?? ''}</td></tr>
+                <tr key={p.id}><td>{p.cups ?? '—'}</td><td>{p.nombre}{p.prioridad === 'prioritaria' ? ' (prioritaria)' : ''}</td><td>{p.justificacion ?? ''}</td></tr>
               ))}
             </tbody>
           </table>

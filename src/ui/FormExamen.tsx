@@ -59,7 +59,24 @@ export function FormExamen({ inicial, onRegistrar, onCancelar }: {
     rubeolaIgG: positivo('positivo', 'Resultado'),
     varicelaIgG: positivo('positivo', 'Resultado'),
     coombsIndirecto: positivo('positivo', 'Resultado'),
-    ecografia: <>{opcion('momento', 'Tipo de ecografía', Object.entries(MOMENTO_ECOGRAFIA))}{opcion('hallazgos', 'Hallazgos', [['normal', 'Normales'], ['anormal', 'Anormales']])}</>,
+    ecografia: (
+      <>
+        {opcion('momento', 'Tipo de ecografía', Object.entries(MOMENTO_ECOGRAFIA))}
+        {opcion('hallazgos', 'Hallazgos', [['normal', 'Normales'], ['anormal', 'Anormales']])}
+        <fieldset className="biometria">
+          <legend>Biometría (opcional, como viene en el informe)</legend>
+          {numero('egSemanas', 'Edad gestacional', 'semanas')}
+          {numero('egDias', 'y', 'días')}
+          {numero('pfeGramos', 'Peso fetal estimado', 'g')}
+          {numero('pfePercentil', 'Percentil del peso fetal', '')}
+          {numero('caMm', 'Circunferencia abdominal', 'mm')}
+          {numero('caPercentil', 'Percentil de la circunferencia abdominal', '')}
+          {numero('fetos', 'Número de fetos', '')}
+          {opcion('liquido', 'Líquido amniótico', [['normal', 'Normal'], ['oligohidramnios', 'Oligohidramnios'], ['polihidramnios', 'Polihidramnios']])}
+          {siNo('miomas', 'Miomas')}
+        </fieldset>
+      </>
+    ),
     glucemia: numero('mgDl', 'Glucemia en ayunas', 'mg/dL'),
     t4libre: numero('ngDl', 'T4 libre', 'ng/dL'),
     antiTPO: positivo('positivo', 'Resultado'),
@@ -96,7 +113,20 @@ export function FormExamen({ inicial, onRegistrar, onCancelar }: {
       case 'vdrl': return b('reactivo') === null ? undefined : { reactivo: b('reactivo'), fta: b('fta'), tratamiento: b('tratamiento'), tratamientoPareja: b('tratamientoPareja') };
       case 'vih': return f.resultado ? { solicitado: b('solicitado') ?? false, realizado: b('realizado') ?? false, resultado: f.resultado } : undefined;
       case 'sifilisTreponemica': return b('reactiva') === null ? undefined : { reactiva: b('reactiva') };
-      case 'ecografia': return f.momento && f.hallazgos ? { momento: f.momento, hallazgos: f.hallazgos } : undefined;
+      case 'ecografia': {
+        if (!f.momento || !f.hallazgos) return undefined;
+        // Solo se guardan los datos de biometría que trae el informe.
+        const opcionales = Object.fromEntries(
+          (['egSemanas', 'egDias', 'pfeGramos', 'pfePercentil', 'caMm', 'caPercentil', 'fetos'] as const).flatMap((k) => (n(k) !== undefined ? [[k, n(k)]] : [])),
+        );
+        return {
+          momento: f.momento,
+          hallazgos: f.hallazgos,
+          ...opcionales,
+          ...(f.liquido ? { liquido: f.liquido } : {}),
+          ...(b('miomas') !== null ? { miomas: b('miomas') } : {}),
+        };
+      }
       case 'glucemia': return n('mgDl') !== undefined ? { mgDl: n('mgDl') } : undefined;
       case 't4libre': return n('ngDl') !== undefined ? { ngDl: n('ngDl') } : undefined;
       case 'tsh': return n('mUIL') !== undefined ? { mUIL: n('mUIL') } : undefined;

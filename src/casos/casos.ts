@@ -2,7 +2,7 @@
 // ejemplos del spec. Corren como prueba automática y generan docs/casos-clinicos.md para que el
 // equipo clínico revise y firme los resultados esperados.
 import { noCorresponde, valor } from '../datos/campo';
-import type { DatosPrimeraConsulta } from '../datos/modelo';
+import type { DatosPrimeraConsulta, DatosSeguimiento } from '../datos/modelo';
 import type { historiaDePrueba } from '../pruebas/historia';
 
 type Opciones = NonNullable<Parameters<typeof historiaDePrueba>[0]>;
@@ -54,6 +54,8 @@ export function gestanteBase(d: DatosPrimeraConsulta) {
 }
 
 const CALCIO_INDICADO = [{ tipo: 'calcio' as const, estado: 'indicado' as const }];
+/** Controles de seguimiento con su altura uterina (cm). */
+const AU = (controles: [string, number][]) => controles.map(([fecha, cm]) => ({ fecha, cambios: (s: DatosSeguimiento) => void (s.alturaUterinaCm = valor(cm)) }));
 const T2 = '2026-09-15'; // 15+1
 const T1 = '2026-08-01'; // 8+5
 
@@ -405,8 +407,8 @@ export const CASOS: CasoClinico[] = [
     datos: ['Control 2026-10-26 (21+0): altura uterina 14 cm'],
     hoy: '2026-10-26',
     extra: { indicaciones: CALCIO_INDICADO, seguimientos: [{ fecha: '2026-10-26', cambios: (s) => { s.alturaUterinaCm = valor(21); s.alturaUterinaCm = valor(14); } }] },
-    alertas: { altura_uterina: 'Altura uterina por debajo del percentil 10' },
-    contiene: { altura_uterina: ['percentil 10: 15,8', 'solicitar ecografía'] },
+    alertas: { crecimiento_fetal: 'Altura uterina por debajo del percentil 10' },
+    contiene: { crecimiento_fetal: ['se aplica la regla clásica', 'se genera la orden de ecografía'] },
   }),
   caso({
     id: 'AU-02',
@@ -425,6 +427,91 @@ export const CASOS: CasoClinico[] = [
     hoy: '2026-10-26',
     extra: { indicaciones: CALCIO_INDICADO, seguimientos: [{ fecha: '2026-10-26', cambios: (s) => { s.alturaUterinaCm = valor(21); s.alturaUterinaCm = valor(19); } }] },
     alertas: {},
+  }),
+  // Crecimiento fetal por la tendencia de la altura uterina (FUM 2026-06-01: semana 24 = 2026-11-16).
+  caso({
+    id: 'CF-01',
+    grupo: 'Crecimiento y bienestar fetal',
+    descripcion: 'Ejemplo del spec: la altura uterina baja del percentil 50 al 15 en 6 semanas, sin cruzar el percentil 10: crecimiento en descenso, con orden de ecografía.',
+    datos: ['Altura uterina 21,6 cm (24+0), 22,6 (26+0), 23,4 (28+0) y 24,1 (30+0)'],
+    hoy: '2026-12-28',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: AU([['2026-11-16', 21.6], ['2026-11-30', 22.6], ['2026-12-14', 23.4], ['2026-12-28', 24.1]]),
+    },
+    alertas: { crecimiento_fetal: 'Crecimiento fetal en descenso por altura uterina' },
+    contiene: { crecimiento_fetal: ['Bajó del percentil', 'en 6 semanas', 'Probabilidad de descenso'] },
+    noContiene: { crecimiento_fetal: ['Proyección'] },
+  }),
+  caso({
+    id: 'CF-02',
+    grupo: 'Crecimiento y bienestar fetal',
+    descripcion: 'Bajo el percentil 10 pero estable (feto pequeño que siempre ha sido pequeño): pequeño estable, sin alerta ni orden.',
+    datos: ['Altura uterina 19,4 cm (26+0), 21,9 (29+0) y 24,6 (32+0), todas cerca del percentil 5'],
+    hoy: '2027-01-11',
+    extra: { indicaciones: CALCIO_INDICADO, seguimientos: AU([['2026-11-30', 19.4], ['2026-12-21', 21.9], ['2027-01-11', 24.6]]) },
+    alertas: {},
+  }),
+  caso({
+    id: 'CF-03',
+    grupo: 'Crecimiento y bienestar fetal',
+    descripcion: 'Descenso con proyección a 2 semanas bajo el percentil 10: sospecha de restricción, orden prioritaria.',
+    datos: ['Altura uterina 24,3 cm (28+0), 24,5 (30+0) y 25,1 (32+0)'],
+    hoy: '2027-01-11',
+    extra: { indicaciones: CALCIO_INDICADO, seguimientos: AU([['2026-12-14', 24.3], ['2026-12-28', 24.5], ['2027-01-11', 25.1]]) },
+    alertas: { crecimiento_fetal: 'Sospecha de restricción del crecimiento fetal' },
+    contiene: { crecimiento_fetal: ['Proyección a 2 semanas'] },
+  }),
+  caso({
+    id: 'CF-04',
+    grupo: 'Crecimiento y bienestar fetal',
+    descripcion: 'Altura uterina en su carril, pero la ecografía muestra peso fetal estimado bajo el percentil de corte: sospecha de restricción.',
+    datos: ['Altura uterina 21,6 cm (24+0), 25 (28+0) y 28 (32+0)', 'Ecografía 2027-01-08: peso fetal estimado 1450 g, percentil 4'],
+    hoy: '2027-01-11',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: AU([['2026-11-16', 21.6], ['2026-12-14', 25], ['2027-01-11', 28]]),
+      examenes: [{ tipo: 'ecografia', fecha: '2027-01-08', valor: { momento: 'tercer_trimestre', hallazgos: 'anormal', pfeGramos: 1450, pfePercentil: 4 } }],
+    },
+    alertas: { crecimiento_fetal: 'Sospecha de restricción del crecimiento fetal' },
+    contiene: { crecimiento_fetal: ['peso fetal estimado en el percentil 4 (corte: 10)', 'Hay una ecografía registrada el 2027-01-08'] },
+  }),
+  caso({
+    id: 'CF-05',
+    grupo: 'Crecimiento y bienestar fetal',
+    descripcion: 'Embarazo gemelar: la curva de altura uterina del CLAP no aplica; no se clasifica ni se alerta por altura uterina.',
+    datos: ['Ecografía 2026-09-15: 2 fetos', 'Control 2026-10-26 (21+0): altura uterina 14 cm'],
+    hoy: '2026-10-26',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: AU([['2026-10-26', 14]]),
+      examenes: [{ tipo: 'ecografia', fecha: '2026-09-15', valor: { momento: 'otra', hallazgos: 'normal', fetos: 2 } }],
+    },
+    alertas: {},
+  }),
+  caso({
+    id: 'CF-06',
+    grupo: 'Crecimiento y bienestar fetal',
+    descripcion: 'Se corrigió una medición y el control que generó la orden de ecografía ya no la requiere: se avisa para revisarla, no se anula sola.',
+    datos: ['Altura uterina 21,6 cm (24+0), 25 (28+0) y 28 (32+0)', 'Orden de ecografía generada en el control de la semana 32, sin resultado'],
+    hoy: '2027-01-11',
+    extra: {
+      indicaciones: CALCIO_INDICADO,
+      seguimientos: [
+        ...AU([['2026-11-16', 21.6], ['2026-12-14', 25]]),
+        {
+          ...AU([['2027-01-11', 28]])[0]!,
+          ordenes: {
+            medicamentos: [],
+            paraclinicos: [
+              { id: 'o1', nombre: 'Ecografía obstétrica de crecimiento', examen: 'ecografia', cups: null, justificacion: 'Descenso del crecimiento por altura uterina desde la semana 24.', automatica: { clase: 'descenso', motivo: 'Descenso del crecimiento por altura uterina desde la semana 24.', fechaHora: '2027-01-11T15:00:00.000Z' } },
+            ],
+          },
+        },
+      ],
+    },
+    alertas: { crecimiento_revisar_orden: 'Revise la orden de ecografía: la clasificación del crecimiento cambió' },
+    contiene: { crecimiento_revisar_orden: ['Control del 2027-01-11', 'crecimiento adecuado'] },
   }),
   caso({
     id: 'MF-01',

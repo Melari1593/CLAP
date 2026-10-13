@@ -31,7 +31,7 @@ export function historiaDePrueba(
     examenes?: { tipo: TipoExamen; valor: ResultadoPorTipo[TipoExamen]; fecha?: string }[];
     /** Fecha de la primera consulta (por defecto 2026-07-20). */
     fechaPrimera?: string;
-    seguimientos?: { fecha: string; cambios?: (d: DatosSeguimiento) => void }[];
+    seguimientos?: { fecha: string; cambios?: (d: DatosSeguimiento) => void; ordenes?: Consulta['ordenes'] }[];
     factores?: Pick<FactorTransitorio, 'tipo' | 'inicio' | 'resolucion' | 'conHospitalizacion'>[];
     indicaciones?: Pick<Indicacion, 'tipo' | 'estado'>[];
   } = {},
@@ -64,7 +64,7 @@ export function historiaDePrueba(
       ...(opciones.seguimientos ?? []).map((s, i): Consulta => {
         const datos = seguimiento(62);
         s.cambios?.(datos);
-        return { ...consulta, ...meta(`s${i}`), tipo: 'seguimiento', fecha: s.fecha, primera: undefined, seguimiento: datos };
+        return { ...consulta, ...meta(`s${i}`), tipo: 'seguimiento', fecha: s.fecha, primera: undefined, seguimiento: datos, ordenes: s.ordenes };
       }),
     ],
     examenes: (opciones.examenes ?? []).map(

@@ -60,7 +60,20 @@ export function resumenExamen(e: ResultadoExamen): string {
     case 'coombsIndirecto': return pos((r as ResultadoPorTipo['coombsIndirecto']).positivo);
     case 'rubeolaIgG': return inmune((r as ResultadoPorTipo['rubeolaIgG']).positivo);
     case 'varicelaIgG': return inmune((r as ResultadoPorTipo['varicelaIgG']).positivo);
-    case 'ecografia': { const v = r as ResultadoPorTipo['ecografia']; return `${MOMENTO_ECOGRAFIA[v.momento]} · ${v.hallazgos}`; }
+    case 'ecografia': {
+      const v = r as ResultadoPorTipo['ecografia'];
+      const bio = [
+        v.egSemanas !== undefined ? `EG ${v.egSemanas}+${v.egDias ?? 0}` : '',
+        v.pfeGramos !== undefined ? `PFE ${v.pfeGramos} g` : '',
+        v.pfePercentil !== undefined ? `PFE p${v.pfePercentil}` : '',
+        v.caMm !== undefined ? `CA ${v.caMm} mm` : '',
+        v.caPercentil !== undefined ? `CA p${v.caPercentil}` : '',
+        v.fetos !== undefined && v.fetos > 1 ? `${v.fetos} fetos` : '',
+        v.liquido && v.liquido !== 'normal' ? v.liquido : '',
+        v.miomas ? 'miomas' : '',
+      ].filter(Boolean);
+      return [`${MOMENTO_ECOGRAFIA[v.momento]} · ${v.hallazgos}`, ...bio].join(' · ');
+    }
     case 'glucemia': return `${(r as ResultadoPorTipo['glucemia']).mgDl} mg/dL`;
     case 't4libre': return `${String((r as ResultadoPorTipo['t4libre']).ngDl).replace('.', ',')} ng/dL`;
     case 'tsh': return `${String((r as ResultadoPorTipo['tsh']).mUIL).replace('.', ',')} mUI/L`;

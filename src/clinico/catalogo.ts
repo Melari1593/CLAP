@@ -560,6 +560,56 @@ const BASE = {
     estado: 'pendiente',
     nota: 'Leídos de la curva del CLAP que entregó la responsable del proyecto (2026-10-07). Reemplazar por la tabla numérica oficial del CLAP.',
   }),
+  'crecimiento.au': p<{
+    errorMedicionCm: number;
+    limiteProbabilidad: number;
+    caidaMinimaZSemana: number;
+    pendientePreviaZSemana: number;
+    ventanaSemanas: number;
+    minimoMediciones: number;
+    proyeccionSemanas: number;
+    confirmarEnDosControles: boolean;
+    cambioImprobableCm: number;
+    ecografiaRecienteDias: number;
+  }>({
+    nombre: 'Crecimiento fetal por altura uterina: modelo de tendencia',
+    valor: {
+      errorMedicionCm: 1,
+      limiteProbabilidad: 0.85,
+      caidaMinimaZSemana: 0,
+      pendientePreviaZSemana: 0.15,
+      ventanaSemanas: 10,
+      minimoMediciones: 3,
+      proyeccionSemanas: 2,
+      confirmarEnDosControles: false,
+      cambioImprobableCm: 4,
+      ecografiaRecienteDias: 14,
+    },
+    unidad: 'cm, probabilidad (0 a 1), desviaciones estándar por semana, semanas, días',
+    fuentes: ['CLAP 2007', 'Equipo clínico'],
+    estado: 'pendiente',
+    revisado: '2026-10-13',
+    nota:
+      'Valores del prototipo: error de la cinta ±1 cm (desviación estándar), alerta con probabilidad de descenso ≥ 85 % en el primer control, proyección a 2 semanas, mínimo 3 mediciones. La pendiente se mide en puntajes z de la curva del CLAP por semana; "caída mínima" 0 = cualquier pendiente negativa. Previa de la pendiente: normal de media 0 y DE 0,15 z/semana. Ventana: últimas 10 semanas. Medición improbable: más de 4 cm de diferencia con lo esperado según el control anterior. No se genera otra orden si hay una ecografía registrada en los últimos 14 días. Fijar con historias perinatales anteriores con desenlace conocido antes del lanzamiento.',
+  }),
+  'crecimiento.ecografia': p<{ pfePercentilCorte: number; caPercentilCorte: number }>({
+    nombre: 'Crecimiento fetal: percentiles ecográficos de corte para sospecha de restricción',
+    valor: { pfePercentilCorte: 10, caPercentilCorte: 10 },
+    unidad: 'percentil del informe ecográfico',
+    fuentes: ['Equipo clínico'],
+    estado: 'pendiente',
+    revisado: '2026-10-13',
+    nota: 'Por decidir: bajo p3 o bajo p10, y qué referencia de percentiles ecográficos se acepta en el informe (Hadlock, INTERGROWTH-21st, OMS). Si el informe no trae percentil, la ecografía no se usa en la clasificación.',
+  }),
+  'crecimiento.obesidadImc': p<number>({
+    nombre: 'Crecimiento fetal: IMC pregestacional desde el que la altura uterina es menos confiable',
+    valor: 30,
+    unidad: 'kg/m²',
+    fuentes: ['Equipo clínico'],
+    estado: 'pendiente',
+    revisado: '2026-10-13',
+    nota: 'Umbral de obesidad por decidir. Con IMC igual o mayor, la clasificación se acompaña de un aviso para apoyarse en la ecografía.',
+  }),
   'nutricion.atalah': p<FilaAtalah[]>({
     nombre: 'IMC para la edad gestacional (Atalah)',
     valor: [

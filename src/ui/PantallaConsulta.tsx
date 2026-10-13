@@ -11,7 +11,7 @@ import {
   primeraConsultaVacia,
   seguimientoVacio,
 } from '../consultas/esquema';
-import type { ResultadoGuardado } from '../consultas/servicio';
+import { conservarAutomaticas, type ResultadoGuardado } from '../consultas/servicio';
 import type { Advertencia } from '../consultas/validaciones';
 import { useApp, type Pantalla } from './contexto';
 import { Formulario } from './Formulario';
@@ -154,7 +154,20 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
         <label>Lugar <input value={cita.lugar} onChange={(e) => setCita({ ...cita, lugar: e.target.value })} /></label>
         <label>Qué llevar <input value={cita.queLlevar} onChange={(e) => setCita({ ...cita, queLlevar: e.target.value })} /></label>
       </div>
-      <SeccionOrdenes embarazoId={embarazoId} ordenes={ordenes} onCambio={setOrdenes} soloLectura={cerrada} version={guardados} />
+      <SeccionOrdenes
+        embarazoId={embarazoId}
+        ordenes={ordenes}
+        onCambio={setOrdenes}
+        onAnular={async (ordenId, motivo) => {
+          if (!consultaId) return;
+          const c = await servicio.anularOrden(consultaId, ordenId, motivo);
+          const anulada = c.ordenes?.paraclinicos.find((p) => p.id === ordenId)?.anulada;
+          setOrdenes((o) => ({ ...o, paraclinicos: o.paraclinicos.map((p) => (p.id === ordenId ? { ...p, anulada } : p)) }));
+          setGuardados((n) => n + 1);
+        }}
+        soloLectura={cerrada}
+        version={guardados}
+      />
       <FirmaProfesional firma={firma} onFirma={setFirma} cierre={cerrada ? cierre : undefined} />
       {cerrada && consultaId && (ordenes.medicamentos.length > 0 || ordenes.paraclinicos.length > 0 || (ordenes.remisiones ?? []).length > 0) && (
         <button type="button" className="primario" onClick={() => ir({ tipo: 'ordenes', gestanteId, embarazoId, consultaId })}>
@@ -190,6 +203,9 @@ export function PantallaConsulta({ tipo, gestanteId, embarazoId, consultaId: idI
     setAdvertencias(undefined);
     // No se reemplaza el formulario con lo guardado: el profesional pudo seguir escribiendo.
     setConsultaId(r.registro.id);
+    // La orden de ecografía que generó la app al guardar aparece en "Plan y órdenes".
+    const guardadas = r.registro.ordenes;
+    setOrdenes((o) => conservarAutomaticas(o, guardadas) ?? o);
     setGuardados((n) => n + 1);
     setMensaje(navigator.onLine ? 'Guardado.' : 'Guardado en este dispositivo · pendiente de enviar.');
     return r.registro;

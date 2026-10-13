@@ -11,6 +11,16 @@ import type { Historia } from '../datos/repositorio';
 import { recordatorios } from '../recordatorios/recordatorios';
 import { examenesPorTrimestre, type GrupoTrimestre } from '../examenes/porTrimestre';
 import { grupoRh } from '../clinico/grupoRh';
+import { ordenesEcografiaPendientes } from '../alertas/crecimientoHistoria';
+
+/**
+ * Aviso de la orden de ecografía que generó la app por el crecimiento: qué hacer y por qué, en
+ * lenguaje simple. Nunca percentiles, probabilidades ni la palabra "restricción".
+ */
+const AVISO_CRECIMIENTO = {
+  tendencia: 'Necesitas una ecografía antes de tu próximo control. En las últimas mediciones tu bebé creció menos de lo esperado y queremos verlo mejor. Lleva la orden que te entregaron.',
+  una: 'Necesitas una ecografía antes de tu próximo control. En la última medición tu barriga midió menos de lo esperado y queremos ver mejor a tu bebé. Lleva la orden que te entregaron.',
+};
 
 export const MENSAJE_CARNE_PAUSADO = 'Comunícate con tu servicio de salud.';
 
@@ -78,6 +88,8 @@ export type DatosCarne =
       senalesCoagulo: boolean;
       /** Si tiene tromboprofilaxis: qué hacer antes de un parto programado (texto del catálogo). */
       tromboAntesDelParto?: string;
+      /** Avisos importantes: qué hacer y por qué, en lenguaje sencillo. */
+      avisos: string[];
       /** Exámenes pendientes en lenguaje sencillo (sin nombrar resultados). */
       examenesPendientes: string[];
       /** Exámenes por trimestre: solo si están hechos, faltan o vienen más adelante. */
@@ -113,6 +125,14 @@ export function proyectarCarne(historia: Historia, carne: Carne, hoy: FechaISO, 
     indicaciones,
     senalesCoagulo: indicaciones.includes('tromboprofilaxis') || (trombo?.puntaje ?? 0) >= umbralCoagulo,
     tromboAntesDelParto: indicaciones.includes('tromboprofilaxis') ? catalogo.valor('trombo.suspensionAntesDelParto') ?? undefined : undefined,
+    // Orden de ecografía por el crecimiento, mientras esté pendiente (desaparece al registrar la ecografía o si se anula).
+    avisos: [
+      ...new Set(
+        ordenesEcografiaPendientes(historia)
+          .filter((p) => p.orden.automatica)
+          .map((p) => (p.orden.automatica!.clase === 'insuficientes' ? AVISO_CRECIMIENTO.una : AVISO_CRECIMIENTO.tendencia)),
+      ),
+    ],
     examenesPendientes: [...new Set(recordatorios(ctx).flatMap((r) => (r.paraGestante ? [r.paraGestante] : [])))],
     examenesPorTrimestre: examenesCarne(examenesPorTrimestre(ctx)),
     // Hemoclasificación de laboratorio si la hay; si no, lo declarado.
