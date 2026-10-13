@@ -58,6 +58,19 @@ Embarazo múltiple (ecografía con 2 o más fetos): no se clasifica.
 Cada control guarda su clasificación, lo que habría hecho la regla clásica (una medición bajo p10), la
 probabilidad de descenso y si se generó la orden (`Consulta.crecimiento`).
 
+La **restricción se confirma con el peso fetal estimado de la ecografía**: percentil bajo el corte de
+`crecimiento.ecografia` (decidido el 2026-10-13). Con eso, la pantalla "Catálogo clínico" compara la
+app con la regla clásica:
+
+| Métrica | Cómo se calcula |
+|---|---|
+| Remisiones innecesarias | De las ecografías que resolvieron órdenes de cada regla, las que mostraron peso fetal en o sobre el corte. Menos es mejor. |
+| Detección antes de la semana 37 | De los embarazos con restricción confirmada (primera ecografía con peso bajo el corte), los que tuvieron orden de esa regla antes de la semana 37 y antes de la ecografía que confirmó. |
+| Gestantes que se hacen la ecografía | De las órdenes que generó la app (no anuladas), las que tienen ecografía registrada antes del siguiente control. Las que siguen en curso no cuentan aún. |
+
+Se calcula con las historias del dispositivo (`src/alertas/crecimientoRendimiento.ts`), no con los
+eventos, porque los eventos no llevan resultados de exámenes. Los embarazos múltiples no cuentan.
+
 ## Pendiente de decidir (catálogo, estado "pendiente")
 
 - `crecimiento.au`:
@@ -70,7 +83,6 @@ probabilidad de descenso y si se generó la orden (`Consulta.crecimiento`).
 - `crecimiento.obesidadImc`: IMC desde el que la altura uterina es menos confiable (30).
 - `au.percentiles`: tabla numérica oficial del CLAP.
 - Contenido de la orden (¿Doppler o solo biometría?) y validez de una orden generada por la app.
-- De dónde sale la confirmación de la restricción (peso al nacer o diagnóstico ecográfico).
 
 Antes del lanzamiento, el rendimiento se revisa con historias perinatales anteriores con desenlace
 conocido para fijar estos valores.

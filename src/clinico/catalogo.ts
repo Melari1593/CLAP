@@ -599,7 +599,7 @@ const BASE = {
     fuentes: ['Equipo clínico'],
     estado: 'pendiente',
     revisado: '2026-10-13',
-    nota: 'Por decidir: bajo p3 o bajo p10, y qué referencia de percentiles ecográficos se acepta en el informe (Hadlock, INTERGROWTH-21st, OMS). Si el informe no trae percentil, la ecografía no se usa en la clasificación.',
+    nota: 'Por decidir: bajo p3 o bajo p10, y qué referencia de percentiles ecográficos se acepta en el informe (Hadlock, INTERGROWTH-21st, OMS). Si el informe no trae percentil, la ecografía no se usa en la clasificación. El mismo corte del peso fetal estimado confirma la restricción para medir el éxito de la alerta (decidido por la responsable del proyecto el 2026-10-13).',
   }),
   'crecimiento.obesidadImc': p<number>({
     nombre: 'Crecimiento fetal: IMC pregestacional desde el que la altura uterina es menos confiable',

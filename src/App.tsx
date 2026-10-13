@@ -12,6 +12,7 @@ import { ServicioCarne } from './carne/servicio';
 import { ServicioConsentimientos } from './consentimiento/servicio';
 import { ServicioCuestionarios } from './cuestionario/servicio';
 import { PantallaCuestionario } from './ui/PantallaCuestionario';
+import { PanelRendimientoCrecimiento } from './ui/PanelRendimientoCrecimiento';
 import { PantallaImpresion } from './ui/PantallaImpresion';
 import { CarneWeb } from './ui/CarneWeb';
 import { RegistroEventos } from './eventos/eventos';
@@ -140,7 +141,12 @@ export function App() {
         {pantalla.tipo === 'impresion' && (
           <PantallaImpresion embarazoId={pantalla.embarazoId} volver={() => ir({ tipo: 'ficha', gestanteId: pantalla.gestanteId })} />
         )}
-        {pantalla.tipo === 'catalogo' && <PantallaCatalogo catalogo={contexto.catalogo} />}
+        {pantalla.tipo === 'catalogo' && (
+          <>
+            <PanelRendimientoCrecimiento />
+            <PantallaCatalogo catalogo={contexto.catalogo} />
+          </>
+        )}
       </main>
     </ContextoApp.Provider>
   );
