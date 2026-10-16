@@ -40,6 +40,8 @@ Para cada caso, el equipo clínico marca si el resultado esperado es correcto y 
 | CLAP-15 | Antirrubéola no recibida. | Antirrubéola: no | **Antirrubéola no recibida** | ☐ Sí ☐ No | |
 | CLAP-16 | Hepatitis B con antígeno de superficie positivo. | HBsAg positivo | **Infecciones**<br>incluye «Hepatitis B: antígeno de superficie positivo»<br>incluye «profilaxis del recién nacido» | ☐ Sí ☐ No | |
 | CLAP-17 | Prueba treponémica rápida reactiva sin VDRL: tratar y pedir VDRL/RPR. | Prueba treponémica reactiva | **Sífilis: prueba treponémica reactiva**<br>incluye «tratar según la guía vigente»<br>incluye «Solicitar VDRL/RPR para el seguimiento.» | ☐ Sí ☐ No | |
+| CLAP-28 | Prueba treponémica reactiva y VDRL posterior no reactivo, sin tratamiento: la alerta se mantiene. | Prueba treponémica reactiva; VDRL no reactivo después, sin tratamiento | **Sífilis: prueba treponémica reactiva**<br>incluye «no descarta la sífilis»<br>incluye «Sin tratamiento registrado» | ☐ Sí ☐ No | |
+| CLAP-29 | VIH positivo: alerta urgente solo para el profesional. | VIH positivo | **VIH: resultado positivo**<br>incluye «programa de VIH»<br>incluye «transmisión materno-infantil» | ☐ Sí ☐ No | |
 | CLAP-18 | IgG de rubéola negativa: susceptible, vacunar en el puerperio. | IgG rubéola negativa | **Susceptible a rubéola** | ☐ Sí ☐ No | |
 | CLAP-19 | Rh negativo no sensibilizada: Coombs indirecto y anti-D en la semana 28. | Rh negativo; No inmunizada | **Rh negativo**<br>incluye «Solicitar Coombs indirecto.»<br>incluye «Aplicar inmunoglobulina anti-D en la semana 28 (2026-12-14).» | ☐ Sí ☐ No | |
 | CLAP-20 | Rh negativo con Coombs indirecto positivo: sensibilizada, remitir. | Rh negativo; Coombs indirecto positivo | **Rh negativo sensibilizada** | ☐ Sí ☐ No | |

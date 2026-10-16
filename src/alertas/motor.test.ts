@@ -4,8 +4,14 @@ import { valor } from '../datos/campo';
 import { ServicioConsultas } from '../consultas/servicio';
 import { primeraConsultaCompleta } from '../pruebas/fixtures';
 import { nuevaBD, repo } from '../pruebas/util';
-import { MotorAlertas, ordenarAlertas } from './motor';
+import type { DatosPrimeraConsulta } from '../datos/modelo';
+import type { Historia } from '../datos/repositorio';
+import { historiaDePrueba } from '../pruebas/historia';
+import { RegistroEventos } from '../eventos/eventos';
+import { asa } from './asa';
+import { construirContexto, evaluar as evaluarReglas, MotorAlertas, ordenarAlertas, type Regla, type ResultadoRegla } from './motor';
 import { REGLAS } from './reglas';
+import { tromboprofilaxis } from './trombo';
 
 const cat = new Catalogo();
 const HOY = '2026-10-06';
@@ -115,5 +121,158 @@ describe('Motor de alertas (C1)', () => {
     await servicio.guardarPrimeraConsulta(embarazoId, d, { consultaId });
     const calcio = (await motor.sincronizar(embarazoId)).find((a) => a.regla === 'calcio')!;
     expect(calcio).toMatchObject({ activa: true, titulo: 'Calcio indicado, pero con contraindicación registrada: valorar' });
+  });
+});
+
+describe('Motor de alertas: reactivación por cambio de variante', () => {
+  // Regla de prueba cuyo resultado se controla desde el test.
+  let actual: ResultadoRegla | null = null;
+  const reglaPrueba: Regla = { id: 'prueba', evaluar: () => actual };
+
+  async function prepararConRegla() {
+    const r = repo(nuevaBD());
+    const servicio = new ServicioConsultas(r, cat, () => HOY);
+    const motor = new MotorAlertas(r, [reglaPrueba], cat, () => HOY);
+    const { embarazo } = await servicio.registrarOAbrir({
+      documentoTipo: 'CC',
+      documentoNumero: '2',
+      nombres: 'Bea',
+      apellidos: 'Gómez',
+      fechaNacimiento: valor('1995-01-01'),
+    });
+    return { motor, embarazoId: embarazo!.id };
+  }
+
+  const estado = async (motor: MotorAlertas, embarazoId: string) => (await motor.sincronizar(embarazoId)).find((a) => a.regla === 'prueba')!;
+
+  it('reaparece si cambia la variante aunque la severidad no suba', async () => {
+    const { motor, embarazoId } = await prepararConRegla();
+    actual = { titulo: 'Considerar tromboprofilaxis', porque: ['x'], severidad: 3 };
+    await motor.sincronizar(embarazoId);
+    await motor.atender(`${embarazoId}:prueba`, 'Atendida');
+    expect((await estado(motor, embarazoId)).activa).toBe(false);
+
+    actual = { titulo: 'Con riesgo de sangrado', porque: ['x'], severidad: 3, variante: 'sangrado:Trombocitopenia' };
+    const a = await estado(motor, embarazoId);
+    expect(a.activa).toBe(true);
+    expect(a.decisionesAnteriores?.[0]?.opcion).toBe('Atendida');
+  });
+
+  it('reaparece aunque la severidad baje, si la variante es otra', async () => {
+    const { motor, embarazoId } = await prepararConRegla();
+    actual = { titulo: 'A', porque: ['x'], severidad: 3 };
+    await motor.sincronizar(embarazoId);
+    await motor.atender(`${embarazoId}:prueba`, 'Atendida');
+    actual = { titulo: 'Suspensión', porque: ['x'], variante: 'suspension' };
+    expect((await estado(motor, embarazoId)).activa).toBe(true);
+  });
+
+  it('no reaparece si la variante y la severidad son las mismas', async () => {
+    const { motor, embarazoId } = await prepararConRegla();
+    actual = { titulo: 'A', porque: ['x'], severidad: 2, variante: 'sangrado:Trombocitopenia' };
+    await motor.sincronizar(embarazoId);
+    const atendida = await motor.atender(`${embarazoId}:prueba`, 'Atendida');
+    expect(atendida.decision?.varianteAtendida).toBe('sangrado:Trombocitopenia');
+    actual = { titulo: 'A', porque: ['texto actualizado'], severidad: 2, variante: 'sangrado:Trombocitopenia' };
+    expect((await estado(motor, embarazoId)).activa).toBe(false);
+  });
+});
+
+describe('Eventos de alertas con resultados sensibles', () => {
+  it('VIH y sífilis no salen con su nombre ni con la opción elegida en los eventos de métricas', async () => {
+    const bd = nuevaBD();
+    const r = repo(bd);
+    const eventos = new RegistroEventos(bd, 'ips-1');
+    const servicio = new ServicioConsultas(r, cat, () => HOY);
+    const motor = new MotorAlertas(r, REGLAS, cat, () => HOY, () => new Date(), eventos);
+    const { embarazo } = await servicio.registrarOAbrir({ documentoTipo: 'CC', documentoNumero: '4', nombres: 'E', apellidos: 'F', fechaNacimiento: valor('1995-01-01') });
+    const embarazoId = embarazo!.id;
+    await servicio.registrarExamen({ embarazoId, consultaId: 'c', fecha: '2026-08-01', tipo: 'vih', resultado: valor({ solicitado: true, realizado: true, resultado: 'positivo' as const }) });
+    await motor.sincronizar(embarazoId);
+    await motor.atender(`${embarazoId}:vih`, 'Remitida al programa de VIH');
+    const registrados = await bd.eventos.toArray();
+    const deAlertas = registrados.filter((e) => e.tipo === 'alerta_activada' || e.tipo === 'alerta_decidida');
+    expect(deAlertas.length).toBeGreaterThan(0);
+    const texto = JSON.stringify(deAlertas);
+    expect(texto).not.toContain('vih');
+    expect(texto).not.toContain('VIH');
+    // Tampoco se distingue del de sífilis por la urgencia.
+    const activada = deAlertas.find((e) => e.tipo === 'alerta_activada');
+    expect(activada).toMatchObject({ regla: 'resultado_sensible', urgente: false });
+  });
+});
+
+describe('Parámetros pendientes de validar en las alertas', () => {
+  const usaPendiente: Regla = { id: 'usa_pendiente', evaluar: (c) => (c.catalogo.valor('au.percentiles'), { titulo: 'P', porque: ['x'] }) };
+  const usaDecidido: Regla = { id: 'usa_decidido', evaluar: (c) => (c.catalogo.valor('anemia.cortesHb'), { titulo: 'D', porque: ['x'] }) };
+
+  it('cada alerta lista los parámetros pendientes que usó su regla, aunque otra regla los haya leído antes', () => {
+    const catalogo = new Catalogo();
+    const ctx = construirContexto(historiaDePrueba(), HOY, catalogo);
+    const r = evaluarReglas([usaPendiente, { ...usaPendiente, id: 'otra' }, usaDecidido], ctx);
+    const nombre = catalogo.parametro('au.percentiles').nombre;
+    expect(r.get('usa_pendiente')?.parametrosPendientes).toEqual([nombre]);
+    expect(r.get('otra')?.parametrosPendientes).toEqual([nombre]);
+    expect(r.get('usa_decidido')?.parametrosPendientes).toBeUndefined();
+  });
+
+  it('la alerta guardada conserva el aviso para mostrarlo al profesional', async () => {
+    const r = repo(nuevaBD());
+    const servicio = new ServicioConsultas(r, cat, () => HOY);
+    const motor = new MotorAlertas(r, [usaPendiente], cat, () => HOY);
+    const { embarazo } = await servicio.registrarOAbrir({ documentoTipo: 'CC', documentoNumero: '3', nombres: 'C', apellidos: 'D', fechaNacimiento: valor('1995-01-01') });
+    const [alerta] = await motor.sincronizar(embarazo!.id);
+    expect(alerta?.parametrosPendientes).toEqual([cat.parametro('au.percentiles').nombre]);
+  });
+});
+
+describe('Variantes de las reglas de tromboprofilaxis y ASA', () => {
+  const ctx = (h: Historia) => construirContexto(h, HOY, cat);
+  const conTrombosis = (d: DatosPrimeraConsulta) => {
+    d.riesgoTrombotico.trombosisPrevia = valor(true);
+  };
+
+  it('tromboprofilaxis: el riesgo de sangrado (incluida la trombocitopenia del hemograma) cambia la variante', () => {
+    const base = tromboprofilaxis.evaluar(ctx(historiaDePrueba({ primera: conTrombosis })));
+    expect(base).not.toBeNull();
+    expect(base?.variante).toBeUndefined();
+    const conPlaquetas = tromboprofilaxis.evaluar(
+      ctx(historiaDePrueba({ primera: conTrombosis, examenes: [{ tipo: 'plaquetas', valor: { x10e9L: 60 } }] })),
+    );
+    expect(conPlaquetas?.variante).toBe('sangrado:Trombocitopenia');
+    expect(conPlaquetas?.severidad).toBe(base?.severidad);
+  });
+
+  it('tromboprofilaxis: el aviso de suspensión tiene su propia variante', () => {
+    const r = tromboprofilaxis.evaluar(
+      ctx(
+        historiaDePrueba({
+          factores: [{ tipo: 'inmovilidadODeshidratacion', inicio: '2026-08-01', resolucion: '2026-10-03', conHospitalizacion: false }],
+          indicaciones: [{ tipo: 'tromboprofilaxis', estado: 'indicado' }],
+        }),
+      ),
+    );
+    expect(r?.titulo).toBe('Tromboprofilaxis: fecha de suspensión');
+    expect(r?.variante).toBe('suspension');
+  });
+
+  it('ASA: una contraindicación nueva cambia la variante', () => {
+    const conCriterio = (d: DatosPrimeraConsulta) => {
+      d.riesgoPreeclampsia.hipertensionCronica = valor(true);
+    };
+    const sin = asa.evaluar(ctx(historiaDePrueba({ primera: conCriterio })));
+    const con = asa.evaluar(
+      ctx(
+        historiaDePrueba({
+          primera: (d) => {
+            conCriterio(d);
+            d.riesgoPreeclampsia.alergiaASAoAINE = valor(true);
+          },
+        }),
+      ),
+    );
+    expect(sin).not.toBeNull();
+    expect(sin?.variante).toBeUndefined();
+    expect(con?.variante).toBe('contraindicacion:Alergia al ASA o a los AINE');
   });
 });

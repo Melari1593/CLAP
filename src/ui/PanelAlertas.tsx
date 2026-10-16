@@ -51,6 +51,11 @@ export function PanelAlertas({ embarazoId, version = 0, abrirDerechos }: { embar
             <p className="suave">Reapareció: la situación cambió después de la última decisión.</p>
           )}
           <ul>{a.porque.map((p) => <li key={p}>{p}</li>)}</ul>
+          {a.parametrosPendientes && a.parametrosPendientes.length > 0 && (
+            <p className="aviso-pendiente">
+              Usa parámetros que el equipo clínico aún no validó ({a.parametrosPendientes.join('; ')}). Verifique con su criterio antes de decidir.
+            </p>
+          )}
           <div className="botones">
             {a.opciones.map((o) => (
               <button key={o.etiqueta} type="button" onClick={() => void decidir(a, o.etiqueta, o.requiereMotivo)}>

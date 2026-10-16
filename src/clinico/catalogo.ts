@@ -1128,6 +1128,8 @@ export interface AvisoParametroPendiente {
 export class Catalogo {
   private readonly parametros: Map<IdParametro, Parametro<unknown>>;
   private readonly pendientesUsados = new Map<IdParametro, AvisoParametroPendiente>();
+  /** Pendientes usados durante `registrarPendientes` (para saber qué regla los usó). */
+  private registro?: Map<IdParametro, AvisoParametroPendiente>;
 
   constructor(cambios: CambiosCatalogo = {}) {
     this.parametros = new Map();
@@ -1144,9 +1146,25 @@ export class Catalogo {
   valor<K extends IdParametro>(id: K): ValorDe<K> {
     const param = this.parametro(id);
     if (param.estado === 'pendiente') {
-      this.pendientesUsados.set(id, { id, nombre: param.nombre, nota: param.nota });
+      const aviso = { id, nombre: param.nombre, nota: param.nota };
+      this.pendientesUsados.set(id, aviso);
+      this.registro?.set(id, aviso);
     }
     return param.valor;
+  }
+
+  /** Ejecuta `fn` y devuelve, además de su resultado, los parámetros pendientes que usó. */
+  registrarPendientes<T>(fn: () => T): { resultado: T; pendientes: AvisoParametroPendiente[] } {
+    const anterior = this.registro;
+    const propio = new Map<IdParametro, AvisoParametroPendiente>();
+    this.registro = propio;
+    try {
+      return { resultado: fn(), pendientes: [...propio.values()] };
+    } finally {
+      // Si había un registro externo, también recibe lo usado aquí.
+      if (anterior) for (const [id, aviso] of propio) anterior.set(id, aviso);
+      this.registro = anterior;
+    }
   }
 
   /** Parámetros pendientes de validar que alguna regla ha usado. */

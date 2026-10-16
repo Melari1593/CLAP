@@ -570,6 +570,8 @@ export interface DecisionAlerta {
   profesionalId: string;
   /** Severidad de la regla cuando se atendió; si sube después, la alerta reaparece (C1). */
   severidadAtendida: number;
+  /** Variante de la regla cuando se atendió (p. ej. "sangrado:…"); si cambia, la alerta reaparece. */
+  varianteAtendida?: string;
 }
 
 export interface OpcionDecision {
@@ -589,11 +591,15 @@ export interface Alerta extends Meta {
   urgente: boolean;
   /** Nivel de la regla; si sube después de atendida, la alerta reaparece. */
   severidad: number;
+  /** Situación clínica distinta dentro de la misma regla; si cambia después de atendida, la alerta reaparece. */
+  variante?: string;
   titulo: string;
   porque: string[];
   opciones: OpcionDecision[];
   /** Pantalla a la que lleva la alerta (por ejemplo, "Opciones y derechos", tarea E1). */
   enlace?: 'derechos';
+  /** Parámetros pendientes de validar que usó la regla: se muestran como aviso al profesional. */
+  parametrosPendientes?: string[];
   vigente: boolean;
   activa: boolean;
   decision?: DecisionAlerta;

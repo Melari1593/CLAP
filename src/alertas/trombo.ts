@@ -182,6 +182,7 @@ export const tromboprofilaxis: Regla = {
         return {
           titulo: 'Tromboprofilaxis: fecha de suspensión',
           porque: e.suspensiones.map((s) => `${s.factor} resuelto: suspender el ${s.fecha} (7 días después), si no hay otro criterio.`),
+          variante: 'suspension',
           opciones: [{ etiqueta: 'Suspensión programada' }, { etiqueta: 'Se mantiene', requiereMotivo: true }],
         };
       }
@@ -211,6 +212,8 @@ export const tromboprofilaxis: Regla = {
           'Discutir el balance de riesgos con un hematólogo con experiencia en trombosis y sangrado en el embarazo.',
         ],
         severidad,
+        // Cada factor de sangrado nuevo (también la trombocitopenia del hemograma) pide decidir otra vez.
+        variante: `sangrado:${[...new Set(e.sangrado.map((s) => s.split(':')[0]))].sort().join('|')}`,
         opciones: [
           { etiqueta: 'Referida a especialista', registraIndicacion: { tipo: 'tromboprofilaxis', estado: 'referida' } },
           { etiqueta: 'No indicada', requiereMotivo: true, registraIndicacion: { tipo: 'tromboprofilaxis', estado: 'no_indicado' } },

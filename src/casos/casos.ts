@@ -291,6 +291,29 @@ export const CASOS: CasoClinico[] = [
     contiene: { sifilis: ['tratar según la guía vigente', 'Solicitar VDRL/RPR para el seguimiento.'] },
   }),
   caso({
+    id: 'CLAP-28',
+    grupo: 'CLAP',
+    descripcion: 'Prueba treponémica reactiva y VDRL posterior no reactivo, sin tratamiento: la alerta se mantiene.',
+    datos: ['Prueba treponémica reactiva', 'VDRL no reactivo después, sin tratamiento'],
+    extra: {
+      examenes: [
+        { tipo: 'sifilisTreponemica', valor: { reactiva: true }, fecha: T1 },
+        { tipo: 'vdrl', valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: T2 },
+      ],
+    },
+    alertas: { sifilis: 'Sífilis: prueba treponémica reactiva' },
+    contiene: { sifilis: ['no descarta la sífilis', 'Sin tratamiento registrado'] },
+  }),
+  caso({
+    id: 'CLAP-29',
+    grupo: 'CLAP',
+    descripcion: 'VIH positivo: alerta urgente solo para el profesional.',
+    datos: ['VIH positivo'],
+    extra: { examenes: [{ tipo: 'vih', valor: { solicitado: true, realizado: true, resultado: 'positivo' }, fecha: T1 }] },
+    alertas: { vih: 'VIH: resultado positivo' },
+    contiene: { vih: ['programa de VIH', 'transmisión materno-infantil'] },
+  }),
+  caso({
     id: 'CLAP-18',
     grupo: 'CLAP',
     descripcion: 'IgG de rubéola negativa: susceptible, vacunar en el puerperio.',

@@ -1,6 +1,7 @@
 // C1 — Motor genérico de alertas y decisiones.
 // Evalúa todas las reglas cada vez que cambia un dato. Una alerta queda activa hasta que el
-// profesional registra una decisión; si después la regla da un resultado peor, avisa de nuevo.
+// profesional registra una decisión; si después la regla da un resultado peor, o una situación
+// clínica distinta (otra variante), avisa de nuevo.
 // Nunca impide guardar: se ejecuta después del guardado.
 import type { Catalogo } from '../clinico/catalogo';
 import { diasEntre, edad, edadGestacional, type EdadGestacional } from '../clinico/calculos';
@@ -40,9 +41,16 @@ export interface ResultadoRegla {
   titulo: string;
   porque: string[];
   severidad?: number;
+  /**
+   * Situación clínica distinta dentro de la misma regla (por ejemplo, "sangrado:Trombocitopenia").
+   * Si cambia después de atendida, la alerta reaparece aunque la severidad no suba.
+   */
+  variante?: string;
   urgente?: boolean;
   opciones?: OpcionDecision[];
   enlace?: Alerta['enlace'];
+  /** Nombres de los parámetros pendientes de validar que usó la regla (lo llena el motor). */
+  parametrosPendientes?: string[];
 }
 
 export interface Regla {
@@ -50,6 +58,13 @@ export interface Regla {
   /** Devuelve la alerta si la condición se cumple; si no, null. */
   evaluar(ctx: ContextoClinico): ResultadoRegla | null;
 }
+
+/**
+ * Reglas cuya sola activación revela un resultado de examen (VIH, sífilis). En los eventos de métricas
+ * salen con un nombre genérico y sin la opción elegida: los eventos no llevan resultados de exámenes.
+ */
+const REGLAS_RESULTADO_SENSIBLE = new Set(['vih', 'sifilis']);
+const reglaEnEvento = (regla: string) => (REGLAS_RESULTADO_SENSIBLE.has(regla) ? 'resultado_sensible' : regla);
 
 export const OPCIONES_GENERICAS: OpcionDecision[] = [
   { etiqueta: 'Atendida' },
@@ -100,8 +115,10 @@ export function construirContexto(historia: Historia, hoy: FechaISO, catalogo: C
 export function evaluar(reglas: Regla[], ctx: ContextoClinico): Map<string, ResultadoRegla> {
   const resultados = new Map<string, ResultadoRegla>();
   for (const regla of reglas) {
-    const r = regla.evaluar(ctx);
-    if (r) resultados.set(regla.id, r);
+    const { resultado: r, pendientes } = ctx.catalogo.registrarPendientes(() => regla.evaluar(ctx));
+    if (!r) continue;
+    // La alerta avisa al profesional si se apoya en parámetros que el equipo clínico aún no validó.
+    resultados.set(regla.id, pendientes.length > 0 ? { ...r, parametrosPendientes: pendientes.map((p) => p.nombre) } : r);
   }
   return resultados;
 }
@@ -156,10 +173,12 @@ export class MotorAlertas {
       }
       const severidad = r.severidad ?? 1;
       const decision = previa?.decision;
-      // Reaparece si nunca se atendió, o si la situación empeoró respecto de cuando se atendió.
-      const activa = !decision || severidad > decision.severidadAtendida;
+      // Reaparece si nunca se atendió, si la situación empeoró respecto de cuando se atendió,
+      // o si cambió de variante (otra situación clínica que pide una decisión nueva).
+      const activa =
+        !decision || severidad > decision.severidadAtendida || (r.variante ?? null) !== (decision.varianteAtendida ?? null);
       if (activa && !previa?.activa) {
-        await this.eventos?.registrar(embarazoId, { tipo: 'alerta_activada', regla: regla.id, urgente: r.urgente ?? false, egDias });
+        await this.eventos?.registrar(embarazoId, { tipo: 'alerta_activada', regla: reglaEnEvento(regla.id), urgente: REGLAS_RESULTADO_SENSIBLE.has(regla.id) ? false : (r.urgente ?? false), egDias });
       }
       await this.repo.guardar('alertas', {
         ...(previa ?? {}),
@@ -169,9 +188,11 @@ export class MotorAlertas {
         titulo: r.titulo,
         porque: r.porque,
         severidad,
+        variante: r.variante,
         urgente: r.urgente ?? false,
         opciones: r.opciones ?? OPCIONES_GENERICAS,
         enlace: r.enlace,
+        parametrosPendientes: r.parametrosPendientes,
         vigente: true,
         activa,
         decision: activa && decision ? undefined : decision,
@@ -213,12 +234,17 @@ export class MotorAlertas {
         fecha: this.ahora().toISOString(),
         profesionalId: this.repo.usuarioId,
         severidadAtendida: alerta.severidad,
+        varianteAtendida: alerta.variante,
       },
     });
     if (this.eventos) {
       const historia = await this.repo.historia(alerta.embarazoId);
       const eg = historia ? construirContexto(historia, this.hoy(), this.catalogo).eg : undefined;
-      await this.eventos.registrar(alerta.embarazoId, { tipo: 'alerta_decidida', regla: alerta.regla, opcion, egDias: eg?.estado === 'calculada' ? eg.dias : null });
+      await this.eventos.registrar(alerta.embarazoId, {
+        tipo: 'alerta_decidida',
+        regla: reglaEnEvento(alerta.regla),
+        opcion: REGLAS_RESULTADO_SENSIBLE.has(alerta.regla) ? '—' : opcion,
+        egDias: eg?.estado === 'calculada' ? eg.dias : null });
     }
     // La indicación puede cambiar otras reglas (por ejemplo, el calcio ya indicado).
     if (def.registraIndicacion) await this.sincronizarAhora(alerta.embarazoId);

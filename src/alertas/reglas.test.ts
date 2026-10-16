@@ -19,6 +19,7 @@ import {
   rhNegativo,
   hipertension,
   sifilis,
+  vih,
   violencia,
 } from './reglasClap';
 
@@ -83,14 +84,121 @@ describe('Reglas básicas del CLAP (C2): cada una dispara y no dispara', () => {
     expect(evaluar(sifilis)).toBeNull();
   });
 
-  it('sífilis: cuenta el último resultado', () => {
+  it('sífilis: un VDRL no reactivo posterior no borra la alerta si no hay tratamiento registrado', () => {
     const r = evaluar(sifilis, {
       examenes: [
         { tipo: 'vdrl', valor: { reactivo: true, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: '2026-07-20' },
         { tipo: 'vdrl', valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: '2026-09-20' },
       ],
     });
+    expect(r).toMatchObject({ severidad: 2 });
+    expect(r!.porque.join(' ')).toContain('Sin tratamiento registrado');
+  });
+
+  it('sífilis: prueba treponémica rápida reactiva seguida de VDRL no reactivo sigue alertando sin tratamiento', () => {
+    const r = evaluar(sifilis, {
+      examenes: [
+        { tipo: 'sifilisTreponemica', valor: { reactiva: true }, fecha: '2026-07-20' },
+        { tipo: 'vdrl', valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: '2026-08-10' },
+      ],
+    });
+    expect(r).toMatchObject({ titulo: 'Sífilis: prueba treponémica reactiva', severidad: 2 });
+    expect(r!.porque.join(' ')).toContain('2026-07-20');
+  });
+
+  it('sífilis: con tratamiento registrado y VDRL posterior no reactivo, la alerta se cierra', () => {
+    const r = evaluar(sifilis, {
+      examenes: [
+        { tipo: 'vdrl', valor: { reactivo: true, fta: null, tratamiento: true, tratamientoPareja: true }, fecha: '2026-07-20' },
+        { tipo: 'vdrl', valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: '2026-09-20' },
+      ],
+    });
     expect(r).toBeNull();
+  });
+
+  it('VIH: un resultado positivo genera una alerta urgente', () => {
+    const r = evaluar(vih, { examenes: [{ tipo: 'vih', valor: { solicitado: true, realizado: true, resultado: 'positivo' }, fecha: '2026-08-20' }] });
+    expect(r).toMatchObject({ urgente: true, severidad: 3 });
+    expect(r!.porque.join(' ')).toContain('2026-08-20');
+  });
+
+  it('VIH: un positivo previo sigue alertando aunque una prueba posterior sea negativa', () => {
+    const r = evaluar(vih, {
+      examenes: [
+        { tipo: 'vih', valor: { solicitado: true, realizado: true, resultado: 'positivo' }, fecha: '2026-07-20' },
+        { tipo: 'vih', valor: { solicitado: true, realizado: true, resultado: 'negativo' }, fecha: '2026-09-20' },
+      ],
+    });
+    expect(r).toMatchObject({ urgente: true });
+  });
+
+  it('VIH: un positivo nuevo tiene otra variante (vuelve a avisar aunque el anterior se haya descartado)', () => {
+    const pos = (fecha: string) => ({ tipo: 'vih' as const, valor: { solicitado: true, realizado: true, resultado: 'positivo' as const }, fecha });
+    const uno = evaluar(vih, { examenes: [pos('2026-07-20')] });
+    const dos = evaluar(vih, { examenes: [pos('2026-07-20'), pos('2026-09-20')] });
+    expect(uno?.variante).toBeDefined();
+    expect(dos?.variante).not.toBe(uno?.variante);
+    expect(dos!.porque.join(' ')).toContain('2026-09-20');
+  });
+
+  it('sífilis: una prueba reactiva nueva cambia la variante', () => {
+    const trep = { tipo: 'sifilisTreponemica' as const, valor: { reactiva: true }, fecha: '2026-07-20' };
+    const uno = evaluar(sifilis, { examenes: [trep] });
+    const dos = evaluar(sifilis, {
+      examenes: [trep, { tipo: 'vdrl', valor: { reactivo: true, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: '2026-09-01' }],
+    });
+    expect(uno?.variante).toBeDefined();
+    expect(dos?.variante).not.toBe(uno?.variante);
+  });
+
+  it('sífilis: tratada y con VDRL posterior no reactivo se cierra aunque la treponémica se repita reactiva', () => {
+    const r = evaluar(sifilis, {
+      examenes: [
+        { tipo: 'vdrl', valor: { reactivo: true, fta: null, tratamiento: true, tratamientoPareja: true }, fecha: '2026-07-20' },
+        { tipo: 'vdrl', valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: '2026-09-20' },
+        { tipo: 'sifilisTreponemica', valor: { reactiva: true }, fecha: '2026-09-25' },
+      ],
+    });
+    expect(r).toBeNull();
+  });
+
+  it('sífilis: con tratamiento, un VDRL reactivo y otro no reactivo el mismo día no cierran la alerta', () => {
+    const r = evaluar(sifilis, {
+      examenes: [
+        { tipo: 'vdrl', valor: { reactivo: true, fta: null, tratamiento: true, tratamientoPareja: true }, fecha: '2026-07-20' },
+        { tipo: 'vdrl', valor: { reactivo: true, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: '2026-09-20' },
+        { tipo: 'vdrl', valor: { reactivo: false, fta: null, tratamiento: null, tratamientoPareja: null }, fecha: '2026-09-20' },
+      ],
+    });
+    expect(r).not.toBeNull();
+  });
+
+  it('sífilis: el tratamiento marcado solo en el VDRL no reactivo no basta para cerrar (falta un control posterior)', () => {
+    const r = evaluar(sifilis, {
+      examenes: [
+        { tipo: 'sifilisTreponemica', valor: { reactiva: true }, fecha: '2026-07-20' },
+        { tipo: 'vdrl', valor: { reactivo: false, fta: null, tratamiento: true, tratamientoPareja: true }, fecha: '2026-08-01' },
+      ],
+    });
+    expect(r).toMatchObject({ severidad: 1 });
+  });
+
+  it('sífilis: reinfección (VDRL reactivo después de cerrar) no se cierra con el tratamiento anterior', () => {
+    const v = (reactivo: boolean, fecha: string, tratamiento: boolean | null = null) => ({
+      tipo: 'vdrl' as const,
+      valor: { reactivo, fta: null, tratamiento, tratamientoPareja: true },
+      fecha,
+    });
+    const r = evaluar(sifilis, { examenes: [v(true, '2026-07-01', true), v(false, '2026-08-01'), v(true, '2026-09-01'), v(false, '2026-10-01')] });
+    expect(r).toMatchObject({ severidad: 2 });
+    expect(r!.porque.join(' ')).toContain('Sin tratamiento registrado después del VDRL/RPR reactivo del 2026-09-01');
+    // Con un tratamiento nuevo y un control posterior, se cierra.
+    expect(evaluar(sifilis, { examenes: [v(true, '2026-07-01', true), v(false, '2026-08-01'), v(true, '2026-09-01', true), v(false, '2026-10-01')] })).toBeNull();
+  });
+
+  it('VIH: negativo o sin resultado no alerta', () => {
+    expect(evaluar(vih, { examenes: [{ tipo: 'vih', valor: { solicitado: true, realizado: true, resultado: 'negativo' } }] })).toBeNull();
+    expect(evaluar(vih)).toBeNull();
   });
 
   it('infecciones: malaria, Chagas, bacteriuria o estreptococo B positivos', () => {

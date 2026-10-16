@@ -4,6 +4,7 @@ import { valorDe } from '../datos/campo';
 import { evaluarAntitetanica } from './antitetanica';
 import type { ContextoClinico, Regla } from './motor';
 import { grupoRh } from '../clinico/grupoRh';
+import type { ResultadoExamen, ResultadoPorTipo, TipoExamen } from '../datos/modelo';
 
 const enDerechos = 'Abrir "Opciones y derechos".';
 
@@ -103,29 +104,89 @@ export const embarazoNoPlaneado: Regla = {
   },
 };
 
+/** Todos los resultados con valor de un tipo de examen en este embarazo, del más antiguo al más reciente. */
+function resultados<K extends TipoExamen>(ctx: ContextoClinico, tipo: K): (ResultadoPorTipo[K] & { fecha: string })[] {
+  return ctx.historia.examenes
+    .filter((e): e is Extract<ResultadoExamen, { tipo: K }> => e.tipo === tipo && e.resultado.estado === 'valor')
+    .sort((a, b) => (a.fecha + a.creadoEn).localeCompare(b.fecha + b.creadoEn))
+    .flatMap((e) => (e.resultado.estado === 'valor' ? [{ ...(e.resultado.valor as ResultadoPorTipo[K]), fecha: e.fecha }] : []));
+}
+
 export const sifilis: Regla = {
   id: 'sifilis',
   evaluar(ctx) {
-    const vdrl = ctx.ultimo('vdrl');
-    const treponemica = ctx.ultimo('sifilisTreponemica');
-    // Cuenta el resultado más reciente de cualquiera de las dos pruebas.
-    const ultimaReactiva = [vdrl && { fecha: vdrl.fecha, reactiva: vdrl.reactivo }, treponemica && { fecha: treponemica.fecha, reactiva: treponemica.reactiva }]
-      .filter((x): x is { fecha: string; reactiva: boolean } => Boolean(x))
-      .sort((a, b) => a.fecha.localeCompare(b.fecha))
-      .at(-1);
-    if (!ultimaReactiva?.reactiva) return null;
+    const vdrls = resultados(ctx, 'vdrl');
+    const treponemicas = resultados(ctx, 'sifilisTreponemica');
+    const primeraTreponemica = treponemicas.find((t) => t.reactiva);
+    const primerVdrlReactivo = vdrls.find((v) => v.reactivo);
+    const ultimoVdrlReactivo = vdrls.filter((v) => v.reactivo).at(-1);
+    // Cualquier prueba reactiva en el embarazo abre la alerta: un resultado no reactivo posterior no
+    // descarta la sífilis. La treponémica queda reactiva de por vida, así que solo sirve para abrirla.
+    if (!primeraTreponemica && !primerVdrlReactivo) return null;
+
+    // Cierre: tratamiento registrado y un VDRL/RPR no reactivo en una fecha posterior a ese registro.
+    // Si el último día con VDRL tiene cualquier resultado reactivo, cuenta como reactivo.
+    // El tratamiento cuenta solo si es del último VDRL reactivo o posterior (una reinfección pide tratar de nuevo).
+    const desde = ultimoVdrlReactivo?.fecha ?? '';
+    const fechaTratamiento = vdrls.filter((v) => v.tratamiento === true && v.fecha >= desde).at(-1)?.fecha;
+    const tratada = fechaTratamiento !== undefined;
+    const ultimaFechaVdrl = vdrls.at(-1)?.fecha;
+    const ultimoDiaVdrlReactivo = vdrls.some((v) => v.fecha === ultimaFechaVdrl && v.reactivo);
+    const controlPosterior = tratada && ultimaFechaVdrl !== undefined && ultimaFechaVdrl > fechaTratamiento;
+    if (controlPosterior && !ultimoDiaVdrlReactivo) return null;
+
+    const fechaPrimeraReactiva = [primeraTreponemica?.fecha, primerVdrlReactivo?.fecha].filter((f): f is string => Boolean(f)).sort()[0];
     const porque: string[] = [];
-    if (treponemica?.reactiva) porque.push(`Prueba treponémica rápida reactiva (${treponemica.fecha}).`);
-    if (vdrl?.reactivo) porque.push(`VDRL/RPR reactivo (${vdrl.fecha}).`);
-    const tratada = vdrl?.tratamiento === true;
-    if (!tratada) porque.push('Sin tratamiento registrado: tratar según la guía vigente.');
-    if (vdrl?.tratamientoPareja !== true) porque.push('Sin tratamiento de la pareja registrado.');
-    if (treponemica?.reactiva && !vdrl) porque.push('Solicitar VDRL/RPR para el seguimiento.');
+    if (primeraTreponemica) porque.push(`Prueba treponémica rápida reactiva (${primeraTreponemica.fecha}).`);
+    if (ultimoVdrlReactivo) porque.push(`VDRL/RPR reactivo (${ultimoVdrlReactivo.fecha}).`);
+    if (ultimaFechaVdrl && fechaPrimeraReactiva && !ultimoDiaVdrlReactivo && ultimaFechaVdrl > fechaPrimeraReactiva) {
+      porque.push(`El VDRL/RPR no reactivo del ${ultimaFechaVdrl} no descarta la sífilis.`);
+    }
+    if (!tratada) {
+      const tratamientoPrevio = vdrls.some((v) => v.tratamiento === true);
+      porque.push(
+        tratamientoPrevio && ultimoVdrlReactivo
+          ? `Sin tratamiento registrado después del VDRL/RPR reactivo del ${ultimoVdrlReactivo.fecha}: posible reinfección o falla del tratamiento. Tratar según la guía vigente.`
+          : 'Sin tratamiento registrado: tratar según la guía vigente, sin esperar otra prueba.',
+      );
+    }
+    else if (!controlPosterior) porque.push(`Tratamiento registrado (${fechaTratamiento}): falta un VDRL/RPR de control posterior.`);
+    if (!vdrls.some((v) => v.tratamientoPareja === true)) porque.push('Sin tratamiento de la pareja registrado.');
+    if (primeraTreponemica && vdrls.length === 0) porque.push('Solicitar VDRL/RPR para el seguimiento.');
     return {
-      titulo: vdrl?.reactivo ? 'Sífilis: VDRL/RPR reactivo' : 'Sífilis: prueba treponémica reactiva',
+      titulo: primerVdrlReactivo ? 'Sífilis: VDRL/RPR reactivo' : 'Sífilis: prueba treponémica reactiva',
       porque,
       severidad: tratada ? 1 : 2,
+      // Un VDRL reactivo nuevo (reinfección o falla del tratamiento) pide decidir otra vez.
+      variante: `reactiva:${ultimoVdrlReactivo?.fecha ?? primeraTreponemica!.fecha}`,
       opciones: [{ etiqueta: 'Tratamiento indicado' }, { etiqueta: 'Referida' }, { etiqueta: 'Ya tratada', requiereMotivo: true }],
+    };
+  },
+};
+
+/** VIH positivo: solo para el profesional (el resultado nunca sale en el carné). */
+export const vih: Regla = {
+  id: 'vih',
+  evaluar(ctx) {
+    // Un positivo en el embarazo no se borra con una prueba posterior: la decisión clínica es del profesional.
+    // Cada positivo nuevo vuelve a avisar, aunque uno anterior se haya descartado.
+    const positivo = resultados(ctx, 'vih').filter((r) => r.resultado === 'positivo').at(-1);
+    if (!positivo) return null;
+    return {
+      titulo: 'VIH: resultado positivo',
+      variante: `positivo:${positivo.fecha}`,
+      porque: [
+        `Prueba de VIH positiva (${positivo.fecha}).`,
+        'Confirmar según el algoritmo diagnóstico vigente y remitir de inmediato al programa de VIH para iniciar tratamiento antirretroviral.',
+        'Planear la prevención de la transmisión materno-infantil: vía del parto, profilaxis del recién nacido y lactancia.',
+      ],
+      severidad: 3,
+      urgente: true,
+      opciones: [
+        { etiqueta: 'Remitida al programa de VIH' },
+        { etiqueta: 'Ya en tratamiento antirretroviral' },
+        { etiqueta: 'Resultado descartado por la prueba confirmatoria', requiereMotivo: true },
+      ],
     };
   },
 };
@@ -421,6 +482,7 @@ export const REGLAS_CLAP: Regla[] = [
   pesoRNPrevio,
   embarazoNoPlaneado,
   sifilis,
+  vih,
   infecciones,
   rhNegativo,
   hipertension,

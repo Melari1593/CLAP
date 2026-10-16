@@ -88,6 +88,7 @@ export const asa: Regla = {
         titulo: 'Criterio de ASA presente, pero con contraindicación registrada',
         porque: [...porque, `Contraindicación: ${e.contraindicacion.join('; ')}.`],
         severidad: factores.length,
+        variante: `contraindicacion:${[...e.contraindicacion].sort().join('|')}`,
         opciones: [{ etiqueta: 'Valorado: no se indica', requiereMotivo: true }, { etiqueta: 'Referida a especialista' }],
       };
     }

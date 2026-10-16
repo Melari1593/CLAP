@@ -261,3 +261,4 @@ label.en-linea { flex-direction: row; align-items: flex-start; gap: 8px; margin:
 .crecimiento-clase.sospecha_restriccion { border-inline-start-color: #b42318; background: #fef3f2; }
 .clase-control { font-size: 0.85em; }
 .carne-aviso { border-inline-start: 4px solid #b45309; background: #fffbeb; padding: 8px 12px; border-radius: 6px; }
+.aviso-pendiente { border-inline-start: 4px solid #b45309; background: #fffbeb; padding: 6px 10px; border-radius: 6px; font-size: 0.9em; }
