@@ -550,6 +550,8 @@ export type TipoIndicacion =
   | 'espiramicina'
   /** Toxoplasmosis: tratamiento pleno (sulfadiazina + pirimetamina + ácido folínico). */
   | 'toxoTratamientoPleno'
+  /** Sífilis gestacional: tratamiento registrado desde la alerta (fechaInicio = fecha de la decisión). Nunca en el carné. */
+  | 'tratamientoSifilis'
   | 'preparacionParto'
   | 'lactancia';
 
@@ -577,8 +579,11 @@ export interface DecisionAlerta {
 export interface OpcionDecision {
   etiqueta: string;
   requiereMotivo?: boolean;
-  /** Al elegirla se registra también la indicación (por ejemplo, "ASA indicado"). */
-  registraIndicacion?: { tipo: TipoIndicacion; estado: Indicacion['estado'] };
+  /**
+   * Al elegirla se registra también la indicación. Con `fechaDeHoy`, la fecha de inicio es la de esta
+   * decisión aunque ya existiera (por ejemplo, un tratamiento nuevo tras una reinfección).
+   */
+  registraIndicacion?: { tipo: TipoIndicacion; estado: Indicacion['estado']; fechaDeHoy?: boolean };
 }
 
 /**

@@ -127,8 +127,16 @@ export const sifilis: Regla = {
     // Cierre: tratamiento registrado y un VDRL/RPR no reactivo en una fecha posterior a ese registro.
     // Si el último día con VDRL tiene cualquier resultado reactivo, cuenta como reactivo.
     // El tratamiento cuenta solo si es del último VDRL reactivo o posterior (una reinfección pide tratar de nuevo).
+    // Puede venir del VDRL ("tratamiento: sí") o de la indicación registrada desde la alerta, con su fecha.
     const desde = ultimoVdrlReactivo?.fecha ?? '';
-    const fechaTratamiento = vdrls.filter((v) => v.tratamiento === true && v.fecha >= desde).at(-1)?.fecha;
+    const indicacion = ctx.historia.indicaciones.find((i) => i.tipo === 'tratamientoSifilis' && (i.estado === 'indicado' || i.estado === 'ya_lo_toma'));
+    const fechaTratamiento = [
+      ...vdrls.filter((v) => v.tratamiento === true).map((v) => v.fecha),
+      ...(indicacion?.fechaInicio ? [indicacion.fechaInicio] : []),
+    ]
+      .filter((f) => f >= desde)
+      .sort()
+      .at(-1);
     const tratada = fechaTratamiento !== undefined;
     const ultimaFechaVdrl = vdrls.at(-1)?.fecha;
     const ultimoDiaVdrlReactivo = vdrls.some((v) => v.fecha === ultimaFechaVdrl && v.reactivo);
@@ -143,14 +151,17 @@ export const sifilis: Regla = {
       porque.push(`El VDRL/RPR no reactivo del ${ultimaFechaVdrl} no descarta la sífilis.`);
     }
     if (!tratada) {
-      const tratamientoPrevio = vdrls.some((v) => v.tratamiento === true);
+      const tratamientoPrevio = vdrls.some((v) => v.tratamiento === true) || indicacion !== undefined;
       porque.push(
         tratamientoPrevio && ultimoVdrlReactivo
           ? `Sin tratamiento registrado después del VDRL/RPR reactivo del ${ultimoVdrlReactivo.fecha}: posible reinfección o falla del tratamiento. Tratar según la guía vigente.`
           : 'Sin tratamiento registrado: tratar según la guía vigente, sin esperar otra prueba.',
       );
     }
-    else if (!controlPosterior) porque.push(`Tratamiento registrado (${fechaTratamiento}): falta un VDRL/RPR de control posterior.`);
+    else if (!controlPosterior) {
+      porque.push(`Tratamiento registrado (${fechaTratamiento}): falta un VDRL/RPR de control posterior.`);
+      if (indicacion?.estado === 'indicado' && indicacion.fechaInicio === fechaTratamiento) porque.push('Confirmar que se aplicó el tratamiento indicado.');
+    }
     if (!vdrls.some((v) => v.tratamientoPareja === true)) porque.push('Sin tratamiento de la pareja registrado.');
     if (primeraTreponemica && vdrls.length === 0) porque.push('Solicitar VDRL/RPR para el seguimiento.');
     return {
@@ -159,7 +170,14 @@ export const sifilis: Regla = {
       severidad: tratada ? 1 : 2,
       // Un VDRL reactivo nuevo (reinfección o falla del tratamiento) pide decidir otra vez.
       variante: `reactiva:${ultimoVdrlReactivo?.fecha ?? primeraTreponemica!.fecha}`,
-      opciones: [{ etiqueta: 'Tratamiento indicado' }, { etiqueta: 'Referida' }, { etiqueta: 'Ya tratada', requiereMotivo: true }],
+      opciones: [
+        // Cada decisión registra el tratamiento con la fecha de hoy: tras una reinfección, el tratamiento nuevo.
+        { etiqueta: 'Tratamiento indicado', registraIndicacion: { tipo: 'tratamientoSifilis', estado: 'indicado', fechaDeHoy: true } },
+        { etiqueta: 'Referida' },
+        // "Ya tratada" es un tratamiento anterior sin fecha conocida: queda la decisión con su motivo, pero no
+        // cuenta como tratamiento para cerrar (la fecha real se registra en el VDRL, "tratamiento: sí").
+        { etiqueta: 'Ya tratada', requiereMotivo: true },
+      ],
     };
   },
 };

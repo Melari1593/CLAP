@@ -14,6 +14,7 @@ const NOMBRE_INDICACION: Record<Indicacion['tipo'], string> = {
   levotiroxina: 'Levotiroxina',
   espiramicina: 'Espiramicina (toxoplasmosis)',
   toxoTratamientoPleno: 'Tratamiento pleno de toxoplasmosis',
+  tratamientoSifilis: 'Tratamiento de sífilis',
   preparacionParto: 'Preparación para el parto',
   lactancia: 'Consejería en lactancia',
 };

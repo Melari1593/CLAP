@@ -7,6 +7,8 @@ export type NivelPrivacidad = 'normal' | 'privado' | 'nunca_en_carne';
 export const DATOS_NUNCA_EN_CARNE = [
   // VIH: resultado y código.
   'examenes.vih',
+  // Sífilis: el tratamiento registrado revela el diagnóstico.
+  'indicaciones.tratamientoSifilis',
   // Respuestas sobre violencia.
   'primera.gestacionActual.violencia',
   'primera.gestacionActual.violenciaSexual',

@@ -214,7 +214,7 @@ export class MotorAlertas {
     if (!def) throw new Error(`Opción no válida: ${opcion}`);
     if (def.requiereMotivo && !motivo?.trim()) throw new Error('Esta decisión requiere un motivo.');
     if (def.registraIndicacion) {
-      const { tipo, estado } = def.registraIndicacion;
+      const { tipo, estado, fechaDeHoy } = def.registraIndicacion;
       const existente = (await this.repo.indicacionesDe(alerta.embarazoId)).find((i) => i.tipo === tipo);
       await this.repo.guardar('indicaciones', {
         ...(existente ?? {}),
@@ -222,7 +222,7 @@ export class MotorAlertas {
         tipo,
         estado,
         motivo: motivo?.trim() || undefined,
-        fechaInicio: existente?.fechaInicio ?? this.hoy(),
+        fechaInicio: fechaDeHoy ? this.hoy() : (existente?.fechaInicio ?? this.hoy()),
         // Una suspensión queda con su fecha, como cuando se registra desde las indicaciones.
         fechaSuspension: estado === 'suspendido' ? this.hoy() : undefined,
       });
