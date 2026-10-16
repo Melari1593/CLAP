@@ -75,3 +75,12 @@ export const ANTIRRUBEOLA: Record<string, string> = {
   no: 'Antirrubéola: te la aplicarán después del parto.',
   no_sabe: 'Antirrubéola: te la aplicarán después del parto.',
 };
+
+/**
+ * ASA o calcio indicados, con una contraindicación registrada que el profesional aún no valoró:
+ * el carné deja de decirle que lo tome y le pide consultar. No nombra la contraindicación.
+ */
+export const AVISO_REVISAR_MEDICAMENTO = {
+  asa: 'No tomes la aspirina hasta hablar con tu servicio de salud: hay un dato nuevo en tu historia que hay que revisar antes de seguir. Comunícate pronto.',
+  calcio: 'No tomes el calcio hasta hablar con tu servicio de salud: hay un dato nuevo en tu historia que hay que revisar antes de seguir. Comunícate pronto.',
+} as const;

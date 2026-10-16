@@ -273,6 +273,6 @@ describe('Variantes de las reglas de tromboprofilaxis y ASA', () => {
     );
     expect(sin).not.toBeNull();
     expect(sin?.variante).toBeUndefined();
-    expect(con?.variante).toBe('contraindicacion:Alergia al ASA o a los AINE');
+    expect(con?.variante).toBe('contraindicacion:sin_indicar:Alergia al ASA o a los AINE');
   });
 });

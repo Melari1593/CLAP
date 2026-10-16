@@ -5,6 +5,9 @@
 import type { Catalogo } from '../clinico/catalogo';
 import { construirContexto } from '../alertas/motor';
 import { evaluarTrombo } from '../alertas/trombo';
+import { evaluarASA } from '../alertas/asa';
+import { evaluarCalcio } from '../alertas/calcio';
+import { AVISO_REVISAR_MEDICAMENTO } from '../carne/textos';
 import { valorDe } from '../datos/campo';
 import type { Carne, FechaISO, TipoIndicacion } from '../datos/modelo';
 import type { Historia } from '../datos/repositorio';
@@ -107,11 +110,27 @@ export function proyectarCarne(historia: Historia, carne: Carne, hoy: FechaISO, 
   const actual = ctx.primera?.gestacionActual;
   const cerradas = historia.consultas.filter((c) => c.cerrada);
   const ultima = cerradas[cerradas.length - 1];
-  const indicaciones = historia.indicaciones
-    .filter((i) => INDICACIONES_EN_CARNE.includes(i.tipo) && (i.estado === 'indicado' || i.estado === 'ya_lo_toma'))
+  // ASA o calcio con una contraindicación registrada que el profesional aún no valoró ("se mantiene"):
+  // el carné no le dice que lo siga tomando y le pide consultar.
+  // "Se mantiene" vale mientras la contraindicación sea la misma (misma variante), aunque la alerta
+  // haya reaparecido solo porque subió la severidad.
+  const mantenido = (regla: 'asa' | 'calcio') =>
+    historia.alertas.some((a) => {
+      if (a.regla !== regla || !a.vigente) return false;
+      const ultima = a.decision ?? a.decisionesAnteriores?.at(-1);
+      return ultima?.opcion === 'Valorado: se mantiene' && (ultima.varianteAtendida ?? null) === (a.variante ?? null);
+    });
+  const enRevision: ('asa' | 'calcio')[] = [];
+  if ((evaluarASA(ctx)?.contraindicacion.length ?? 0) > 0 && !mantenido('asa')) enRevision.push('asa');
+  if ((evaluarCalcio(ctx)?.contraindicaciones.length ?? 0) > 0 && !mantenido('calcio')) enRevision.push('calcio');
+  const vigentes = historia.indicaciones.filter(
+    (i) => INDICACIONES_EN_CARNE.includes(i.tipo) && (i.estado === 'indicado' || i.estado === 'ya_lo_toma'),
+  );
+  const enCurso = vigentes
     // La aspirina va hasta la semana 36: desde ahí deja de aparecer en el carné.
-    .filter((i) => i.tipo !== 'asa' || ctx.eg.estado !== 'calculada' || ctx.eg.dias < catalogo.valor('asa.semanaFin') * 7)
-    .map((i) => i.tipo);
+    .filter((i) => i.tipo !== 'asa' || ctx.eg.estado !== 'calculada' || ctx.eg.dias < catalogo.valor('asa.semanaFin') * 7);
+  const avisosMedicamento = enRevision.filter((t) => enCurso.some((i) => i.tipo === t)).map((t) => AVISO_REVISAR_MEDICAMENTO[t]);
+  const indicaciones = enCurso.filter((i) => !(enRevision as TipoIndicacion[]).includes(i.tipo)).map((i) => i.tipo);
   const trombo = evaluarTrombo(ctx);
   const umbralCoagulo = catalogo.valor('trombo.umbrales').desdeSemana28;
 
@@ -127,6 +146,7 @@ export function proyectarCarne(historia: Historia, carne: Carne, hoy: FechaISO, 
     tromboAntesDelParto: indicaciones.includes('tromboprofilaxis') ? catalogo.valor('trombo.suspensionAntesDelParto') ?? undefined : undefined,
     // Orden de ecografía por el crecimiento, mientras esté pendiente (desaparece al registrar la ecografía o si se anula).
     avisos: [
+      ...avisosMedicamento,
       ...new Set(
         ordenesEcografiaPendientes(historia)
           .filter((p) => p.orden.automatica)

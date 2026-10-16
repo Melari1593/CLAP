@@ -71,25 +71,45 @@ export const asa: Regla = {
   id: 'asa',
   evaluar(ctx) {
     const e = evaluarASA(ctx);
-    // Antes de la semana 12 no hay alerta: el resumen muestra la fecha de inicio.
-    if (!e || !e.cumpleCriterio || e.antesDeInicio) return null;
-    // Desde la semana 36 ya no se inicia: va hasta la semana 36.
+    if (!e) return null;
     const semanaFin = ctx.catalogo.valor('asa.semanaFin');
-    if (ctx.eg.estado === 'calculada' && ctx.eg.dias >= semanaFin * 7) return null;
+    const terminado = ctx.eg.estado === 'calculada' && ctx.eg.dias >= semanaFin * 7;
+    const indicacion = ctx.historia.indicaciones.find((i) => i.tipo === 'asa');
+    const indicado = indicacion?.estado === 'indicado' || indicacion?.estado === 'ya_lo_toma';
+    // Si ya lo toma y aparece una contraindicación, se valora aunque no se cumpla el criterio o aún no
+    // llegue la semana de inicio: el carné deja de mostrarlo hasta esa decisión (desde la semana 36 ya terminó).
+    const valorarContraindicacion = indicado && e.contraindicacion.length > 0 && !terminado;
+    // Antes de la semana 12 no hay alerta: el resumen muestra la fecha de inicio.
+    if (!valorarContraindicacion && (!e.cumpleCriterio || e.antesDeInicio || terminado)) return null;
     const { minimaMg, maximaMg } = ctx.catalogo.valor('asa.dosis');
     const semanaInicio = ctx.catalogo.valor('asa.semanaInicio');
     const factores = [...e.altos.map((f) => `${f} (alto)`), ...e.moderados.map((f) => `${f} (moderado)`)];
-    const porque = [`Factores: ${factores.join('; ')}.`];
+    const porque = factores.length > 0 ? [`Factores: ${factores.join('; ')}.`] : ['Sin criterio de ASA registrado, pero la gestante ya lo toma.'];
     if (ctx.eg.estado !== 'calculada') porque.push('EG no confiable: confirme la semana de gestación.');
-    if (e.inicioTardio) porque.push(`Inicio después de la semana ${ctx.catalogo.valor('asa.semanaInicioTardio')}: el profesional decide.`);
+    if (e.inicioTardio && !indicado) porque.push(`Inicio después de la semana ${ctx.catalogo.valor('asa.semanaInicioTardio')}: el profesional decide.`);
 
     if (e.contraindicacion.length > 0) {
+      // Igual que el calcio: si ya lo toma, se valora si se suspende (con fecha) o se mantiene (con motivo).
+      // Mientras no se decida "se mantiene", el carné no le dice a la gestante que siga tomándolo.
       return {
-        titulo: 'Criterio de ASA presente, pero con contraindicación registrada',
-        porque: [...porque, `Contraindicación: ${e.contraindicacion.join('; ')}.`],
-        severidad: factores.length,
-        variante: `contraindicacion:${[...e.contraindicacion].sort().join('|')}`,
-        opciones: [{ etiqueta: 'Valorado: no se indica', requiereMotivo: true }, { etiqueta: 'Referida a especialista' }],
+        titulo: indicado ? 'ASA indicado, pero con contraindicación registrada: valorar' : 'Criterio de ASA presente, pero con contraindicación registrada',
+        porque: [
+          ...porque,
+          `Contraindicación: ${e.contraindicacion.join('; ')}.`,
+          ...(indicado ? ['Mientras no se valore, el carné le pide a la gestante no tomar la aspirina y consultar.'] : []),
+        ],
+        severidad: Math.max(1, factores.length),
+        variante: `contraindicacion:${indicado ? 'indicado' : 'sin_indicar'}:${[...e.contraindicacion].sort().join('|')}`,
+        opciones: indicado
+          ? [
+              { etiqueta: 'Valorado: se suspende', requiereMotivo: true, registraIndicacion: { tipo: 'asa', estado: 'suspendido' } },
+              { etiqueta: 'Valorado: se mantiene', requiereMotivo: true },
+              { etiqueta: 'Referida a especialista' },
+            ]
+          : [
+              { etiqueta: 'Valorado: no se indica', requiereMotivo: true, registraIndicacion: { tipo: 'asa', estado: 'no_indicado' } },
+              { etiqueta: 'Referida a especialista' },
+            ],
       };
     }
     return {

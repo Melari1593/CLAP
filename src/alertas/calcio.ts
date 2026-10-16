@@ -54,8 +54,9 @@ export const calcio: Regla = {
   id: 'calcio',
   evaluar(ctx) {
     const e = evaluarCalcio(ctx);
-    // Antes de la semana 14 no hay alerta: el resumen muestra la fecha de inicio.
-    if (!e || e.antesDeInicio) return null;
+    // Antes de la semana 14 no hay alerta (el resumen muestra la fecha de inicio), salvo que ya lo tome
+    // y tenga una contraindicación: el carné deja de mostrarlo hasta que el profesional lo valore.
+    if (!e || (e.antesDeInicio && !(e.indicado && e.contraindicaciones.length > 0))) return null;
     const { semanaInicio, dosisDiariaMg, tabletaMg } = ctx.catalogo.valor('calcio.indicacion');
 
     if (e.contraindicaciones.length > 0) {

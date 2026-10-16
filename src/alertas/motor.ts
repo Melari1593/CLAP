@@ -223,7 +223,20 @@ export class MotorAlertas {
         estado,
         motivo: motivo?.trim() || undefined,
         fechaInicio: existente?.fechaInicio ?? this.hoy(),
+        // Una suspensión queda con su fecha, como cuando se registra desde las indicaciones.
+        fechaSuspension: estado === 'suspendido' ? this.hoy() : undefined,
       });
+    }
+    // Si la decisión registró una indicación, la regla puede cambiar de variante por esa misma decisión
+    // (por ejemplo, ASA "se suspende" deja de estar indicado): se atiende la situación que resulta.
+    let severidadAtendida = alerta.severidad;
+    let varianteAtendida = alerta.variante;
+    const regla = this.reglas.find((r) => r.id === alerta.regla);
+    const historiaTras = def.registraIndicacion && regla ? await this.repo.historia(alerta.embarazoId) : undefined;
+    const tras = historiaTras && regla ? regla.evaluar(construirContexto(historiaTras, this.hoy(), this.catalogo)) : null;
+    if (tras) {
+      severidadAtendida = tras.severidad ?? 1;
+      varianteAtendida = tras.variante;
     }
     const atendida = await this.repo.guardar('alertas', {
       ...alerta,
@@ -233,8 +246,8 @@ export class MotorAlertas {
         motivo: motivo?.trim() || undefined,
         fecha: this.ahora().toISOString(),
         profesionalId: this.repo.usuarioId,
-        severidadAtendida: alerta.severidad,
-        varianteAtendida: alerta.variante,
+        severidadAtendida,
+        varianteAtendida,
       },
     });
     if (this.eventos) {
